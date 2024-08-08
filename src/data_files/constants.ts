@@ -2,11 +2,11 @@ import ogImageSrc from "@images/social.png";
 
 export const SITE = {
   title: "ScrewFast",
-  tagline: "Top-quality Hardware Tools",
-  description: "ScrewFast offers top-tier hardware tools and expert construction services to meet all your project needs. Start exploring and contact our sales team for superior quality and reliability.",
-  description_short: "ScrewFast offers top-tier hardware tools and expert construction services to meet all your project needs.",
+  tagline: "Mapping of CSO Initiatives",
+  description: "The Mapping of CSO Initiatives by AfricTivistes is an interactive platform that centralizes and visualizes the initiatives of civil society organizations (CSOs) in Africa related to elections. This platform aims to promote transparency, integrity, and citizen participation in electoral processes, while facilitating collaborations among CSOs and sharing best practices in electoral governance.",
+  description_short: "Platform for mapping civil society initiatives related to elections in Africa by AfricTivistes.",
   url: "https://screwfast.uk",
-  author: "Emil Gulamov",
+  author: "AfricTivistes",
 };
 
 export const SEO = {
@@ -33,7 +33,7 @@ export const OG = {
   locale: "en_US",
   type: "website",
   url: SITE.url,
-  title: `${SITE.title}: : Hardware Tools & Construction Services`,
-  description: "Equip your projects with ScrewFast's top-quality hardware tools and expert construction services. Trusted by industry leaders, ScrewFast offers simplicity, affordability, and reliability. Experience the difference with user-centric design and cutting-edge tools. Start exploring now!",
+  title: `${SITE.title}: : Mapping of CSO Initiatives`,
+  description: "The Mapping of CSO Initiatives by AfricTivistes is an interactive platform that centralizes and visualizes the initiatives of civil society organizations (CSOs) in Africa related to elections. This platform aims to promote transparency, integrity, and citizen participation in electoral processes, while facilitating collaborations among CSOs and sharing best practices in electoral governance.",
   image: ogImageSrc,
 };
