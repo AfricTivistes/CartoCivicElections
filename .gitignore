@@ -20,3 +20,9 @@ pnpm-debug.log*
 
 # macOS-specific files
 .DS_Store
+
+# lock
+package-lock.json
+
+# output
+.vercel/output
