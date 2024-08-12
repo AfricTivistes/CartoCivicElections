@@ -1,12 +1,10 @@
-
+// An array of links for navigation bar
 const navBarLinks = [
-  { name: "Accueil", url: "/fr" },
-  { name: "Produits", url: "/fr/products" },
-  { name: "Services", url: "/fr/services" },
-  { name: "Blog", url: "/fr/blog" },
+  { name: "A Propos", url: "/fr/services" },
+  { name: "Initiatives", url: "/fr/products" },
+  { name: "Actualités", url: "/fr/blog" },
   { name: "Contact", url: "/fr/contact" },
 ];
-
 const footerLinks = [
   {
     section: "Écosystème",
