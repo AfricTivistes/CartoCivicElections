@@ -10,7 +10,7 @@ import TestimonialsSection from "@components/sections/testimonials/TestimonialsS
 import PricingSection from "@components/sections/pricing/PricingSection.astro";
 import FAQ from "@components/sections/misc/FAQ.astro";
 import AnnouncementBanner from "@components/ui/banners/AnnouncementBanner.astro";
-import heroImage from "@images/ciscafrica.webp";
+import heroImage from "@images/ciscafrica.png";
 import faqs from "@data/fr/faqs.json";
 import { features } from "@/data_files/fr/features";
 import pricing from "@data/fr/pricing.json";
@@ -67,32 +67,7 @@ const avatarSrcs: Array<string> = [
   <FeaturesNavs
     title=`Personnalisez les offres de <span class="text-yellow-500 dark:text-yellow-400">ScrewFast</span> pour répondre parfaitement à vos besoins en matériel et en construction.`
     tabs={[
-      {
-        heading: "Outils de pointe",
-        content:
-          "Optimisez vos projets avec les outils de pointe de ScrewFast. Faites l'expérience d'une efficacité accrue dans la gestion de la construction avec nos solutions automatisées sophistiquées.",
-        svg: "tools",
-        src: tools,
-        alt: "Équipement lourd jaune et noir sur un champ d'herbe brune",
-        first: true,
-      },
-      {
-        heading: "Tableaux de bord intuitifs",
-        content:
-          "Naviguez facilement avec les tableaux de bord intuitifs de ScrewFast. Configurez et supervisez vos projets de manière transparente, avec des interfaces conviviales conçues pour une gestion efficace des flux de travail rapide et efficace.",
-        svg: "dashboard",
-        src: dashboard,
-        alt: "Capture d'écran ou représentation graphique du tableau de bord intuitif",
-        second: true,
-      },
-      {
-        heading: "Fonctionnalités robustes",
-        content:
-          "Minimisez la complexité, maximisez la productivité. Les fonctionnalités robustes de ScrewFast sont conçues pour rationaliser votre processus de construction, offrant des résultats qui se distinguent par leur excellence.",
-        svg: "house",
-        src: construction,
-        alt: "Structure métallique grise d'un bâtiment près d'une grue à tour pendant la journée",
-      },
+      
     ]}
   />
 
