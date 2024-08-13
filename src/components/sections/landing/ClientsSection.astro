@@ -47,7 +47,7 @@ const partenaires = [
 ];
 ---
 
-<section class="px-8 py-8 lg:py-20">
+<section class="">
   <!-- Title and description -->
   <div class="mx-auto max-w-3xl space-y-4 text-center">
     <h2
@@ -62,20 +62,25 @@ const partenaires = [
         </p>
       )
     }
-    <div class="container mx-auto text-center">
-      <div class="flex flex-wrap items-center justify-center gap-8">
-        {
-          partenaires.map((partenaire) => (
-            <a href={partenaire.href} target="_blank">
-              <img
-                src={partenaire.logo}
-                alt={partenaire.name}
-                class="w-20"
-              />
-            </a>
-          ))
-        }
-      </div>
-    </div>
+  </div>
+  <div
+    class="flex flex-wrap items-center justify-center gap-8 overflow-x-auto py-4"
+  >
+    {
+      partenaires.map((partenaire) => (
+        <a
+          href={partenaire.href}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <img
+            src={partenaire.logo}
+            alt={`Logo de ${partenaire.name}`}
+            class="w-40"
+            loading="lazy"
+          />
+        </a>
+      ))
+    }
   </div>
 </section>
