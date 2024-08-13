@@ -9,6 +9,10 @@ import LanguagePicker from "@components/ui/LanguagePicker.astro";
 // Select the correct translation based on the page's lang prop:
 const strings = Astro.currentLocale === "fr" ? frStrings : enStrings;
 const homeUrl = Astro.currentLocale === "fr" ? "/fr" : "/";
+const submitButton =
+  Astro.currentLocale === "fr"
+    ? "Soumettre une initiative!"
+    : "Submit an initiative!";
 ---
 
 <!-- Main header component -->
@@ -94,7 +98,7 @@ const homeUrl = Astro.currentLocale === "fr" ? "/fr" : "/";
           <span
             class="ms-1 inline rounded-lg bg-orange-500 px-2 py-1 text-xs font-bold text-neutral-50"
           >
-            Soumettre mon initiative!
+            {submitButton}
           </span>
         </a>
         <LanguagePicker />
