@@ -12,7 +12,7 @@ import FAQ from "@components/sections/misc/FAQ.astro";
 import AnnouncementBanner from "@components/ui/banners/AnnouncementBanner.astro";
 import heroImage from "@images/ciscafrica.webp";
 import faqs from "@data/fr/faqs.json";
-import features from "@data/fr/features.json";
+import { features } from "@/data_files/fr/features";
 import pricing from "@data/fr/pricing.json";
 import featureImage from "@images/features-image.avif";
 import construction from "@images/construction-image.avif";
@@ -58,8 +58,7 @@ const avatarSrcs: Array<string> = [
   />
 
   <FeaturesGeneral
-    title="Répondre aux exigences de l'industrie"
-    subTitle="Chez ScrewFast, nous relevons les défis uniques rencontrés dans les secteurs du matériel et de la construction. Des outils de pointe aux services experts, nous sommes déterminés à vous aider à surmonter les obstacles et à atteindre vos objectifs."
+    title="CISCAfrica : La base de données des initiatives citoyennes électorales en Afrique"
     src={featureImage}
     alt="Produits ScrewFast dans des boîtes flottantes"
     features={features}
