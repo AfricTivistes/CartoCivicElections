@@ -12,7 +12,7 @@ import FAQ from "@components/sections/misc/FAQ.astro";
 import AnnouncementBanner from "@components/ui/banners/AnnouncementBanner.astro";
 import heroImage from "@images/ciscafrica.png";
 import faqs from "@data/fr/faqs.json";
-import { features } from "@/data_files/fr/features";
+import { features, featuresTabs } from "@/data_files/fr/features";
 import pricing from "@data/fr/pricing.json";
 import featureImage from "@images/features-image.avif";
 import construction from "@images/construction-image.avif";
@@ -65,10 +65,8 @@ const avatarSrcs: Array<string> = [
   />
 
   <FeaturesNavs
-    title=`Personnalisez les offres de <span class="text-yellow-500 dark:text-yellow-400">ScrewFast</span> pour répondre parfaitement à vos besoins en matériel et en construction.`
-    tabs={[
-      
-    ]}
+    title=`Enjeux de la plateforme <span class="text-yellow-500 dark:text-yellow-400">CISCAfrica</span>`
+    tabs = {featuresTabs}
   />
 
   <TestimonialsSection

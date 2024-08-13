@@ -2,7 +2,6 @@
 // Import the necessary dependencies
 import TabNav from "@components/ui/blocks/TabNav.astro";
 import TabContent from "@components/ui/blocks/TabContent.astro";
-import Icon from "@components/ui/icons/Icon.astro";
 
 // Define props from Astro
 const { title, tabs } = Astro.props;
@@ -11,7 +10,7 @@ const { title, tabs } = Astro.props;
 interface Tab {
   heading: string;
   content: string;
-  svg: string;
+  icon: string;
   src: any;
   alt: string;
   first?: boolean;
@@ -52,7 +51,9 @@ interface Props {
                 content={tab.content}
                 first={tab.first}
               >
-                <Icon name={tab.svg} />
+                <div>
+                  <slot set:html={tab.icon} />
+                </div>
               </TabNav>
             ))
           }
