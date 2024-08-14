@@ -7,18 +7,18 @@ const navBarLinks = [
 ];
 const footerLinks = [
   {
-    section: "Écosystème",
+    section: "Projet",
     links: [
-      { name: "Documentation", url: "/fr/welcome-to-docs/" },
-      { name: "Outils et Équipements", url: "/fr/products" },
-      { name: "Services de Construction", url: "/fr/services" },
+      { name: "AHEAD AFRICA", url: "#" },
+      { name: "Le projet", url: "#" },
+      { name: "A propos", url: "#" },
     ],
   },
   {
     section: "Société",
     links: [
-      { name: "À propos de nous", url: "#" },
-      { name: "Blog", url: "/fr/blog" },
+      { name: "À propos", url: "#" },
+      { name: "Blog", url: "#" },
       { name: "Carrières", url: "#" },
       { name: "Clients", url: "#" },
     ],

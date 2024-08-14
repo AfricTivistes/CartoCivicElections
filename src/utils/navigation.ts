@@ -8,18 +8,18 @@ const navBarLinks = [
 // An array of links for footer
 const footerLinks = [
   {
-    section: "Ecosystem",
+    section: "Project",
     links: [
-      { name: "Documentation", url: "/welcome-to-docs/" },
-      { name: "Tools & Equipment", url: "/products" },
-      { name: "Construction Services", url: "/services" },
+      { name: "AHEAD AFRICA", url: "#" },
+      { name: "Project", url: "#" },
+      { name: "About", url: "#" },
     ],
   },
   {
     section: "Company",
     links: [
       { name: "About us", url: "#" },
-      { name: "Blog", url: "/blog" },
+      { name: "Blog", url: "#" },
       { name: "Careers", url: "#" },
       { name: "Customers", url: "#" },
     ],
