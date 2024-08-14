@@ -1,29 +1,29 @@
 {
-  "subTitle": "Ask us anything about our brand and products, and get factual responses.",
+  "subTitle": "Ask us any questions about our CISCAfrica project and get factual answers.",
   "faqs": [
     {
-      "question": "What types of tools are included in the Starter Kit?",
-      "answer": "The Starter Kit features essential hand and power tools for diverse DIY projects, including hammers, drills, screwdrivers, and a variety of fasteners. It's a curated selection to help beginners and experienced DIYers alike tackle most home improvement tasks."
+      "question": "How to contribute?",
+      "answer": "To contribute, access the 'I contribute' section and fill out the form, or click on this [link](https://docs.google.com/forms/d/1Vdr3PbcZzwoGFT5-RIudQZVJ921ByHuphNSLvvMy07w/edit). You can also contact our teams via info@africtivistes.org for an interview."
     },
     {
-      "question": "Can I upgrade from the Starter Kit to the Professional Toolbox?",
-      "answer": "Absolutely! You can upgrade to the Professional Toolbox at any time to access a wider range of high-quality tools, enjoy priority customer support, and receive exclusive content. Contact our support team for a seamless transition."
+      "question": "What types of data are aggregated?",
+      "answer": "We collect qualitative and quantitative data related to the electoral initiatives of African civil society, including their type, field of activity, nature, targets, scope, and means of intervention."
     },
     {
-      "question": "What discounts are available for bulk orders through the Professional Toolbox plan?",
-      "answer": "Professional Toolbox members are entitled to exclusive discounts on bulk orders, the percentage of which may vary depending on the order volume. Get in touch with us to discuss your needs, and we'll provide a tailored discount structure."
+      "question": "How are the data collected?",
+      "answer": "The data are collected via a questionnaire, documentary research, and interviews."
     },
     {
-      "question": "What kind of customer support can I expect?",
-      "answer": "All our customers receive dedicated email support. With the Starter Kit, you'll receive our standard support, while the Professional Toolbox plan upgrades you to priority support, meaning faster response times and specialized assistance."
+      "question": "What are the main initiatives covered by CISCAfrica?",
+      "answer": "CISCAfrica lists citizen initiatives covering the entire electoral cycle, from voter awareness to election observation."
     },
     {
-      "question": "How current are the online resources and tutorials?",
-      "answer": "We regularly update our online resources and tutorials to reflect the latest trends in DIY and construction, as well as introductions to new tools and techniques. Our material aims to be comprehensive and user-friendly for all skill levels."
+      "question": "How can I access CISCAfrica data?",
+      "answer": "The data aggregated by CISCAfrica will be accessible through our online platform. Details on access will be provided on our website."
     },
     {
-      "question": "Does ScrewFast offer services for large-scale construction projects?",
-      "answer": "Yes, our Enterprise Solutions are designed for larger companies requiring comprehensive services. We provide consultation, planning, and supply of high-grade tools and materials, as well as staffing solutions for substantial construction needs. Contact us for a customized quote."
+      "question": "What is the geographical scope of CISCAfrica?",
+      "answer": "The CISCAfrica project covers citizen initiatives across the African continent, with a particular focus on countries in the West African sub-region."
     }
   ]
 }
