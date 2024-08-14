@@ -1,9 +1,11 @@
 ---
 import AfrictivistesLogo from "../../../images/partenaires/Africtivistes.svg";
 import logosfds from "@images/partenaires/Africtivistes.svg";
+import TabContent from "@/components/ui/blocks/TabContent.astro";
+import Image from "astro/components/Image.astro";
 
-interface partenaires {
-  logo: string;
+interface Partenaire {
+  logo: any;
   name: string;
   href: string;
 }
@@ -12,11 +14,10 @@ interface partenaires {
 interface Props {
   title: string;
   subTitle?: string;
-  partenaires: partenaires[];
+  partenaires: Partenaire[];
 }
 
 const { title, subTitle, partenaires } = Astro.props;
-
 ---
 
 <section class="">
@@ -40,10 +41,9 @@ const { title, subTitle, partenaires } = Astro.props;
       class="flex flex-wrap items-center justify-center gap-8 overflow-x-auto py-4"
     >
       {
-        partenaires &&
         partenaires.map((partenaire) => (
           <a href={partenaire.href} target="_blank" rel="noopener noreferrer">
-            <img
+            <Image
               src={partenaire.logo}
               alt={`Logo de ${partenaire.name}`}
               class="w-40"

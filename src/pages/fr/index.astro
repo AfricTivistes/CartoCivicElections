@@ -16,6 +16,13 @@ import {
   formulaireLink,
 } from "@/data_files/fr/features";
 import featureImage from "@images/image_ahead.png";
+import AfricTivistes from "@images/partenaires/africtivistes-rb.png";
+import afeonet from "@images/partenaires/afeonet.png";
+import zesn from "@images/partenaires/zesn.png";
+import epd from "@images/partenaires/EPD.png";
+import waeon from "@images/partenaires/WAEON.png";
+import ehorn from "@images/partenaires/e-horn.png";
+import esn from "@images/partenaires/esn-sa.png";
 
 const avatarSrcs: Array<string> = [
   "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80",
@@ -71,43 +78,43 @@ const avatarSrcs: Array<string> = [
 
   <ClientsSection
     title="Partenaires"
-    subTitle="Le projet est financé par l’Union européenne et mis en oeuvre par un consortium constitué de réseaux d’observation électorale et de soutien à la démocratie."
+    subTitle="Le projet est co-financé par l’Union européenne et mis en oeuvre par un consortium constitué de réseaux d’observation électorale et de soutien à la démocratie."
     partenaires={[
-        {
-          logo: "src/images/partenaires/Africtivistes.svg",
-          name: "AfricTivistes",
-          href: "https://www.africtivistes.com/",
-        },
-          {
-          logo: `src/images/partenaires/afeonet.png`,
-          name: "AfEONET",
-          href: "https://acfim.org/afeonet/",
-        },
-          {
-          logo: "src/images/partenaires/e-horn.png",
-          name: "E-HORN",
-          href: "https://ehorn.org/",
-        },
-          {
-          logo: "src/images/partenaires/EPD.png",
-          name: "EPD",
-          href: "https://epd.eu/",
-        },
-          {
-          logo: "src/images/partenaires/esn-sa.png",
-          name: "ESN-SA",
-          href: "https://www.esn-sa.org/",
-        },
-          {
-          logo: "src/images/partenaires/WAEON.png",
-          name: "WAEON",
-          href: "https://www.waeon.org/",
-        },
-          {
-          logo: "src/images/partenaires/zesn.png",
-          name: "ZESN",
-          href: "https://www.zesn.org.zw/",
-        },
+      {
+        logo: AfricTivistes,
+        name: "AfricTivistes",
+        href: "https://www.africtivistes.com/",
+      },
+      {
+        logo: afeonet,
+        name: "AfEONET",
+        href: "https://acfim.org/afeonet/",
+      },
+      {
+        logo: ehorn,
+        name: "E-HORN",
+        href: "https://ehorn.org/",
+      },
+      {
+        logo: epd,
+        name: "EPD",
+        href: "https://epd.eu/",
+      },
+      {
+        logo: esn,
+        name: "ESN-SA",
+        href: "https://www.esn-sa.org/",
+      },
+      {
+        logo: waeon,
+        name: "WAEON",
+        href: "https://www.waeon.org/",
+      },
+      {
+        logo: zesn,
+        name: "ZESN",
+        href: "https://www.zesn.org.zw/",
+      },
     ]}
   />
 </MainLayout>
