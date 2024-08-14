@@ -11,7 +11,8 @@ import AnnouncementBanner from "@components/ui/banners/AnnouncementBanner.astro"
 import heroImage from "@images/ciscafrica.png";
 import faqs from "@data/faqs.json";
 import { features, featuresTabs, formulaireLink } from "@/data_files/features";
-import featureImage from "@images/features-image.avif";
+
+import featureImage from "@images/image_ahead.png";
 
 const avatarSrcs: Array<string> = [
   "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80",
@@ -42,11 +43,6 @@ const avatarSrcs: Array<string> = [
     alt="Stack of ScrewFast product boxes containing assorted hardware tools"
   />
 
-  <ClientsSection
-    title="Partenaires"
-    subTitle="The project is funded by the European Union and implemented by a consortium of election observation and democracy support networks."
-  />
-
   <FeaturesGeneral
     title="CISCAfrica: The database of citizens' electoral initiatives in Africa"
     src={featureImage}
@@ -66,4 +62,10 @@ const avatarSrcs: Array<string> = [
     subTitle="Join us and help enrich the database of citizen electoral initiatives across Africa."
     url={formulaireLink}
   />
+
+  <ClientsSection
+    title="Partenaires"
+    subTitle="The project is funded by the European Union and implemented by a consortium of election observation and democracy support networks."
+  />
+
 </MainLayout>

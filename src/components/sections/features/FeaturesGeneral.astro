@@ -22,10 +22,17 @@ const { title, subTitle, src, alt, features } = Astro.props;
 ---
 
 <section
-  class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full"
+  class="mx-auto mt-2 max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full"
 >
   <!-- Block to display the feature image -->
-  <div class="relative mb-6 overflow-hidden md:mb-8">
+  <!-- Rendering title -->
+  <h1
+    class="block text-balance text-center text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-200 sm:text-4xl lg:text-6xl lg:leading-tight"
+  >
+    <!-- About Fragment: https://docs.astro.build/en/basics/astro-syntax/#fragments -->
+    <Fragment set:html={title} />
+  </h1>
+  <div class="relative overflow-hidden md:mb-4">
     {
       src && alt && (
         <Image
@@ -41,19 +48,13 @@ const { title, subTitle, src, alt, features } = Astro.props;
   </div>
 
   <!-- Displaying the main content consisting of title, subtitle, and several `IconBlock` components -->
-  <div class="mt-5 grid gap-8 lg:mt-16 lg:grid-cols-3 lg:gap-12">
+  <div class="grid gap-4 lg:mt-4 lg:grid-cols-2 lg:gap-6">
     <!-- Block for title and subtitle -->
     <div class="lg:col-span-1">
-      <!-- Rendering title -->
-      <h2
-        class="text-balance text-2xl font-bold text-neutral-800 dark:text-neutral-200 md:text-3xl"
-      >
-        {title}
-      </h2>
       <!-- Rendering subtitle -->
       {
         subTitle && (
-          <p class="mt-2 text-pretty text-neutral-600 dark:text-neutral-400 md:mt-4">
+          <p class="text-pretty text-neutral-600 dark:text-neutral-400 md:mt-4">
             {subTitle}
           </p>
         )
@@ -62,7 +63,7 @@ const { title, subTitle, src, alt, features } = Astro.props;
 
     <!-- Block to display the IconBlock components -->
     <div class="lg:col-span-2">
-      <div class="grid gap-8 sm:grid-cols-2 md:gap-12">
+      <div class="grid gap-4 sm:grid-cols-2 md:gap-6">
         <!-- Injecting IconBlock components with different properties -->
         {
           features &&
