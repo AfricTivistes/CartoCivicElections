@@ -1,86 +1,57 @@
 ---
-// Define props from Astro
-const { title, subTitle } = Astro.props;
+import AfrictivistesLogo from "../../../images/partenaires/Africtivistes.svg";
+import logosfds from "@images/partenaires/Africtivistes.svg";
+
+interface partenaires {
+  logo: string;
+  name: string;
+  href: string;
+}
 
 // Define TypeScript interface for props
 interface Props {
   title: string;
   subTitle?: string;
+  partenaires: partenaires[];
 }
 
-const partenaires = [
-  {
-    logo: "src/images/partenaires/Africtivistes.svg",
-    name: "AfricTivistes",
-    href: "https://www.africtivistes.com/",
-  },
-  {
-    logo: "src/images/partenaires/afeonet.png",
-    name: "AfEONET",
-    href: "https://acfim.org/afeonet/",
-  },
-  {
-    logo: "src/images/partenaires/e-horn.png",
-    name: "E-HORN",
-    href: "https://ehorn.org/",
-  },
-  {
-    logo: "src/images/partenaires/EPD.png",
-    name: "EPD",
-    href: "https://epd.eu/",
-  },
-  {
-    logo: "src/images/partenaires/esn-sa.png",
-    name: "ESN-SA",
-    href: "https://www.esn-sa.org/",
-  },
-  {
-    logo: "src/images/partenaires/WAEON.png",
-    name: "WAEON",
-    href: "https://www.waeon.org/",
-  },
-  {
-    logo: "src/images/partenaires/zesn.png",
-    name: "ZESN",
-    href: "https://www.zesn.org.zw/",
-  },
-];
+const { title, subTitle, partenaires } = Astro.props;
+
 ---
 
 <section class="">
   <!-- Title and description -->
   <div class="mx-auto max-w-3xl space-y-4 text-center">
-    <h2
-      class="text-balance text-2xl font-bold leading-tight text-neutral-800 dark:text-neutral-200 sm:text-3xl"
+    <h1
+      class="block text-balance text-center text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-200 sm:text-4xl lg:text-6xl lg:leading-tight"
     >
-      {title}
-    </h2>
-    {
-      subTitle && (
-        <p class="text-pretty leading-tight text-neutral-600 dark:text-neutral-400">
-          {subTitle}
-        </p>
-      )
-    }
-  </div>
-  <div
-    class="flex flex-wrap items-center justify-center gap-8 overflow-x-auto py-4"
-  >
-    {
-      partenaires.map((partenaire) => (
-        <a
-          href={partenaire.href}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img
-            src={partenaire.logo}
-            alt={`Logo de ${partenaire.name}`}
-            class="w-40"
-            loading="lazy"
-          />
-        </a>
-      ))
-    }
+      <!-- About Fragment: https://docs.astro.build/en/basics/astro-syntax/#fragments -->
+      <Fragment set:html={title} />
+      <h1></h1>
+      {
+        subTitle && (
+          <p class="text-pretty leading-tight text-neutral-600 dark:text-neutral-400">
+            {subTitle}
+          </p>
+        )
+      }
+    </h1>
+    <div
+      class="flex flex-wrap items-center justify-center gap-8 overflow-x-auto py-4"
+    >
+      {
+        partenaires &&
+        partenaires.map((partenaire) => (
+          <a href={partenaire.href} target="_blank" rel="noopener noreferrer">
+            <img
+              src={partenaire.logo}
+              alt={`Logo de ${partenaire.name}`}
+              class="w-40"
+              loading="lazy"
+            />
+          </a>
+        ))
+      }
+    </div>
   </div>
 </section>
