@@ -9,6 +9,10 @@ import { Image } from "astro:assets";
 import Logo from "../../../images/logob.avif";
 
 // Select the correct translation based on the page's lang prop:
+const formLink =
+  Astro.currentLocale === "fr"
+    ? "https://chk.me/3YMEbfE"
+    : "https://chk.me/3YMEbfE";
 const strings = Astro.currentLocale === "fr" ? frStrings : enStrings;
 const homeUrl = Astro.currentLocale === "fr" ? "/fr" : "/";
 const submitButton =
@@ -96,7 +100,7 @@ const submitButton =
           ))
         }
         |
-        <a href="">
+        <a href={formLink}>
           <span
             class="ms-1 inline rounded-lg bg-orange-500 px-2 py-1 text-xs font-bold text-neutral-50"
           >

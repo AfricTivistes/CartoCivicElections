@@ -54,3 +54,5 @@ export const featuresTabs =[
         alt: "",
     }
 ]
+
+export const formulaireLink = "https://chk.me/3YMEbfE"

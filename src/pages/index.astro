@@ -6,14 +6,11 @@ import HeroSectionAlt from "@components/sections/landing/HeroSectionAlt.astro";
 import ClientsSection from "@components/sections/landing/ClientsSection.astro";
 import FeaturesGeneral from "@components/sections/features/FeaturesGeneral.astro";
 import FeaturesNavs from "@components/sections/features/FeaturesNavs.astro";
-import TestimonialsSection from "@components/sections/testimonials/TestimonialsSection.astro";
-import PricingSection from "@components/sections/pricing/PricingSection.astro";
 import FAQ from "@components/sections/misc/FAQ.astro";
 import AnnouncementBanner from "@components/ui/banners/AnnouncementBanner.astro";
 import heroImage from "@images/ciscafrica.png";
 import faqs from "@data/faqs.json";
-import { features, featuresTabs } from "@/data_files/features";
-import pricing from "@data/pricing.json";
+import { features, featuresTabs, formulaireLink } from "@/data_files/features";
 import featureImage from "@images/features-image.avif";
 
 const avatarSrcs: Array<string> = [
@@ -28,7 +25,7 @@ const avatarSrcs: Array<string> = [
   <AnnouncementBanner
     btnId="dismiss-button"
     btnTitle="Submit an initiative"
-    url="https://chk.me/3YMEbfE"
+    url={formulaireLink}
   />
 
   <HeroSection
@@ -36,9 +33,9 @@ const avatarSrcs: Array<string> = [
         class="text-yellow-500 dark:text-yellow-400">Africa</span>`
     subTitle="To identify and map citizen initiatives relating to elections across the African continent."
     primaryBtn="Submit an initiative"
-    primaryBtnURL="/products"
+    primaryBtnURL={formulaireLink}
     secondaryBtn="Start Exploring"
-    secondaryBtnURL="/contact"
+    secondaryBtnURL="#"
     withReview={false}
     avatars={avatarSrcs}
     src={heroImage}
@@ -67,6 +64,6 @@ const avatarSrcs: Array<string> = [
   <HeroSectionAlt
     title="Let's build together’"
     subTitle="Join us and help enrich the database of citizen electoral initiatives across Africa."
-    url="https://chk.me/3YMEbfE"
+    url={formulaireLink}
   />
 </MainLayout>
