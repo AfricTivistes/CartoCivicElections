@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+import defaultTheme from 'tailwindcss/defaultTheme'
+
 import colors from 'tailwindcss/colors';
 export default {
   content: [
@@ -8,31 +10,35 @@ export default {
   darkMode: "class",
   theme: {
     colors: {
-      transparent: "transparent",
-      current: "currentColor",
-      black: "#000000",
       white: "#ffffff",
-      gray: colors.gray,
-      indigo: colors.indigo,
-      neutral: colors.neutral,  // Used mainly for text color
-      yellow: {
-        50: "#fefce8",
-        100: "#fef9c3",
-        400: "#facc15",
-        500: "#eab308",
-      }, // Accent colors, used mainly for star color, heading and buttons
-      orange: {
-        100: "#ffedd5",
-        200: "#fed7aa",
-        300: "#fb713b",
-        400: "#fa5a15",
-        500: "#e14d0b",
-        600: "#ea580c",
-      }, // Primary colors, used mainly for links, buttons and svg icons
-      red: colors.red, // Used for bookmark icon
-      zinc: colors.zinc, // Used mainly for box-shadow
+      neutral: colors.neutral, 
+      primary: {
+        black: "#000000",
+        yellow: "#FFC24A",
+        orange: "#FF5836",
+        green: "#6EC770",
+        blue: "#2D83F5",
+      },
+      secondary: {
+        beige: "#EBDED4",
+        teal: "#4DA29A",
+      },
+      neutral: {
+        ...require('tailwindcss/colors').neutral,
+      },
+      gray: require('tailwindcss/colors').gray,
+      indigo: require('tailwindcss/colors').indigo,
+      red: require('tailwindcss/colors').red,
+      zinc: require('tailwindcss/colors').zinc,
     },
-    extend: {},
+    extend: {
+      fontFamily: {
+        onest: ['"Onest Bold"', 'sans-serif'],
+        paragraph: ['"Paragraph font"', 'sans-serif'],
+        light: ['"Light"', 'sans-serif'],
+        normal: ['"Book,Normal"', 'sans-serif'],
+      },
+    },
   },
   plugins: [
     require("tailwindcss/nesting"),
