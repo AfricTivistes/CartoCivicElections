@@ -1,7 +1,7 @@
 // An array of links for navigation bar
 const navBarLinks = [
   { name: "A Propos", url: "#" },
-  { name: "Initiatives", url: "/fr/initiatives" },
+  { name: "Initiatives", url: "#" },
   { name: "Actualités", url: "#" },
   { name: "Contact", url: "/fr/contact" },
 ];
