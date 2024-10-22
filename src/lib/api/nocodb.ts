@@ -5,12 +5,12 @@ dotenv.config();
 
 // Récupérer les variables d'environnement
 const API_URL = process.env.API_URL;
-const API_KEY = process.env.API_KEY;
+const API_TOKEN = process.env.API_TOKEN;
 
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'xc-auth': API_KEY,
+    'xc-token': API_TOKEN,
     'Content-Type': 'application/json',
   },
 });

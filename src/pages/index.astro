@@ -20,9 +20,16 @@ import ehorn from "public/partenaires/e-horn.png";
 import esn from "public/partenaires/esn-sa.png";
 
 import featureImage from "@images/image_ahead.png";
-import { getData } from "@/lib/contentNocodb";
+import { getData } from "@/lib/contentNocodb.astro";
 // Example: Fetch data
-const tableData = await getData("Initiative");
+const tableId = "m2nwtvnotcr0zr1"; // Remplacez par l'ID de votre table
+const query = {
+  offset: '0',
+  limit: '25',
+  where: '',
+  viewId: 'vwpo4oslv7k1vafr'
+};
+const tableData = await getData(tableId, query);
 console.log(tableData);
 
 const avatarSrcs: Array<string> = [
