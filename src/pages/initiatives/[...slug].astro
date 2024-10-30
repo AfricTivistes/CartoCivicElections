@@ -6,6 +6,20 @@ import PrimaryCTA from "@components/ui/buttons/PrimaryCTA.astro";
 import { Image } from "astro:assets";
 import { getCollection } from "astro:content";
 import { SITE } from "@data/constants";
+import { getData } from "@/lib/contentNocodb.astro";
+
+const tableId = "mfms3szbpfsk6mh"; // Remplacez par l'ID de votre table
+const query = {
+  offset: "0",
+  limit: "25",
+  where: "",
+  viewId: "vwih3n51o1hp674a", //Gerer la partie des views
+};
+const initiativeData = await getData(tableId, query);
+//console.log(initiativeData.list[0].logo[0].url);
+console.log(initiativeData.list[0]);
+console.log(initiativeData.list[0].Pays);
+console.log(initiativeData.list[0].Country);
 
 // Global declaration for gsap animation library
 declare global {
@@ -24,7 +38,7 @@ export async function getStaticPaths() {
 
 const { product } = Astro.props;
 
-const pageTitle: string = `${product.data.title} | ${SITE.title}`;
+const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
 ---
 
 <MainLayout title={pageTitle}>
@@ -49,19 +63,21 @@ const pageTitle: string = `${product.data.title} | ${SITE.title}`;
         <h1
           class="block text-4xl font-bold tracking-tighter text-neutral-800 dark:text-neutral-200 sm:text-5xl md:text-6xl lg:text-7xl"
         >
-          {product.data.title}
+          {initiativeData.list[2].nom}
         </h1>
         <p class="text-lg text-neutral-600 dark:text-neutral-400">
-          {product.data.description}
+          {initiativeData.list[2].Country}
         </p>
       </div>
       <div>
         <Image
           id="fadeInMoveRight"
-          src={product.data.main.imgMain}
+          src={initiativeData.list[2].logo[0].signedUrl}
           class="w-[600px]"
           alt={product.data.main.imgAlt}
           format={"avif"}
+          width="600"
+          height="600"
           loading={"eager"}
         />
       </div>
@@ -160,7 +176,7 @@ const pageTitle: string = `${product.data.title} | ${SITE.title}`;
                     </div>
                   ))}
                 </div>
-              ) : product.data.tableData ? (
+              ) : product.data.initiativeData ? (
                 <div class="mt-6 space-y-6 md:ml-auto md:mt-0">
                   <div class="flex flex-col">
                     <div class="-m-1.5 overflow-x-auto">
@@ -169,7 +185,7 @@ const pageTitle: string = `${product.data.title} | ${SITE.title}`;
                           <table class="min-w-full divide-y divide-neutral-300 dark:divide-neutral-700">
                             <thead>
                               <tr>
-                                {product.data.tableData?.[0].feature?.map(
+                                {product.data.initiativeData?.[0].feature?.map(
                                   (header) => (
                                     <th
                                       scope="col"
@@ -182,7 +198,7 @@ const pageTitle: string = `${product.data.title} | ${SITE.title}`;
                               </tr>
                             </thead>
                             <tbody class="divide-y divide-neutral-300 dark:divide-neutral-700">
-                              {product.data.tableData?.map((row) =>
+                              {product.data.initiativeData?.map((row) =>
                                 // Wrap each row's content in a separate <tr> element
                                 row.description.map((rowData) => (
                                   <tr>
