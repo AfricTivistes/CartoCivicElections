@@ -6,6 +6,7 @@ import CardSmall from "@components/ui/cards/CardSmall.astro";
 import CardWide from "@components/ui/cards/CardWide.astro";
 import FeaturesStatsAlt from "@components/sections/features/FeaturesStatsAlt.astro";
 import TestimonialsSectionAlt from "@components/sections/testimonials/TestimonialsSectionAlt.astro";
+import FeaturesStats from "@components/sections/features/FeaturesStats.astro";
 
 // Importing necessary functions from Astro
 import { getCollection } from "astro:content";
@@ -21,9 +22,9 @@ const product: CollectionEntry<"products">[] = (
 );
 
 // Define variables for page content
-const title: string = "Initiatives";
+const title: string = "Initiatives Citoyennes";
 const subTitle: string =
-  "Explore the durability and precision of ScrewFast tools, designed for both professionals and enthusiasts. Each of our products is crafted with precision and built to last, ensuring you have the right tool for every job.";
+  "Découvrez et soutenez les initiatives citoyennes pour des élections transparentes et équitables à travers l'Afrique";
 
 // Testimonial data that will be rendered in the component
 const testimonials = [
@@ -60,6 +61,7 @@ const testimonials = [
 ];
 
 const pageTitle: string = `Products | ${SITE.title}`;
+const categories = ["categorie","categorie"]
 ---
 
 <MainLayout
@@ -100,6 +102,89 @@ const pageTitle: string = `Products | ${SITE.title}`;
       </div>
       <PrimaryCTA title="Customer Stories" url="#testimonials" noArrow={true} />
     </div>
+    <!--FeaturesStats section showcases essential stats valuable to users-->
+    {/* Search and Filter Section */}
+    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center">
+  <!-- Search Input -->
+  <div class="flex-grow">
+    <label
+      for="search"
+      class="mb-2 block text-sm text-neutral-800 dark:text-neutral-200"
+    >
+      {Astro.currentLocale === "fr" ? "Rechercher" : "Search"}
+    </label>
+    <div class="relative">
+      <input
+        type="search"
+        id="search"
+        name="search"
+        placeholder={Astro.currentLocale === "fr" ? "Rechercher une initiative ou un pays..." : "Search for an initiative or country..."}
+        class="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 pl-10 text-sm text-neutral-700 focus:border-neutral-200 focus:outline-none focus:ring focus:ring-neutral-400 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-700/30 dark:text-neutral-300 dark:focus:ring-1"
+        required
+      />
+      <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+        <svg 
+          class="h-4 w-4 text-neutral-500 dark:text-neutral-400" 
+          xmlns="http://www.w3.org/2000/svg" 
+          fill="none" 
+          viewBox="0 0 24 24" 
+          stroke="currentColor"
+        >
+          <path 
+            stroke-linecap="round" 
+            stroke-linejoin="round" 
+            stroke-width="2" 
+            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+          />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Select -->
+  <div class="w-full md:w-[200px]">
+    <label
+      for="category"
+      class="mb-2 block text-sm text-neutral-800 dark:text-neutral-200"
+    >
+      {Astro.currentLocale === "fr" ? "Catégorie" : "Category"}
+    </label>
+    <select
+      id="category"
+      name="category"
+      class="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 focus:border-neutral-200 focus:outline-none focus:ring focus:ring-neutral-400 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-700/30 dark:text-neutral-300 dark:focus:ring-1"
+    >
+      <option value="">
+        {Astro.currentLocale === "fr" ? "Toutes les catégories" : "All categories"}
+      </option>
+      {categories.map((category) => (
+        <option key={category} value={category}>
+          {category}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
+    <FeaturesStats
+      title="By the Numbers"
+      subTitle="Our commitment to quality and reliability is evident in every project we undertake. At ScrewFast, we are dedicated to delivering industry-leading services that ensure your construction projects are built to last."
+      mainStatTitle="96%"
+      mainStatSubTitle="of our clients rate their experience with ScrewFast as exceptional"
+      stats={[
+        {
+          stat: "99.8%",
+          description: "project completion rate",
+        },
+        {
+          stat: "5,000+",
+          description: "successful installations",
+        },
+        {
+          stat: "85%",
+          description: "client growth year-over-year",
+        },
+      ]}
+    />
     <!--Displaying products in alternating styles. Alternative product gets different card styling.-->
     <!--Maps through all product entries and displays them with either CardSmall or CardWide based on their position.-->
     <section class="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6 xl:gap-8">

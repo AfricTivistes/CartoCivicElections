@@ -8,37 +8,42 @@ import { getCollection } from "astro:content";
 import { SITE } from "@data/constants";
 import { getData } from "@/lib/contentNocodb.astro";
 
-const tableId = "mfms3szbpfsk6mh"; // Remplacez par l'ID de votre table
-const query = {
-  offset: "0",
-  limit: "25",
-  where: "",
-  viewId: "vwih3n51o1hp674a", //Gerer la partie des views
-};
-const initiativeData = await getData(tableId, query);
-//console.log(initiativeData.list[0].logo[0].url);
-console.log(initiativeData.list[0]);
-console.log(initiativeData.list[0].Pays);
-console.log(initiativeData.list[0].Country);
-
 // Global declaration for gsap animation library
 declare global {
   interface Window {
     gsap: any;
   }
 }
-// This gets the static paths for all the unique products
+// This gets the static paths for all the unique products "Nom de l'initiative" qui est une clé de "product"
 export async function getStaticPaths() {
-  const productEntries = await getCollection("products");
-  return productEntries.map((product) => ({
-    params: { slug: product.slug },
-    props: { product },
-  }));
+  const tableId = "mrv8bch7o0jh5ld";
+  const query = {
+    offset: "0",
+    limit: "25",
+    where: "",
+    viewId: "vw793taeypy81he9",
+    fields: [
+      "Nom de l'initiative",
+      "Résumé descriptif de l'initiative",
+      "Pays / Country"
+    ]
+  };
+  const productEntries = await getData(tableId, query);
+  console.log(productEntries);
+  return productEntries.list.map((product) => {
+    const initiativeName = product["Nom de l'initiative"];
+    console.log(product);
+    const productSlug = typeof initiativeName === 'string' ? initiativeName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") : "";
+    return {
+      params: { slug: productSlug },
+      props: { product },
+    };
+  });
 }
 
 const { product } = Astro.props;
 
-const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
+const pageTitle: string = `${product["Nom de l'initiative"]} | ${SITE.title}`;
 ---
 
 <MainLayout title={pageTitle}>
@@ -53,7 +58,7 @@ const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
         id="fadeText"
         class="mb-8 max-w-prose text-pretty font-light text-neutral-700 dark:text-neutral-300 sm:text-xl"
       >
-        {product.data.main.content}
+        {product["Résumé descriptif de l'initiative"]}
       </p>
     </div>
     <div
@@ -63,14 +68,14 @@ const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
         <h1
           class="block text-4xl font-bold tracking-tighter text-neutral-800 dark:text-neutral-200 sm:text-5xl md:text-6xl lg:text-7xl"
         >
-          {initiativeData.list[2].nom}
+          {product["Nom de l'initiative"]}
         </h1>
         <p class="text-lg text-neutral-600 dark:text-neutral-400">
-          {initiativeData.list[2].Country}
+          {product["Pays / Country"]}
         </p>
       </div>
       <div>
-        <Image
+        <!--<Image
           id="fadeInMoveRight"
           src={initiativeData.list[2].logo[0].signedUrl}
           class="w-[600px]"
@@ -79,7 +84,7 @@ const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
           width="600"
           height="600"
           loading={"eager"}
-        />
+        />-->
       </div>
     </div>
   </section>
@@ -90,7 +95,7 @@ const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
       aria-label="Tabs"
       role="tablist"
     >
-      {
+      <!--{
         product.data.tabs.map((tab, index) => (
           <ProductTabBtn
             title={tab.title}
@@ -99,7 +104,7 @@ const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
             first={index === 0}
           />
         ))
-      }
+      }-->
     </nav>
 
     <div class="mt-12 md:mt-16">
@@ -110,24 +115,24 @@ const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
               <h2
                 class="text-balance text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-200 md:leading-tight lg:text-4xl"
               >
-                {product.data.longDescription.title}
+                Titre
               </h2>
               <p
                 class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
               >
-                {product.data.longDescription.subTitle}
+                Description
               </p>
               <p class="mt-5">
-                <PrimaryCTA
+                <!--<PrimaryCTA
                   title={product.data.longDescription.btnTitle}
                   url={product.data.longDescription.btnURL}
-                />
+                />-->
               </p>
             </div>
 
             <div class="space-y-6 lg:space-y-10">
               {
-                product.data.descriptionList.map((list) => (
+                product.data && product.data.descriptionList.map((list) => (
                   <div class="flex">
                     <div>
                       <h3 class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg">
@@ -150,7 +155,7 @@ const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
           <div class="grid w-full grid-cols-1 gap-x-16 md:grid-cols-2">
             <div class="max-w-md space-y-6">
               {
-                product.data.specificationsLeft.map((spec) => (
+                product.data && product.data.specificationsLeft.map((spec) => (
                   <div>
                     <h3 class="block font-bold text-neutral-800 dark:text-neutral-200">
                       {spec.title}
@@ -163,7 +168,7 @@ const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
               }
             </div>
             {
-              product.data.specificationsRight ? (
+              product.data && product.data.specificationsRight ? (
                 <div class="mt-6 max-w-md space-y-6 md:ml-auto md:mt-0">
                   {product.data.specificationsRight?.map((spec) => (
                     <div>
@@ -176,7 +181,7 @@ const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
                     </div>
                   ))}
                 </div>
-              ) : product.data.initiativeData ? (
+              ) : product.data && product.data.initiativeData ? (
                 <div class="mt-6 space-y-6 md:ml-auto md:mt-0">
                   <div class="flex flex-col">
                     <div class="-m-1.5 overflow-x-auto">
@@ -233,7 +238,7 @@ const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
         class="relative left-12 top-12 z-10 overflow-hidden rounded-xl shadow-lg md:left-12 md:top-16 md:-ml-12 lg:ml-0"
       >
         {
-          product.data.blueprints.first && (
+          product.data && product.data.blueprints.first && (
             <Image
               src={product.data.blueprints.first}
               class="h-full w-full object-cover object-center"
@@ -246,7 +251,7 @@ const pageTitle: string = `${initiativeData.list[2].nom} | ${SITE.title}`;
 
       <div class="relative right-12 overflow-hidden rounded-xl shadow-xl">
         {
-          product.data.blueprints.second && (
+          product.data && product.data.blueprints.second && (
             <Image
               src={product.data.blueprints.second}
               class="h-full w-full object-cover object-center"
