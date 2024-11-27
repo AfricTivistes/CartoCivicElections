@@ -1,0 +1,44 @@
+run = "npm run dev"
+modules = ["nodejs-20"]
+
+[deployment]
+run = ["sh", "-c", "npm run dev -- --host --port 4322"]
+
+[[ports]]
+localPort = 4321
+externalPort = 80
+exposeLocalhost = true
+
+[[ports]]
+localPort = 4322
+externalPort = 3000
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Astro Dev Server"
+
+[[workflows.workflow]]
+name = "Astro Dev Server"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev -- --host --port 4322"
+waitForPort = 4322

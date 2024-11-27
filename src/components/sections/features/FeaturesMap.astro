@@ -1,0 +1,262 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title } = Astro.props;
+---
+
+<section class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full">
+  <h1
+    class="block text-balance text-center text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-200 sm:text-4xl lg:text-6xl lg:leading-tight"
+  >
+    <!-- About Fragment: https://docs.astro.build/en/basics/astro-syntax/#fragments -->
+    <Fragment set:html={title} />
+  </h1>
+  <div id="map" class="h-[600px] w-full rounded-lg md:mb-4"></div>
+</section>
+
+<script>
+  import maplibregl from 'maplibre-gl';
+  
+  // Initialize the map when the component mounts
+  const initMap = () => {
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: {
+        version: 8,
+        sources: {
+          'osm': {
+            type: 'raster',
+            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+            tileSize: 256,
+            attribution: '© OpenStreetMap Contributors'
+          }
+        },
+        layers: [{
+          id: 'osm',
+          type: 'raster',
+          source: 'osm',
+          minzoom: 0,
+          maxzoom: 19
+        }]
+      },
+      center: [20, 0], // Center of Africa
+      zoom: 3
+    });
+
+    // Add navigation controls
+    map.addControl(new maplibregl.NavigationControl());
+
+    // African countries data points
+    const points = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [9.537499, 34.014478] // Tunisia
+          },
+          properties: {
+            title: 'Tunisie',
+            description: 'Initiatives en Tunisie',
+            country: 'Tunisie',
+            count: 5
+          }
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [2.213749, 13.55] // Niger
+          },
+          properties: {
+            title: 'Niger',
+            description: 'Initiatives au Niger',
+            country: 'Niger',
+            count: 3
+          }
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [-1.023194, 7.946527] // Ghana
+          },
+          properties: {
+            title: 'Ghana',
+            description: 'Initiatives au Ghana',
+            country: 'Ghana',
+            count: 7
+          }
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [37.906193, -0.023559] // Kenya
+          },
+          properties: {
+            title: 'Kenya',
+            description: 'Initiatives au Kenya',
+            country: 'Kenya',
+            count: 4
+          }
+        },
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [18.665695, -33.918861] // South Africa
+          },
+          properties: {
+            title: 'Afrique du Sud',
+            description: 'Initiatives en Afrique du Sud',
+            country: 'Afrique du Sud',
+            count: 6
+          }
+        }
+      ]
+    };
+
+    map.on('load', () => {
+      // Add the source for clusters
+      map.addSource('initiatives', {
+        type: 'geojson',
+        data: points,
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 50
+      });
+
+      // Add cluster layer
+      map.addLayer({
+        id: 'clusters',
+        type: 'circle',
+        source: 'initiatives',
+        filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': [
+            'step',
+            ['get', 'point_count'],
+            '#FB923C', // Primary orange color for small clusters
+            10,
+            '#EA580C', // Darker orange for medium clusters
+            30,
+            '#9A3412' // Darkest orange for large clusters
+          ],
+          'circle-radius': [
+            'step',
+            ['get', 'point_count'],
+            20,
+            10,
+            30,
+            30,
+            40
+          ]
+        }
+      });
+
+      // Add cluster count
+      map.addLayer({
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'initiatives',
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-field': '{point_count_abbreviated}',
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          'text-size': 12
+        },
+        paint: {
+          'text-color': '#ffffff'
+        }
+      });
+
+      // Add unclustered point layer
+      map.addLayer({
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'initiatives',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': '#FB923C',
+          'circle-radius': 8,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#fff'
+        }
+      });
+
+      // Create a popup for individual points
+      const popup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false
+      });
+
+      map.on('mouseenter', 'unclustered-point', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+        
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const { title, description, count } = e.features[0].properties;
+        
+        const popupContent = `
+          <a href="/initiatives/${title.toLowerCase()}" class="block">
+            <h3 class="font-bold text-lg">${title}</h3>
+            <p class="text-sm">${description}</p>
+            <p class="text-sm mt-2">${count} initiative${count > 1 ? 's' : ''}</p>
+          </a>
+        `;
+
+        popup.setLngLat(coordinates)
+          .setHTML(popupContent)
+          .addTo(map);
+      });
+
+      map.on('mouseleave', 'unclustered-point', () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+      });
+
+      // Add click handler for unclustered points
+      map.on('click', 'unclustered-point', (e) => {
+        const { title } = e.features[0].properties;
+        window.location.href = `/initiatives`;
+      });
+    });
+
+    // Inspect a cluster on click
+    map.on('click', 'clusters', (e) => {
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: ['clusters']
+      });
+      const clusterId = features[0].properties.cluster_id;
+      map.getSource('initiatives').getClusterExpansionZoom(
+        clusterId,
+        (err, zoom) => {
+          if (err) return;
+
+          map.easeTo({
+            center: features[0].geometry.coordinates,
+            zoom: zoom
+          });
+        }
+      );
+    });
+
+    // Show pointer cursor on hover
+    map.on('mouseenter', 'clusters', () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+    map.on('mouseleave', 'clusters', () => {
+      map.getCanvas().style.cursor = '';
+    });
+  };
+
+  // Initialize map when component mounts
+  document.addEventListener('DOMContentLoaded', initMap);
+</script>
+
+<style is:global>
+  @import 'maplibre-gl/dist/maplibre-gl.css';
+</style>

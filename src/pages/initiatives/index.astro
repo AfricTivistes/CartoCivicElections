@@ -1,218 +1,81 @@
 ---
-// Importing necessary components
 import MainLayout from "@/layouts/MainLayout.astro";
-import PrimaryCTA from "@components/ui/buttons/PrimaryCTA.astro";
-import CardSmall from "@components/ui/cards/CardSmall.astro";
-import CardWide from "@components/ui/cards/CardWide.astro";
-import FeaturesStatsAlt from "@components/sections/features/FeaturesStatsAlt.astro";
-import TestimonialsSectionAlt from "@components/sections/testimonials/TestimonialsSectionAlt.astro";
-import FeaturesStats from "@components/sections/features/FeaturesStats.astro";
-
-// Importing necessary functions from Astro
-import { getCollection } from "astro:content";
-import type { CollectionEntry } from "astro:content";
-import { SITE } from "@data/constants";
-
-// Fetching all the product related content and sorting it by main.id
-const product: CollectionEntry<"products">[] = (
-  await getCollection("products")
-).sort(
-  (a: CollectionEntry<"products">, b: CollectionEntry<"products">) =>
-    a.data.main.id - b.data.main.id,
-);
+import Card from "@/components/Card.astro";
+import InitiativesGrid from "@/components/InitiativesGrid.astro";
+import { getData } from "@/lib/contentNocodb.astro";
 
 // Define variables for page content
 const title: string = "Initiatives Citoyennes";
 const subTitle: string =
   "Découvrez et soutenez les initiatives citoyennes pour des élections transparentes et équitables à travers l'Afrique";
 
-// Testimonial data that will be rendered in the component
-const testimonials = [
-  // First testimonial data
-  {
-    content:
-      " \"Since switching to ScrewFast's hardware tools, the efficiency on our construction sites has skyrocketed. The durability of the hex bolts and precision of the machine screws are simply unmatched. It's refreshing to work with a company that truly understands the daily demands of the industry.\" ",
-    author: "Jason Clark",
-    role: "Site Foreman | TopBuild",
-    avatarSrc:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80",
-    avatarAlt: "Image Description",
-  },
-  // Second testimonial data
-  {
-    content:
-      " \"As an interior designer, I'm always looking for high-quality materials and tools that help bring my visions to life. ScrewFast's mixed screws assortment has been a game-changer for my projects, providing the perfect blend of quality and variety. The outstanding customer support was just the cherry on top!\" ",
-    author: "Maria Gonzalez",
-    role: "Interior Designer | Creative Spaces",
-    avatarSrc:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1376&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80",
-    avatarAlt: "Image Description",
-  },
-  // Third testimonial data
-  {
-    content:
-      " \"I’ve been a professional carpenter for over 15 years, and I can sincerely say that ScrewFast’s tap bolts and nuts are some of the best I've used. They grip like no other, and I have full confidence in every joint and fixture. Plus, the service is impeccable – they truly care about my project's success.\" ",
-    author: "Richard Kim",
-    role: "Master Carpenter | WoodWright",
-    avatarSrc:
-      "https://images.unsplash.com/photo-1474176857210-7287d38d27c6?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D8&auto=format&fit=facearea&facepad=2&w=320&h=320&q=80",
-    avatarAlt: "Image Description",
-  },
-];
+// Fetch initiatives data
+const tableId = "mrv8bch7o0jh5ld";
+const query = {
+  offset: "0",
+  limit: "25",
+  where: "",
+  viewId: "vw793taeypy81he9",
+  fields: [
+    "Nom de l'initiative",
+    "Pays / Country",
+    "Catégorie de l'initiative ?",
+    "Thématique de l'initiative ?"
+  ]
+};
 
-const pageTitle: string = `Products | ${SITE.title}`;
-const categories = ["categorie","categorie"]
+const rawInitiatives = await getData(tableId, query);
+
+// Format initiatives data
+const initiatives = Array.isArray(rawInitiatives?.list) ? rawInitiatives.list.map((initiative) => ({
+  title: initiative["Nom de l'initiative"] || "Initiative sans nom",
+  country: initiative["Pays / Country"] || "Pays non spécifié",
+  category: initiative["Catégorie de l'initiative ?"] || "Non catégorisé",
+  description: initiative["Thématique de l'initiative ?"] || "Description non disponible",
+})) : [];
+
+// Get unique categories from all initiatives (handling multiple categories per initiative)
+const allCategories = initiatives.flatMap(init => 
+  init.category.split(',').map(cat => cat.trim())
+).filter(Boolean);
+const categories = [...new Set(allCategories)];
 ---
 
-<MainLayout
-  title={pageTitle}
-  structuredData={{
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "@id": "https://screwfast.uk/products",
-    "url": "https://screwfast.uk/products",
-    "name": "Hardware Tools | ScrewFast",
-    "description": "Explore the durability and precision of ScrewFast tools, designed for both professionals and enthusiasts.",
-    "isPartOf": {
-      "@type": "WebSite",
-      "url": "https://screwfast.uk",
-      "name": "ScrewFast",
-      "description": "ScrewFast offers top-tier hardware tools and expert construction services to meet all your project needs."
-    },
-    "inLanguage": "en-US"
-  }}
->
-  <div
-    class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full"
-  >
-    <div class="mb-4 flex items-center justify-between gap-8 sm:mb-8 md:mb-12">
-      <div class="flex items-center gap-12">
-        <h1
-          class="text-balance text-2xl font-bold tracking-tight text-neutral-800 dark:text-neutral-200 md:text-4xl md:leading-tight"
-        >
-          {title}
-        </h1>
-        {
-          subTitle && (
-            <p class="hidden max-w-screen-sm text-pretty text-neutral-600 dark:text-neutral-400 md:block">
-              {subTitle}
-            </p>
-          )
-        }
-      </div>
-      <PrimaryCTA title="Customer Stories" url="#testimonials" noArrow={true} />
+<MainLayout title={title}>
+  <div class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+    <!-- Header Section -->
+    <div class="mb-8 text-center">
+      <h1 class="mb-4 text-4xl font-bold text-primary-600">{title}</h1>
+      <p class="text-lg text-gray-600">{subTitle}</p>
     </div>
-    <!--FeaturesStats section showcases essential stats valuable to users-->
-    {/* Search and Filter Section */}
-    <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-center">
-  <!-- Search Input -->
-  <div class="flex-grow">
-    <label
-      for="search"
-      class="mb-2 block text-sm text-neutral-800 dark:text-neutral-200"
-    >
-      {Astro.currentLocale === "fr" ? "Rechercher" : "Search"}
-    </label>
-    <div class="relative">
-      <input
-        type="search"
-        id="search"
-        name="search"
-        placeholder={Astro.currentLocale === "fr" ? "Rechercher une initiative ou un pays..." : "Search for an initiative or country..."}
-        class="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 pl-10 text-sm text-neutral-700 focus:border-neutral-200 focus:outline-none focus:ring focus:ring-neutral-400 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-700/30 dark:text-neutral-300 dark:focus:ring-1"
-        required
-      />
-      <div class="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-        <svg 
-          class="h-4 w-4 text-neutral-500 dark:text-neutral-400" 
-          xmlns="http://www.w3.org/2000/svg" 
-          fill="none" 
-          viewBox="0 0 24 24" 
-          stroke="currentColor"
-        >
-          <path 
-            stroke-linecap="round" 
-            stroke-linejoin="round" 
-            stroke-width="2" 
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      </div>
-    </div>
-  </div>
 
-  <!-- Category Select -->
-  <div class="w-full md:w-[200px]">
-    <label
-      for="category"
-      class="mb-2 block text-sm text-neutral-800 dark:text-neutral-200"
-    >
-      {Astro.currentLocale === "fr" ? "Catégorie" : "Category"}
-    </label>
-    <select
-      id="category"
-      name="category"
-      class="block w-full rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-700 focus:border-neutral-200 focus:outline-none focus:ring focus:ring-neutral-400 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-600 dark:bg-neutral-700/30 dark:text-neutral-300 dark:focus:ring-1"
-    >
-      <option value="">
-        {Astro.currentLocale === "fr" ? "Toutes les catégories" : "All categories"}
-      </option>
-      {categories.map((category) => (
-        <option key={category} value={category}>
-          {category}
-        </option>
-      ))}
-    </select>
+    <!-- Search and Filter Section -->
+    <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center">
+      <!-- Search Input -->
+      <div class="flex-grow">
+        <input
+          type="search"
+          id="search"
+          placeholder="Rechercher une initiative..."
+          class="w-full rounded-lg border border-gray-300 p-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
+        />
+      </div>
+
+      <!-- Category Filter -->
+      <div class="w-full md:w-64">
+        <select
+          id="category"
+          class="w-full rounded-lg border border-gray-300 p-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
+        >
+          <option value="">Toutes les catégories</option>
+          {categories.map((category) => (
+            <option value={category}>{category}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+
+    <!-- Initiatives Grid -->
+    <InitiativesGrid initiatives={initiatives} />
   </div>
-</div>
-    <FeaturesStats
-      title="By the Numbers"
-      subTitle="Our commitment to quality and reliability is evident in every project we undertake. At ScrewFast, we are dedicated to delivering industry-leading services that ensure your construction projects are built to last."
-      mainStatTitle="96%"
-      mainStatSubTitle="of our clients rate their experience with ScrewFast as exceptional"
-      stats={[
-        {
-          stat: "99.8%",
-          description: "project completion rate",
-        },
-        {
-          stat: "5,000+",
-          description: "successful installations",
-        },
-        {
-          stat: "85%",
-          description: "client growth year-over-year",
-        },
-      ]}
-    />
-    <!--Displaying products in alternating styles. Alternative product gets different card styling.-->
-    <!--Maps through all product entries and displays them with either CardSmall or CardWide based on their position.-->
-    <section class="grid grid-cols-1 gap-4 sm:grid-cols-3 md:gap-6 xl:gap-8">
-      {
-        product.map((product, index) => {
-          const position = index % 4;
-          if (position === 0 || position === 3) {
-            return <CardSmall product={product} />;
-          } else {
-            return <CardWide product={product} />;
-          }
-        })
-      }
-    </section>
-  </div>
-  <!--Features statistics section-->
-  <FeaturesStatsAlt
-    title="Why Choose ScrewFast?"
-    subTitle="Transform your ideas into tangible results with ScrewFast tools. Whether you're starting with a sketch on a napkin or diving into a comprehensive construction project, our tools are engineered to help you build with confidence."
-    benefits={[
-      "Robust and reliable tools for long-lasting performance.",
-      "Innovative solutions tailored to modern construction needs.",
-      "Customer support dedicated to your project's success.",
-    ]}
-  />
-  <!--Testimonials section-->
-  <TestimonialsSectionAlt
-    title="What Our Customers Say"
-    testimonials={testimonials}
-  />
 </MainLayout>
