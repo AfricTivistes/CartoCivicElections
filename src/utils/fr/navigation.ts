@@ -5,6 +5,16 @@ const navBarLinks = [
   { name: "Actualités", url: "#" },
   { name: "Contact", url: "/fr/contact" },
 ];
+const navBarAhead = [
+  { name: "About", url: "https://ahead.africa/about/" },
+  { name: "Countries", url: "https://ahead.africa/countries/" },
+  { name: "Learning", url: "https://ahead.africa/learning/" },
+  { name: "Research", url: "https://ahead.africa/research/" },
+  { name: "Advocacy", url: "https://ahead.africa/advocacy/" },
+  { name: "Opportunities", url: "https://ahead.africa/opportunities/" },
+  { name: "News", url: "https://ahead.africa/news/" },
+  { name: "Events", url: "https://ahead.africa/events/" },
+]
 const footerLinks = [
   {
     section: "Projet",
@@ -35,6 +45,7 @@ const socialLinks = {
 
 export default {
   navBarLinks,
+  navBarAhead,
   footerLinks,
   socialLinks,
 };
