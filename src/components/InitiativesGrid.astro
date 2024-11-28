@@ -1,0 +1,31 @@
+---
+import Card from './Card.astro';
+
+interface Initiative {
+  title: string;
+  country: string;
+  category: string;
+  description: string;
+  link?: string;
+}
+
+interface Props {
+  initiatives: Initiative[];
+}
+
+const { initiatives } = Astro.props;
+---
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+  {
+    initiatives.map((initiative) => (
+      <Card
+        title={initiative.title}
+        country={initiative.country}
+        category={initiative.category}
+        description={initiative.description}
+        link={initiative.link}
+      />
+    ))
+  }
+</div>
