@@ -1,7 +1,19 @@
 ---
-import { api } from './api/nocodb.ts';
+import { api } from './api/nocodb';
 
-export async function getData(tableId: string, query: object = {}) {
+interface PageInfo {
+  totalRows: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+interface ApiResponse {
+  list: any[];
+  pageInfo: PageInfo;
+}
+
+export const getData = async (tableId: string, query: object = {}) => {
   try {
     const response = await api.get(`/api/v2/tables/${tableId}/records`, { params: query });
     return response.data;
@@ -9,9 +21,86 @@ export async function getData(tableId: string, query: object = {}) {
     console.error('Error fetching data:', error);
     throw error;
   }
-}
+};
 
-export async function insertData(tableId: string, data: object[]) {
+export const getAll = async (tableId: string, query: object = {}) => {
+  try {
+    let allRecords = [];
+    let page = 1;
+    let hasMore = true;
+    let totalRows = 0;
+    const baseParams = {
+      viewId: query?.viewId,
+      fields: query?.fields,
+      where: query?.where
+    };
+    
+    // Première requête pour obtenir le nombre total d'enregistrements
+    const firstResponse = await api.get(`/api/v2/tables/${tableId}/records`, {
+      params: {
+        ...baseParams,
+        limit: 100,
+        page: 1
+      }
+    });
+    
+    const firstData = firstResponse.data as ApiResponse;
+    if (!firstData.pageInfo) {
+      throw new Error('Format de réponse API invalide : pageInfo manquant');
+    }
+    
+    totalRows = firstData.pageInfo.totalRows;
+    allRecords = [...firstData.list];
+    
+    // Calcul du nombre total de pages
+    const totalPages = Math.ceil(totalRows / 100);
+    
+    // Récupération des pages restantes
+    while (page < totalPages) {
+      page++;
+      
+      try {
+        const response = await api.get(`/api/v2/tables/${tableId}/records`, {
+          params: {
+            ...baseParams,
+            limit: 100,
+            page: page
+          }
+        });
+        
+        const data = response.data as ApiResponse;
+        if (!data.list) {
+          throw new Error(`Format de réponse API invalide pour la page ${page}`);
+        }
+        
+        allRecords = [...allRecords, ...data.list];
+        
+        // Pause courte entre les requêtes pour éviter la surcharge
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+      } catch (error) {
+        console.error(`Erreur lors de la récupération de la page ${page}:`, error);
+        throw new Error(`Échec de la récupération de la page ${page}`);
+      }
+    }
+    
+    return {
+      list: allRecords,
+      total: allRecords.length,
+      pageInfo: {
+        totalRows,
+        totalPages,
+        pageSize: 100
+      }
+    };
+    
+  } catch (error) {
+    console.error('Erreur lors de la récupération de toutes les données:', error);
+    throw error;
+  }
+};
+
+export const insertData = async (tableId: string, data: object[]) => {
   try {
     const response = await api.post(`/api/v2/tables/${tableId}/records`, data);
     return response.data;
@@ -19,9 +108,9 @@ export async function insertData(tableId: string, data: object[]) {
     console.error('Error inserting data:', error);
     throw error;
   }
-}
+};
 
-export async function deleteData(tableId: string, recordIds: string[]) {
+export const deleteData = async (tableId: string, recordIds: string[]) => {
   try {
     const response = await api.delete(`/api/v2/tables/${tableId}/records`, { data: recordIds });
     return response.data;
@@ -29,5 +118,5 @@ export async function deleteData(tableId: string, recordIds: string[]) {
     console.error('Error deleting data:', error);
     throw error;
   }
-}
+};
 ---
