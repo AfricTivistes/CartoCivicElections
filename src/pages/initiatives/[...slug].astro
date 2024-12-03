@@ -6,7 +6,7 @@ import PrimaryCTA from "@components/ui/buttons/PrimaryCTA.astro";
 import { Image } from "astro:assets";
 import { getCollection } from "astro:content";
 import { SITE } from "@data/constants";
-import { getData } from "@/lib/contentNocodb.astro";
+import { getAll } from "@/lib/contentNocodb.astro";
 import { slug } from '@/utils/slug';
 
 // Global declaration for gsap animation library
@@ -19,9 +19,6 @@ declare global {
 export async function getStaticPaths() {
   const tableId = "mrv8bch7o0jh5ld";
   const query = {
-    offset: "0",
-    limit: "25",
-    where: "",
     viewId: "vw793taeypy81he9",
     fields: [
       "Type d'organisation ?",
@@ -35,7 +32,7 @@ export async function getStaticPaths() {
       "Type d'élection ? / Type of election"
     ]
   };
-  const productEntries = await getData(tableId, query);
+  const productEntries = await getAll(tableId, query);
   console.log(productEntries);
   return productEntries.list.map((product) => {
     const initiativeName = product["Nom de l'initiative"];
