@@ -9,7 +9,6 @@ import FeaturesMap from "@components/sections/features/FeaturesMap.astro";
 import FeaturesNavs from "@components/sections/features/FeaturesNavs.astro";
 import FAQ from "@components/sections/misc/FAQ.astro";
 import AnnouncementBanner from "@components/ui/banners/AnnouncementBanner.astro";
-import { getData } from "@/lib/contentNocodb.astro";
 
 import heroImage from "@images/ciscafrica.png";
 import faqs from "@data/faqs.json";
@@ -30,20 +29,6 @@ const avatarSrcs: Array<string> = [
   "https://images.unsplash.com/photo-1541101767792-f9b2b1c4f127?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&&auto=format&fit=facearea&facepad=3&w=300&h=300&q=80",
   "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80",
 ];
-
-// Fetch initiatives data
-const tableId = "mrv8bch7o0jh5ld";
-const query = {
-  offset: "0",
-  limit: "25",
-  where: "",
-  viewId: "vw793taeypy81he9",
-  fields: [
-    "Pays / Country"
-  ]
-};
-
-const rawInitiatives = await getData(tableId, query);
 ---
 
 <MainLayout>
