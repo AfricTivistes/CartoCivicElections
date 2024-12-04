@@ -1,0 +1,48 @@
+---
+interface Highlight {
+heading: string;
+icon: string;
+}
+
+interface Props {
+highlights?: Highlight[];
+title: string;
+subTitle: string;
+}
+
+// Define Props from Astro
+const { title, subTitle, highlights } = Astro.props;
+---
+
+<section
+id="highlights"
+class="mx-auto max-w-[85rem] px-4 py-12 sm:px-6 lg:px-8 lg:py-16 2xl:max-w-full"
+>
+<!-- Section Header -->
+<div class="text-center mb-8">
+    <h2 class="text-3xl font-extrabold text-primary-black sm:text-4xl">
+    {title}
+    </h2>
+    <p class="mt-2 text-lg text-neutral-600">
+    {subTitle}
+    </p>
+</div>
+
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
+    {highlights &&
+    highlights.map((highlight) => (
+        <div
+        class="group flex flex-col items-center justify-center h-44 sm:h-60 rounded-xl border border-secondary-beige bg-secondary-beige dark:bg-neutral-800 dark:border-neutral-700 p-6 text-center shadow-md hover:shadow-lg transition-shadow duration-300"
+        >
+        <div
+            class="flex items-center justify-center transform transition-transform duration-300 group-hover:scale-110"
+        >
+            <slot set:html={highlight.icon} />
+        </div>
+        <h3 class="mt-5 text-lg font-bold text-primary-black dark:text-neutral-200">
+            {highlight.heading}
+        </h3>
+        </div>
+    ))}
+</div>
+</section>

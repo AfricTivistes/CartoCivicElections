@@ -1,0 +1,65 @@
+---
+import { Image } from "astro:assets";
+
+interface Feature {
+  heading: string;
+  content: string;
+  icon: string; // HTML ou chemin SVG
+}
+
+interface Props {
+  title: string;
+  subTitle: string;
+  alt?: string;
+  features: Feature[];
+  src?: any;
+}
+
+const { title, subTitle, features, src, alt } = Astro.props;
+---
+
+<section class="flex flex-wrap items-center gap-8 rounded-xl p-8 text-gray-800">
+  <div class="max-w-[40%] flex-1 overflow-hidden rounded-lg">
+    <h2 class="mb-4 text-2xl font-bold text-gray-600 dark:text-gray-400">
+      {title}
+    </h2>
+    <p class="mb-8 text-gray-600 dark:text-gray-400">{subTitle}</p>
+  </div>
+
+<!-- Texte et fonctionnalités -->
+  <div class="max-w-[55%] flex-1">
+    <!-- Grille des fonctionnalités -->
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      {
+        features.map((feature) => (
+          <div class="flex items-start gap-4">
+            <div class="text-blue-600 bg-blue-100 flex items-center justify-center rounded-full p-3">
+              <slot set:html={feature.icon} />
+            </div>
+            <div>
+              <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                {feature.heading}
+              </h3>
+              <p class="text-sm text-gray-600 dark:text-gray-400">
+                {feature.content}
+              </p>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+  <div class="flex justify-center overflow-hidden">
+    {
+      src && (
+        <Image
+          src={src}
+          alt={alt || "AHEAD AFRICA"}
+          class="h-full rounded max-w-[60%] object-cover object-center"
+          draggable={"false"}
+          loading={"eager"}
+        />
+      )
+    }
+  </div>
+</section>
