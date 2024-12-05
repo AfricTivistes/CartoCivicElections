@@ -20,13 +20,19 @@ const { title, subTitle, features, src, alt } = Astro.props;
 
 <section class="flex flex-wrap items-center gap-8 rounded-xl p-8 text-gray-800">
   <div class="max-w-[40%] flex-1 overflow-hidden rounded-lg">
-    <h2 class="mb-4 text-2xl font-bold text-gray-600 dark:text-gray-400">
+    <h2
+      class="mb-4 text-balance text-4xl font-extrabold tracking-tight text-neutral-800 dark:text-neutral-200"
+    >
       {title}
     </h2>
-    <p class="mb-8 text-gray-600 dark:text-gray-400">{subTitle}</p>
+    <p
+      class="mb-4 max-w-prose text-pretty font-light text-neutral-600 dark:text-neutral-400 sm:text-lg"
+    >
+      {subTitle}
+    </p>
   </div>
 
-<!-- Texte et fonctionnalités -->
+  <!-- Texte et fonctionnalités -->
   <div class="max-w-[55%] flex-1">
     <!-- Grille des fonctionnalités -->
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -55,7 +61,7 @@ const { title, subTitle, features, src, alt } = Astro.props;
         <Image
           src={src}
           alt={alt || "AHEAD AFRICA"}
-          class="h-full rounded max-w-[60%] object-cover object-center"
+          class="h-full max-w-[60%] rounded object-cover object-center"
           draggable={"false"}
           loading={"eager"}
         />
