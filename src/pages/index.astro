@@ -13,15 +13,9 @@ import AnnouncementBanner from "@components/ui/banners/AnnouncementBanner.astro"
 import heroImage from "@images/ciscafrica.png";
 import faqs from "@data/faqs.json";
 import { features, featuresTabs, formulaireLink } from "@/data_files/features";
-import AfricTivistes from "public/partenaires/Africtivistes.svg";
-import afeonet from "public/partenaires/afeonet.png";
-import zesn from "public/partenaires/zesn.png";
-import epd from "public/partenaires/EPD.png";
-import waeon from "public/partenaires/WAEON.png";
-import ehorn from "public/partenaires/e-horn.png";
-import esn from "public/partenaires/esn-sa.png";
 
 import featureImage from "@images/image_ahead.png";
+import { partenaires } from "@/data_files/data";
 
 const avatarSrcs: Array<string> = [
   "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=300&h=300&q=80",
@@ -42,21 +36,21 @@ const avatarSrcs: Array<string> = [
     title=`Mapping citizen electoral initiatives in <span
         class="text-primary-orange dark:text-primary-yellow">Africa</span>`
     subTitle="To identify and map citizen initiatives relating to elections across the African continent."
-    primaryBtn="Submit an initiative"
-    primaryBtnURL={formulaireLink}
-    secondaryBtn="Start Exploring"
-    secondaryBtnURL="#"
+    primaryBtn="Start Exploring"
+    primaryBtnURL="/initiatives"
+    secondaryBtn="Submit an initiative"
+    secondaryBtnURL={formulaireLink}
     withReview={false}
     avatars={avatarSrcs}
     src={heroImage}
     alt="Stack of ScrewFast product boxes containing assorted hardware tools"
   />
 
-  <FeaturesMap title="CISCAfrica: The database of citizens' electoral initiatives in Africa" />
-  
-  <FeaturesGeneral
-    features={features}
+  <FeaturesMap
+    title="CISCAfrica: The database of citizens' electoral initiatives in Africa"
   />
+
+  <FeaturesGeneral features={features} />
 
   <FeaturesNavs
     title=`<span class="text-primary-orange dark:text-primary-orange">CISCAfrica</span> platform challenges`
@@ -74,42 +68,6 @@ const avatarSrcs: Array<string> = [
   <ClientsSection
     title="Partenaires"
     subTitle="The project is funded by the European Union and implemented by a consortium of election observation and democracy support networks."
-    partenaires={[
-      {
-        logo: AfricTivistes,
-        name: "AfricTivistes",
-        href: "https://www.africtivistes.com/",
-      },
-      {
-        logo: afeonet,
-        name: "AfEONET",
-        href: "https://acfim.org/afeonet/",
-      },
-      {
-        logo: ehorn,
-        name: "E-HORN",
-        href: "https://ehorn.org/",
-      },
-      {
-        logo: epd,
-        name: "EPD",
-        href: "https://epd.eu/",
-      },
-      {
-        logo: esn,
-        name: "ESN-SA",
-        href: "https://www.esn-sa.org/",
-      },
-      {
-        logo: waeon,
-        name: "WAEON",
-        href: "https://www.waeon.org/",
-      },
-      {
-        logo: zesn,
-        name: "ZESN",
-        href: "https://www.zesn.org.zw/",
-      },
-    ]}
+    partenaires={partenaires}
   />
 </MainLayout>
