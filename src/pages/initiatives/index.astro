@@ -1,7 +1,8 @@
 ---
 import MainLayout from "@/layouts/MainLayout.astro";
-import { getAll } from "@/lib/contentNocodb.astro";
 import InitiativesGrid from "@/components/InitiativesGrid.jsx";
+import InitiativesGrid from "@/components/InitiativesGrid.astro";
+import { getAll } from "@/lib/contentNocodb.astro";
 
 // Define variables for page content
 const title: string = "Initiatives Citoyennes";
