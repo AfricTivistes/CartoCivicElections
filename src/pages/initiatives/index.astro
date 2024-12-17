@@ -1,8 +1,7 @@
 ---
 import MainLayout from "@/layouts/MainLayout.astro";
-import Card from "@/components/Card.astro";
-import InitiativesGrid from "@/components/InitiativesGrid.astro";
 import { getAll } from "@/lib/contentNocodb.astro";
+import InitiativesGrid from "@/components/InitiativesGrid.jsx";
 
 // Define variables for page content
 const title: string = "Initiatives Citoyennes";
@@ -30,12 +29,6 @@ const initiatives = Array.isArray(rawInitiatives?.list) ? rawInitiatives.list.ma
   category: initiative["Catégorie de l'initiative ?"] || "Non catégorisé",
   description: initiative["Thématique de l'initiative ?"] || "Description non disponible",
 })) : [];
-
-// Get unique categories from all initiatives (handling multiple categories per initiative)
-const allCategories = initiatives.flatMap(init => 
-  init.category.split(',').map(cat => cat.trim())
-).filter(Boolean);
-const categories = [...new Set(allCategories)];
 ---
 
 <MainLayout title={title}>
@@ -46,33 +39,7 @@ const categories = [...new Set(allCategories)];
       <p class="text-lg text-gray-600">{subTitle}</p>
     </div>
 
-    <!-- Search and Filter Section -->
-    <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-center">
-      <!-- Search Input -->
-      <div class="flex-grow">
-        <input
-          type="search"
-          id="search"
-          placeholder="Rechercher une initiative..."
-          class="w-full rounded-lg border border-gray-300 p-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
-        />
-      </div>
-
-      <!-- Category Filter -->
-      <div class="w-full md:w-64">
-        <select
-          id="category"
-          class="w-full rounded-lg border border-gray-300 p-3 focus:border-primary-500 focus:ring-2 focus:ring-primary-200"
-        >
-          <option value="">Toutes les catégories</option>
-          {categories.map((category) => (
-            <option value={category}>{category}</option>
-          ))}
-        </select>
-      </div>
-    </div>
-
-    <!-- Initiatives Grid -->
-    <InitiativesGrid initiatives={initiatives} />
+    <!-- Initiatives Grid Component -->
+    <InitiativesGrid client:load initiatives={initiatives} />
   </div>
 </MainLayout>

@@ -4,6 +4,7 @@ import vercelStatic from "@astrojs/vercel/static";
 import sitemap from "@astrojs/sitemap";
 import compressor from "astro-compressor";
 import starlight from "@astrojs/starlight";
+import react from "@astrojs/react";
 
 // https://astro.build/config
 export default defineConfig({
@@ -24,6 +25,9 @@ export default defineConfig({
   // },
   prefetch: true,
   integrations: [
+    react({
+      include: ['**/*.jsx', '**/*.tsx']
+    }),
     tailwind(),
     sitemap({
       i18n: {

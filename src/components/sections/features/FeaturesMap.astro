@@ -6,57 +6,6 @@ interface Props {
 }
 
 const { title } = Astro.props;
-
-// Fetch initiatives data
-const tableId = "mrv8bch7o0jh5ld";
-const query = {
-  viewId: "vw793taeypy81he9",
-  fields: [
-    "Pays / Country"
-  ]
-};
-
-const Initiatives = await getAll(tableId, query);
-
-// Process initiatives to get country data
-const countryData = {};
-Initiatives.list.forEach((initiative) => {
-  const country = initiative['Pays / Country'];
-  if (country) {
-    if (!countryData[country]) {
-      countryData[country] = {
-        count: 0
-      };
-    }
-    countryData[country].count += 1;
-  }
-});
-
-// Create features array for the map
-const points = {
-  type: 'FeatureCollection',
-  features: Object.entries(countryData).map(([country, data]) => {
-    const coordinates = countryCoordinates[country];
-    if (coordinates) {
-      return {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: coordinates
-        },
-        properties: {
-          title: country,
-          description: `Initiatives en ${country}`,
-          country: country,
-          count: data.count
-        }
-      };
-    }
-    return null;
-  }).filter(Boolean)
-};
-//const pointsJson = JSON.stringify(points);
-//console.log(pointsJson);
 ---
 <section class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full">
   <h1
@@ -101,7 +50,16 @@ const points = {
     map.addControl(new maplibregl.NavigationControl());
 
     // African countries data points
-    const points = {"type":"FeatureCollection","features":[{"type":"Feature","geometry":{"type":"Point","coordinates":[43.872219,-11.875001]},"properties":{"title":"Comores","description":"Initiatives en Comores","country":"Comores","count":1}},{"type":"Feature","geometry":{"type":"Point","coordinates":[2.213749,13.55]},"properties":{"title":"République du Niger","description":"Initiatives en République du Niger","country":"République du Niger","count":1}},{"type":"Feature","geometry":{"type":"Point","coordinates":[2.315834,9.30769]},"properties":{"title":"Bénin","description":"Initiatives en Bénin","country":"Bénin","count":2}},{"type":"Feature","geometry":{"type":"Point","coordinates":[24.684866,-22.328474]},"properties":{"title":"Botswana","description":"Initiatives en Botswana","country":"Botswana","count":1}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-10.940835,21.00789]},"properties":{"title":"Mauritanie","description":"Initiatives en Mauritanie","country":"Mauritanie","count":3}},{"type":"Feature","geometry":{"type":"Point","coordinates":[27.849332,-13.133897]},"properties":{"title":"Zambie","description":"Initiatives en Zambie","country":"Zambie","count":2}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-9.696645,9.945587]},"properties":{"title":"République de Guinée","description":"Initiatives en République de Guinée","country":"République de Guinée","count":4}},{"type":"Feature","geometry":{"type":"Point","coordinates":[12.354722,7.369722]},"properties":{"title":"Cameroun","description":"Initiatives en Cameroun","country":"Cameroun","count":5}},{"type":"Feature","geometry":{"type":"Point","coordinates":[21.758664,-4.038333]},"properties":{"title":"République démocratique du Congo","description":"Initiatives en République démocratique du Congo","country":"République démocratique du Congo","count":3}},{"type":"Feature","geometry":{"type":"Point","coordinates":[18.732207,15.454166]},"properties":{"title":"Tchad","description":"Initiatives en Tchad","country":"Tchad","count":1}},{"type":"Feature","geometry":{"type":"Point","coordinates":[-14.452362,14.497401]},"properties":{"title":"Sénégal","description":"Initiatives en Sénégal","country":"Sénégal","count":2}},{"type":"Feature","geometry":{"type":"Point","coordinates":[32.290275,1.373333]},"properties":{"title":"Ouganda","description":"Initiatives en Ouganda","country":"Ouganda","count":2}},{"type":"Feature","geometry":{"type":"Point","coordinates":[37.906193,-0.023559]},"properties":{"title":"Kenya","description":"Initiatives en Kenya","country":"Kenya","count":4}},{"type":"Feature","geometry":{"type":"Point","coordinates":[11.609444,-0.803689]},"properties":{"title":"Gabon","description":"Initiatives en Gabon","country":"Gabon","count":2}},{"type":"Feature","geometry":{"type":"Point","coordinates":[34.888822,-6.369028]},"properties":{"title":"Tanzanie","description":"Initiatives en Tanzanie","country":"Tanzanie","count":3}},{"type":"Feature","geometry":{"type":"Point","coordinates":[40.489673,9.145]},"properties":{"title":"Éthiopie","description":"Initiatives en Éthiopie","country":"Éthiopie","count":1}},{"type":"Feature","geometry":{"type":"Point","coordinates":[9.537499,34.014478]},"properties":{"title":"Tunisie","description":"Initiatives en Tunisie","country":"Tunisie","count":1}},{"type":"Feature","geometry":{"type":"Point","coordinates":[20.939444,6.611111]},"properties":{"title":"République centrafricaine","description":"Initiatives en République centrafricaine","country":"République centrafricaine","count":1}},{"type":"Feature","geometry":{"type":"Point","coordinates":[29.154857,-19.015438]},"properties":{"title":"Zimbabwe","description":"Initiatives en Zimbabwe","country":"Zimbabwe","count":2}}]};
+
+    let points;
+
+    const fetchPoints = async () => {
+      const response = await fetch('/api/map.json');
+      points = await response.json();
+    };
+
+
+    const pointsPromise = fetchPoints();
 
     map.on('load', () => {
       // Add the source for clusters
@@ -148,7 +106,6 @@ const points = {
         source: 'initiatives',
         filter: ['has', 'point_count'],
         layout: {
-          'text-field': '{point_count_abbreviated}',
           'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
           'text-size': 12
         },
