@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 
-import colors from 'tailwindcss/colors';
+import colors, { green } from 'tailwindcss/colors';
 export default {
   content: [
     "./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}",
@@ -19,6 +19,7 @@ export default {
         blue: "#2D83F5",
       },
       secondary: {
+        green: "#c3e8c4",
         beige: "#EBDED4",
         teal: "#4DA29A",
       },

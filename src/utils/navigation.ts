@@ -2,7 +2,6 @@
 const navBarLinks = [
   { name: "About", url: "/about" },
   { name: "Initiatives", url: "/initiatives" },
-  { name: "News", url: "#" },
   { name: "Contact", url: "/contact" },
 ];
 const navBarAhead = [
@@ -37,11 +36,12 @@ const footerLinks = [
 ];
 // An object of links for social icons
 const socialLinks = {
-  facebook: "https://www.facebook.com/",
-  x: "https://twitter.com/",
+  facebook: "https://www.facebook.com/profile.php?id=61558341643684",
+  x: "https://x.com/AHEADxAfrica",
   github: "https://github.com/mearashadowfax/ScrewFast",
-  google: "https://www.google.com/",
-  slack: "https://slack.com/",
+  google: "#",
+  slack: "#",
+  linkedin: "https://www.linkedin.com/company/ahead-africa/"
 };
 
 export default {

@@ -55,4 +55,4 @@ export const featuresTabs =[
     }
 ]
 
-export const formulaireLink = "https://chk.me/3YMEbfE"
+export const formulaireLink = "https://chk.me/8TAqN45"
