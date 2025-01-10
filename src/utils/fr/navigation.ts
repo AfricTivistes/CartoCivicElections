@@ -16,11 +16,11 @@ const navBarAhead = [
 ]
 const footerLinks = [
   {
-    section: "Projet",
+    section: "Liens utiles",
     links: [
-      { name: "AHEAD AFRICA", url: "#" },
-      { name: "Le projet", url: "#" },
-      { name: "A propos", url: "#" },
+      { name: "AHEAD AFRICA", url: "https://ahead.africa/fr/" },
+      { name: "Project", url: "https://africtivistes.com/fr/programme/ahead-africa" },
+      { name: "AfricTivistes", url: "https://africtivistes.com/fr/" },
     ],
   },
   {

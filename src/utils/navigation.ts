@@ -17,20 +17,11 @@ const navBarAhead = [
 // An array of links for footer
 const footerLinks = [
   {
-    section: "Project",
+    section: "Links",
     links: [
-      { name: "AHEAD AFRICA", url: "#" },
-      { name: "Project", url: "#" },
-      { name: "About", url: "#" },
-    ],
-  },
-  {
-    section: "Company",
-    links: [
-      { name: "About us", url: "#" },
-      { name: "Blog", url: "#" },
-      { name: "Careers", url: "#" },
-      { name: "Customers", url: "#" },
+      { name: "AHEAD AFRICA", url: "https://ahead.africa/en/" },
+      { name: "Project", url: "https://africtivistes.com/en/programme/ahead-africa-2/" },
+      { name: "AfricTivistes", url: "https://africtivistes.com/en/" },
     ],
   },
 ];

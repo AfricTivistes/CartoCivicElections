@@ -5,7 +5,7 @@ import EmailFooterInput from "@components/ui/forms/input/EmailFooterInput.astro"
 import enStrings from "@utils/navigation.ts";
 import frStrings from "@utils/fr/navigation.ts";
 import Icon from "@components/ui/icons/Icon.astro";
-import BrandLogo from "@components/BrandLogo.astro";
+import ue from "public/partenaires/eu-logo.png";
 import { SITE } from "@data/constants";
 import Logo from "../../../images/logob.avif";
 import { Image } from "astro:assets";
@@ -30,27 +30,37 @@ const formlink =
   Astro.currentLocale === "fr"
     ? "https://landing.mailerlite.com/webforms/landing/s9v5l8"
     : "https://landing.mailerlite.com/webforms/landing/c8s2a3";
+const description =
+  Astro.currentLocale === "fr"
+    ? "Ce site web a été créé et mis à jour avec le soutien financier de l'Union européenne. Son contenu relève de la seule responsabilité du Partenariat européen pour la démocratie et de ses partenaires et ne reflète pas nécessairement les opinions de l'Union européenne."
+    : "This website was created and maintained with the financial support of the European Union. Its contents are the sole responsibility of the European Partnership for Democracy and its partners and do not necessarily reflect the views of the European Union.";
 ---
 
-<footer class="w-full bg-neutral-300 dark:bg-neutral-900">
-  <div
-    class="mx-auto w-full max-w-[85rem] px-4 py-10 sm:px-6 lg:px-16 lg:pt-20 2xl:max-w-screen-2xl"
-  >
-    <div class="grid grid-cols-2 gap-6 md:grid-cols-4 lg:grid-cols-5">
-      <div class="col-span-full lg:col-span-1">
-        <!-- Brand Logo -->
-        <a
-          class="flex-none rounded-lg text-xl font-bold outline-none ring-zinc-500 focus-visible:ring dark:ring-zinc-200 dark:focus:outline-none"
-          href={homeUrl}
-          aria-label="Brand"
-        >
-          <Image src={Logo} alt="Logo" class="h-auto w-32" />
-        </a>
-      </div>
-      <!-- An array of links for Product and Company sections -->
-      {
+<section id="footer">
+  <footer class="w-full bg-neutral-300 dark:bg-neutral-900">
+    <div
+      class="mx-auto w-full max-w-[85rem] px-4 py-10 sm:px-6 lg:px-16 lg:pt-20 2xl:max-w-screen-2xl"
+    >
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <!-- Colonne 1 : Logo et Description -->
+        <div class="col-span-1">
+          <a
+            class="flex-none rounded-lg text-xl font-bold outline-none ring-zinc-500 focus-visible:ring dark:ring-zinc-200 dark:focus:outline-none"
+            href={homeUrl}
+            aria-label="Brand"
+          >
+            <Image src={Logo} alt="Logo" class="mb-4 h-auto w-32" />
+            <Image src={ue} alt="EU Logo" class="h-auto w-32" />
+          </a>
+          <p class="mt-4 text-sm text-neutral-600 dark:text-neutral-400">
+            {description}
+          </p>
+        </div>
+
+        <!-- Colonne 2 : Liens utiles -->
+        {
         strings.footerLinks.map((section) => (
-          <div class="col-span-1">
+          <div class="col-span-1 text-center">
             <h3 class="font-bold text-neutral-800 dark:text-neutral-200">
               {section.section}
             </h3>
@@ -67,56 +77,49 @@ const formlink =
               ))}
             </ul>
           </div>
-        ))
-      }
 
-      <div class="col-span-2">
-        <h3 class="font-bold text-neutral-800 dark:text-neutral-200">
-          {sectionThreeTitle}
-        </h3>
-
-        <form>
-          <div class="mt-7 grid w-full gap-3 sm:inline-flex">
-            {primaryBtn && <PrimaryCTA title={primaryBtn} url={formlink} />}
-
-            <p class="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
-              {sectionThreeContent}
-            </p>
-          </div>
-        </form>
+        ))}
+        <!-- Colonne 3 : Newsletter -->
+        <div class="col-span-1">
+          <h3 class="font-bold text-neutral-800 dark:text-neutral-200">
+            {sectionThreeTitle}
+          </h3>
+          <form>
+            <div class="mt-7 grid w-full gap-3">
+              {primaryBtn && <PrimaryCTA title={primaryBtn} url={formlink} />}
+              <p class="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
+                {sectionThreeContent}
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
 
-    <div
-      class="mt-9 grid gap-y-2 sm:mt-12 sm:flex sm:items-center sm:justify-between sm:gap-y-0"
-    >
-      <div class="flex items-center justify-between">
+      <div
+        class="mt-9 grid gap-y-2 sm:mt-12 sm:flex sm:items-center sm:justify-between sm:gap-y-0"
+      >
         <p class="text-sm text-neutral-600 dark:text-neutral-400">
           © <span id="current-year"></span>
           {SITE.title}
         </p>
+        <div class="flex space-x-4">
+          <FooterSocialLink url={strings.socialLinks.facebook}
+            ><Icon name="facebookFooter" /></FooterSocialLink
+          >
+          <FooterSocialLink url={strings.socialLinks.x}
+            ><Icon name="xFooter" /></FooterSocialLink
+          >
+          <FooterSocialLink url={strings.socialLinks.linkedin}
+            ><Icon name="linkedIn" /></FooterSocialLink
+          >
+        </div>
       </div>
 
-      <!-- Social Brands -->
-      <div>
-        <FooterSocialLink url={strings.socialLinks.facebook}
-          ><Icon name="facebookFooter" />
-        </FooterSocialLink>
-
-        <FooterSocialLink url={strings.socialLinks.x}
-          ><Icon name="xFooter" /></FooterSocialLink
-        >
-
-        <FooterSocialLink url={strings.socialLinks.linkedin}
-          ><Icon name="linkedIn" />
-        </FooterSocialLink>
-      </div>
+      <script>
+        const year = new Date().getFullYear();
+        const element = document.getElementById("current-year");
+        element!.innerText = year.toString();
+      </script>
     </div>
-
-    <script>
-      const year = new Date().getFullYear();
-      const element = document.getElementById("current-year");
-      element!.innerText = year.toString();
-    </script>
-  </div>
-</footer>
+  </footer>
+</section>
