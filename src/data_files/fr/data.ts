@@ -1,13 +1,19 @@
 import AfricTivistes from "public/partenaires/Africtivistes.svg";
 import afeonet from "public/partenaires/afeonet.png";
-import zesn from "public/partenaires/zesn.png";
+import dri from "public/partenaires/dri.png";
 import epd from "public/partenaires/EPD.png";
 import waeon from "public/partenaires/WAEON.png";
 import ehorn from "public/partenaires/e-horn.png";
 import esn from "public/partenaires/esn-sa.png";
+import eu from "public/partenaires/eu-logo.png";
 
 
 export const partenaires = [
+    {
+        logo: eu,
+        name: "European Union",
+        href: "https://europa.eu/",
+    },
     {
         logo: AfricTivistes,
         name: "AfricTivistes",
@@ -39,9 +45,9 @@ export const partenaires = [
         href: "https://www.waeon.org/",
     },
     {
-        logo: zesn,
+        logo: dri,
         name: "ZESN",
-        href: "https://www.zesn.org.zw/",
+        href: "https://democracy-reporting.org/en/office/global",
     },
 ]
 

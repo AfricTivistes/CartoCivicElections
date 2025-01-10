@@ -2,7 +2,6 @@
 const navBarLinks = [
   { name: "About", url: "/about" },
   { name: "Initiatives", url: "/initiatives" },
-  { name: "News", url: "#" },
   { name: "Contact", url: "/contact" },
 ];
 const navBarAhead = [
@@ -18,30 +17,22 @@ const navBarAhead = [
 // An array of links for footer
 const footerLinks = [
   {
-    section: "Project",
+    section: "Links",
     links: [
-      { name: "AHEAD AFRICA", url: "#" },
-      { name: "Project", url: "#" },
-      { name: "About", url: "#" },
-    ],
-  },
-  {
-    section: "Company",
-    links: [
-      { name: "About us", url: "#" },
-      { name: "Blog", url: "#" },
-      { name: "Careers", url: "#" },
-      { name: "Customers", url: "#" },
+      { name: "AHEAD AFRICA", url: "https://ahead.africa/en/" },
+      { name: "Project", url: "https://africtivistes.com/en/programme/ahead-africa-2/" },
+      { name: "AfricTivistes", url: "https://africtivistes.com/en/" },
     ],
   },
 ];
 // An object of links for social icons
 const socialLinks = {
-  facebook: "https://www.facebook.com/",
-  x: "https://twitter.com/",
+  facebook: "https://www.facebook.com/profile.php?id=61558341643684",
+  x: "https://x.com/AHEADxAfrica",
   github: "https://github.com/mearashadowfax/ScrewFast",
-  google: "https://www.google.com/",
-  slack: "https://slack.com/",
+  google: "#",
+  slack: "#",
+  linkedin: "https://www.linkedin.com/company/ahead-africa/"
 };
 
 export default {
