@@ -20,8 +20,9 @@ const footerLinks = [
     section: "Links",
     links: [
       { name: "AHEAD AFRICA", url: "https://ahead.africa/en/" },
-      { name: "Project", url: "https://africtivistes.com/en/programme/ahead-africa-2/" },
       { name: "AfricTivistes", url: "https://africtivistes.com/en/" },
+      { name: "Project", url: "https://africtivistes.com/en/programme/ahead-africa-2/" },
+
     ],
   },
 ];

@@ -19,17 +19,8 @@ const footerLinks = [
     section: "Liens utiles",
     links: [
       { name: "AHEAD AFRICA", url: "https://ahead.africa/fr/" },
-      { name: "Project", url: "https://africtivistes.com/fr/programme/ahead-africa" },
       { name: "AfricTivistes", url: "https://africtivistes.com/fr/" },
-    ],
-  },
-  {
-    section: "Société",
-    links: [
-      { name: "À propos", url: "#" },
-      { name: "Blog", url: "#" },
-      { name: "Carrières", url: "#" },
-      { name: "Clients", url: "#" },
+      { name: "Projet", url: "https://africtivistes.com/fr/programme/ahead-africa" },
     ],
   },
 ];
