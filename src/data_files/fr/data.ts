@@ -1,4 +1,3 @@
-import AfricTivistes from "public/partenaires/Africtivistes.svg";
 import afeonet from "public/partenaires/afeonet.png";
 import dri from "public/partenaires/dri.png";
 import epd from "public/partenaires/EPD.png";
@@ -15,19 +14,14 @@ export const partenaires = [
         href: "https://europa.eu/",
     },
     {
-        logo: AfricTivistes,
-        name: "AfricTivistes",
-        href: "https://www.africtivistes.com/",
-    },
-    {
         logo: afeonet,
         name: "AfEONET",
         href: "https://acfim.org/afeonet/",
     },
     {
-        logo: ehorn,
-        name: "E-HORN",
-        href: "https://ehorn.org/",
+        logo: esn,
+        name: "ESN-SA",
+        href: "https://www.esn-sa.org/",
     },
     {
         logo: epd,
@@ -35,9 +29,9 @@ export const partenaires = [
         href: "https://epd.eu/",
     },
     {
-        logo: esn,
-        name: "ESN-SA",
-        href: "https://www.esn-sa.org/",
+        logo: ehorn,
+        name: "E-HORN",
+        href: "https://ehorn.org/",
     },
     {
         logo: waeon,

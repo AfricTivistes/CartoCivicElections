@@ -7,6 +7,7 @@ import frStrings from "@utils/fr/navigation.ts";
 import LanguagePicker from "@components/ui/LanguagePicker.astro";
 import { Image } from "astro:assets";
 import Logo from "../../../images/logob.avif";
+import SecondaryCTA from "@/components/ui/buttons/SecondaryCTA.astro";
 
 // Select the correct translation based on the page's lang prop:
 const formLink =
@@ -25,6 +26,13 @@ const newsletterLink =
     : "https://landing.mailerlite.com/webforms/landing/c8s2a3";
 const newsletterButton =
   Astro.currentLocale === "fr" ? "S'inscrire" : "Subscribe";
+
+const secondaryBtn =
+  Astro.currentLocale === "fr" ? "Projet AHEAD" : "AHEAD Project";
+const secondaryBtnURL =
+  Astro.currentLocale === "fr"
+    ? "https://ahead.africa/fr/"
+    : "https://ahead.africa/en/";
 ---
 
 <!-- Main header component -->
@@ -181,6 +189,11 @@ const newsletterButton =
       <div
         class="mt-5 flex flex-col gap-x-0 gap-y-4 md:mt-0 md:flex-row md:items-center md:justify-end md:gap-x-4 md:gap-y-0 md:ps-7 lg:gap-x-7"
       >
+        <SecondaryCTA
+          title={secondaryBtn}
+          url={secondaryBtnURL}
+          target="_blank"
+        />
         <!-- Navigation links and Authentication component -->
         {
           strings.navBarLinks.map((link) => (

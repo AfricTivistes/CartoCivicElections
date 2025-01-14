@@ -1,11 +1,12 @@
 ---
 // Destructure the properties from Astro.props
-const { title, url } = Astro.props;
+const { title, url, target } = Astro.props;
 
 // Define TypeScript interface for the properties
 interface Props {
   title?: string;
   url?: string;
+  target?: string;
 }
 // Define CSS classes for the hyperlink button
 const baseClasses =
@@ -26,6 +27,7 @@ const darkClasses =
 <a
   class={`${baseClasses} ${borderClasses} ${bgColorClasses} ${hoverClasses} ${disableClasses} ${fontSizeClasses} ${ringClasses} ${darkClasses}`}
   href={url}
+  target={target}
 >
   {title}
 </a>

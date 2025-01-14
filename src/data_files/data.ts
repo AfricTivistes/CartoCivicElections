@@ -15,34 +15,31 @@ export const partenaires = [
         href: "https://europa.eu/",
     },
     {
-        logo: AfricTivistes,
-        name: "AfricTivistes",
-        href: "https://www.africtivistes.com/",
-    },
-    {
         logo: afeonet,
         name: "AfEONET",
         href: "https://acfim.org/afeonet/",
     },
     {
-        logo: ehorn,
-        name: "E-HORN",
-        href: "https://ehorn.org/",
+        logo: waeon,
+        name: "WAEON",
+        href: "https://www.waeon.org/",
     },
+
     {
         logo: epd,
         name: "EPD",
         href: "https://epd.eu/",
     },
     {
+        logo: ehorn,
+        name: "E-HORN",
+        href: "https://ehorn.org/",
+    },
+
+    {
         logo: esn,
         name: "ESN-SA",
         href: "https://www.esn-sa.org/",
-    },
-    {
-        logo: waeon,
-        name: "WAEON",
-        href: "https://www.waeon.org/",
     },
     {
         logo: dri,
