@@ -5,6 +5,7 @@ import HeroSection from "@components/sections/landing/HeroSection.astro";
 import HeroSectionAlt from "@components/sections/landing/HeroSectionAlt.astro";
 import ClientsSection from "@components/sections/landing/ClientsSection.astro";
 import FeaturesGeneral from "@components/sections/features/FeaturesGeneral.astro";
+import FeaturesMap from "@components/sections/features/FeaturesMap.astro";
 import FeaturesNavs from "@components/sections/features/FeaturesNavs.astro";
 import FAQ from "@components/sections/misc/FAQ.astro";
 import { partenaires } from "@/data_files/fr/data";
@@ -50,12 +51,11 @@ const avatarSrcs: Array<string> = [
     alt="Pile de boîtes de produits ScrewFast contenant des outils matériels assortis"
   />
 
-  <FeaturesGeneral
+  <FeaturesMap
     title="CISCAfrica : La base de données des initiatives citoyennes électorales en Afrique"
-    src={featureImage}
-    alt="Produits ScrewFast dans des boîtes flottantes"
-    features={features}
   />
+
+  <FeaturesGeneral features={features} />
 
   <FeaturesNavs
     title=`Enjeux de la plateforme <span class="text-primary-orange dark:text-primary-orange">CISCAfrica</span>`
@@ -67,12 +67,12 @@ const avatarSrcs: Array<string> = [
   <HeroSectionAlt
     title="Construisons ensemble"
     subTitle="Rejoignez-nous et contribuez à l'enrichissement de la base de données des initiatives citoyennes électorales à travers l'Afrique."
-    url="https://chk.me/3YMEbfE"
+    url={formulaireLink}
   />
 
   <ClientsSection
-    title="Partenaires"
-    subTitle="Le projet est co-financé par l’Union européenne et mis en oeuvre par un consortium constitué de réseaux d’observation électorale et de soutien à la démocratie."
+    title=""
+    subTitle="Ce programme est soutenu et mis en œuvre par AfricTivistes dans le cadre du projet AHEAD Africa."
     partenaires={partenaires}
   />
 </MainLayout>
