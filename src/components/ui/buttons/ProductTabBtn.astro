@@ -1,34 +1,72 @@
 ---
 // Destructure the properties from Astro.props
-const { id, dataTab, title, first } = Astro.props;
+const { id, dataTab, title } = Astro.props;
 
-// Define TypeScript interface for the properties
-interface Props {
-  id: string;
-  dataTab: string;
-  title: string;
-  first?: boolean;
-}
-// Define constants for styling classes
+// Définition des classes de base avec état par défaut uniquement
 const BUTTON_CLASS =
   "flex w-full justify-center rounded-xl border border-transparent p-3 outline-none ring-zinc-500 transition duration-300 hover:bg-neutral-100 focus-visible:ring dark:ring-zinc-200 dark:hover:bg-neutral-700 dark:focus:outline-none md:p-5";
 
 const HEADING_CLASS = "block text-center font-bold";
 const INACTIVE_HEADING_CLASS = "text-neutral-800 dark:text-neutral-200";
+
+// Classes pour l'état actif
+const ACTIVE_CLASSES = "bg-neutral-100 dark:bg-zinc-700";
+const DEFAULT_BG = "bg-secondary-green dark:bg-primary-green";
 ---
 
-<!-- Tab button element -->
+<!-- Bouton de tabulation -->
 <button
   type="button"
-  class={`${BUTTON_CLASS} ${first ? "active bg-neutral-100 hover:border-transparent dark:bg-white/[.05]" : ""}`}
+  class={`${BUTTON_CLASS} ${DEFAULT_BG}`}
   id={id}
   data-target={dataTab}
   role="tab"
+  data-active="false"
 >
-  <!-- Tab text -->
   <span
-    class={`${HEADING_CLASS} ${first ? "text-orange-400 dark:text-orange-300" : INACTIVE_HEADING_CLASS}`}
+    class={`${HEADING_CLASS} ${INACTIVE_HEADING_CLASS}`}
+    id={`${id}-heading`}
   >
     {title}
   </span>
 </button>
+
+<script define:vars={{ DEFAULT_BG, ACTIVE_CLASSES }}>
+  function handleButtonClick(event) {
+    const buttons = document.querySelectorAll("[role='tab']");
+    const clickedButton = event.currentTarget;
+
+    // Reset tous les boutons à leur état par défaut
+    buttons.forEach((button) => {
+      button.classList.remove(...ACTIVE_CLASSES.split(" "));
+      button.classList.add(...DEFAULT_BG.split(" "));
+      button.setAttribute("data-active", "false");
+    });
+
+    // Active le bouton cliqué
+    clickedButton.classList.remove(...DEFAULT_BG.split(" "));
+    clickedButton.classList.add(...ACTIVE_CLASSES.split(" "));
+    clickedButton.setAttribute("data-active", "true");
+
+    // Gestion du contenu des tabs
+    const targetId = clickedButton.getAttribute("data-target");
+    if (targetId) {
+      const tabContents = document.querySelectorAll("[role='tabpanel']");
+      tabContents.forEach((content) => {
+        content.classList.add("hidden");
+      });
+      const targetContent = document.getElementById(targetId);
+      if (targetContent) {
+        targetContent.classList.remove("hidden");
+      }
+    }
+  }
+
+  // Ajout des event listeners
+  document.addEventListener("DOMContentLoaded", () => {
+    const buttons = document.querySelectorAll("[role='tab']");
+    buttons.forEach((button) => {
+      button.addEventListener("click", handleButtonClick);
+    });
+  });
+</script>
