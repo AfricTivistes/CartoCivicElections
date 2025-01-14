@@ -95,14 +95,15 @@ const dev = Astro.currentLocale === "fr" ? "Par" : "By";
               </p>
             </div>
           </form>
-          
-          <p class="text-sm mt-3 text-neutral-600 dark:text-neutral-400">
+          <p class="mt-3 text-sm text-neutral-600 dark:text-neutral-400">
             {dev}
-            <Image
-              src={AfricTivistes}
-              alt="AfricTivistes"
-              class="h-auto w-32"
-            />
+            <a href="https://africtivistes.org/" target="_blank">
+              <Image
+                src={AfricTivistes}
+                alt="AfricTivistes"
+                class="h-auto w-32"
+              />
+            </a>
             © <span id="current-year"></span>
             {SITE.title}
           </p>
