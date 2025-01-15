@@ -7,11 +7,13 @@ import ClientsSection from "@components/sections/landing/ClientsSection.astro";
 import FeaturesGeneral from "@components/sections/features/FeaturesGeneral.astro";
 import FeaturesMap from "@components/sections/features/FeaturesMap.astro";
 import FeaturesNavs from "@components/sections/features/FeaturesNavs.astro";
+import Copyright from "@/components/sections/landing/Copyright.astro";
 import FAQ from "@components/sections/misc/FAQ.astro";
-import { partenaires } from "@/data_files/fr/data";
+import { partenaires, africTivistes } from "@/data_files/fr/data";
 import AnnouncementBanner from "@components/ui/banners/AnnouncementBanner.astro";
 import heroImage from "@images/ciscafrica.png";
 import faqs from "@data/fr/faqs.json";
+import africtivistes from "public/partenaires/Africtivistes.svg";
 import {
   features,
   featuresTabs,
@@ -70,9 +72,9 @@ const avatarSrcs: Array<string> = [
     url={formulaireLink}
   />
 
-  <ClientsSection
+  <Copyright
     title=""
     subTitle="Ce programme est soutenu et mis en œuvre par AfricTivistes dans le cadre du projet AHEAD Africa."
-    partenaires={partenaires}
+    partenaires={africTivistes}
   />
 </MainLayout>

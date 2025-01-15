@@ -5,7 +5,15 @@ import waeon from "public/partenaires/WAEON.png";
 import ehorn from "public/partenaires/e-horn.png";
 import esn from "public/partenaires/esn-sa.png";
 import eu from "public/partenaires/eu-logo.png";
+import africtivistes from "public/partenaires/Africtivistes.svg";
 
+export const africTivistes = [
+    {
+    logo: africtivistes,
+    name: "AfricTivistes",
+    href: "https://africtivistes.com/",
+    }
+];
 
 export const partenaires = [
     {

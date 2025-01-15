@@ -9,11 +9,48 @@ import TextAreaInput from "@components/ui/forms/input/TextAreaInput.astro";
 import Icon from "@components/ui/icons/Icon.astro";
 
 // Define the variables that will be used in this component
-const title: string = "Contact us";
-const subTitle: string =
-  "Have questions or want to discuss a project? Reach out, and let's craft the perfect solution with our tools and services.";
-const formTitle: string = "Fill in the form below";
-const formSubTitle: string = "We'll get back to you in 1-2 business days.";
+
+const title = Astro.currentLocale === "fr" ? "Nous Contacter" : "Contact us";
+const subTitle =
+  Astro.currentLocale === "fr"
+    ? "Vous avez des questions ou souhaitez discuter d'un projet ? Contactez-nous et laissons-nous élaborer la solution parfaite avec nos outils et services."
+    : "Have questions or want to discuss a project? Reach out, and let's craft the perfect solution with our tools and services.";
+const formTitle =
+  Astro.currentLocale === "fr"
+    ? "Remplissez le formulaire ci-dessous"
+    : "Fill in the form below";
+
+const heading1 =
+  Astro.currentLocale === "fr" ? "Bases de connaissances" : "Knowledgebase";
+const content1 =
+  Astro.currentLocale === "fr"
+    ? "Initiatives qui renforcent les democraties electorales sur le continent."
+    : "Initiatives that strengthen electoral democracies on the continent.";
+const linktitle1 =
+  Astro.currentLocale === "fr"
+    ? "Visiter les initiatives"
+    : "Visit initiatives";
+const linkurl1 =
+  Astro.currentLocale === "fr" ? "/fr/initiatives" : "/initiatives";
+const content2 =
+  Astro.currentLocale === "fr"
+    ? "Explorez notre FAQ pour des réponses rapides et claires aux questions courantes."
+    : "Explore our FAQ for quick, clear answers to common queries.";
+const linktitle2 =
+  Astro.currentLocale === "fr" ? "Visiter la FAQ" : "Visit the FAQ";
+const linkurl2 = Astro.currentLocale === "fr" ? "/fr/#faq" : "/#faq";
+
+const heading3 =
+  Astro.currentLocale === "fr" ? "Visitez notre bureau" : "Visit our office";
+
+const heading4 =
+  Astro.currentLocale === "fr"
+    ? "Contactez-nous par e-mail"
+    : "Contact us by email";
+const content4 =
+  Astro.currentLocale === "fr"
+    ? "Préférez-vous le texte écrit ? Envoyez-nous un e-mail à"
+    : "Prefer the written word? Drop us an email at";
 ---
 
 <!-- Contact Us -->
@@ -66,50 +103,45 @@ const formSubTitle: string = "We'll get back to you in 1-2 business days.";
             <AuthBtn title="Send Message" />
           </div>
 
-          <div class="mt-3 text-center">
-            <p class="text-sm text-neutral-600 dark:text-neutral-400">
-              {formSubTitle}
-            </p>
-          </div>
         </form>
       </div>
 
       <!--ContactIconBlocks are used to display different methods of contacting, including visiting office, email, browsing knowledgebase, and FAQ.-->
       <div class="divide-y divide-neutral-300 dark:divide-neutral-700">
         <ContactIconBlock
-          heading="Knowledgebase"
-          content="Browse through all of our knowledgebase articles."
+          heading={heading1}
+          content={content1}
           isLinkVisible={true}
-          linkTitle="Visit guides & tutorials"
-          linkURL="#"
+          linkTitle={linktitle1}
+          linkURL={linkurl1}
           isArrowVisible={true}
           ><Icon name="question" />
         </ContactIconBlock>
 
         <ContactIconBlock
           heading="FAQ"
-          content="Explore our FAQ for quick, clear answers to common queries."
+          content={content2}
           isLinkVisible={true}
-          linkTitle="Visit FAQ"
-          linkURL="#"
+          linkTitle={linktitle2}
+          linkURL={linkurl2}
           isArrowVisible={true}
           ><Icon name="chatBubble" />
         </ContactIconBlock>
 
         <ContactIconBlock
-          heading="Visit our office"
-          content="UK ScrewFast"
+          heading={heading3}
+          content="AfricTivistes"
           isAddressVisible={true}
-          addressContent="72 Union Terrace, E10 4PE London"
+          addressContent="Villa n° 263 Liberté extension, Dakar, Sénégal BP 19968"
           ><Icon name="mapPin" />
         </ContactIconBlock>
 
         <ContactIconBlock
-          heading="Contact us by email"
-          content="Prefer the written word? Drop us an email at"
+          heading={heading4}
+          content={content4}
           isLinkVisible={true}
-          linkTitle="support@screwfast.uk"
-          linkURL="#"
+          linkTitle="info@africtivistes.org"
+          linkURL="mailto:info@africtivistes.org"
           ><Icon name="envelopeOpen" />
         </ContactIconBlock>
       </div>
