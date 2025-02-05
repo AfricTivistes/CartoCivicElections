@@ -9,26 +9,30 @@ const subTitle: string =
   "Discover and support citizens' initiatives for transparent and fair elections across Africa";
 
 // Fetch initiatives data
-const tableId = "mrv8bch7o0jh5ld";
+const tableId = "m9erh9bplb8jihp";
 const query = {
-  viewId: "vw793taeypy81he9",
+  viewId: "vwdobxvm00ayso6s",
   fields: [
     "Nom de l'initiative",
-    "Pays / Country",
-    "Catégorie de l'initiative ?",
-    "Thématique de l'initiative ?"
-  ]
+    "Pays",
+    "Catégorie de l'initiative",
+    "Thématique de l'initiative",
+  ],
 };
 
 const rawInitiatives = await getAll(tableId, query);
 
 // Format initiatives data
-const initiatives = Array.isArray(rawInitiatives?.list) ? rawInitiatives.list.map((initiative) => ({
-  title: initiative["Nom de l'initiative"] || "Initiative sans nom",
-  country: initiative["Pays / Country"] || "Pays non spécifié",
-  category: initiative["Catégorie de l'initiative ?"] || "Non catégorisé",
-  description: initiative["Thématique de l'initiative ?"] || "Description non disponible",
-})) : [];
+const initiatives = Array.isArray(rawInitiatives?.list)
+  ? rawInitiatives.list.map((initiative) => ({
+      title: initiative["Nom de l'initiative"] || "Initiative sans nom",
+      country: initiative["Pays"] || "Pays non spécifié",
+      category: initiative["Catégorie de l'initiative"] || "Non catégorisé",
+      description:
+        initiative["Thématique de l'initiative"] ||
+        "Description non disponible",
+    }))
+  : [];
 ---
 
 <MainLayout title={title}>
