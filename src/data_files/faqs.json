@@ -1,5 +1,5 @@
 {
-  "subTitle": "Ask us any questions about our CISCAfrica project and get factual answers.",
+  "subTitle": "Ask us any questions about our Soobu project and get factual answers.",
   "faqs": [
     {
       "question": "How to contribute?",
@@ -14,16 +14,16 @@
       "answer": "The data are collected via a questionnaire, documentary research, and interviews."
     },
     {
-      "question": "What are the main initiatives covered by CISCAfrica?",
-      "answer": "CISCAfrica lists citizen initiatives covering the entire electoral cycle, from voter awareness to election observation."
+      "question": "What are the main initiatives covered by Soobu?",
+      "answer": "Soobu lists citizen initiatives covering the entire electoral cycle, from voter awareness to election observation."
     },
     {
-      "question": "How can I access CISCAfrica data?",
-      "answer": "The data aggregated by CISCAfrica will be accessible through our online platform. Details on access will be provided on our website."
+      "question": "How can I access Soobu data?",
+      "answer": "The data aggregated by Soobu will be accessible through our online platform. Details on access will be provided on our website."
     },
     {
-      "question": "What is the geographical scope of CISCAfrica?",
-      "answer": "The CISCAfrica project covers citizen initiatives across the African continent, with a particular focus on countries in the West African sub-region."
+      "question": "What is the geographical scope of Soobu?",
+      "answer": "The Soobu project covers citizen initiatives across the African continent, with a particular focus on countries in the West African sub-region."
     }
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "subTitle": "Posez-nous toutes vos questions sur notre projet CISCAfrica, et obtenez des réponses factuelles.",
+  "subTitle": "Posez-nous toutes vos questions sur notre projet Soobu, et obtenez des réponses factuelles.",
   "faqs": [
     {
       "question": "Comment contribuer ?",
@@ -14,16 +14,16 @@
       "answer": "Les données sont collectées via un questionnaire, de la recherche documentaire et des entretiens."
     },
     {
-      "question": "Quelles sont les principales initiatives couvertes par CISCAfrica ?",
-      "answer": "CISCAfrica recense des initiatives citoyennes couvrant toute la gamme du cycle électoral, de la sensibilisation des électeurs à l'observation des élections."
+      "question": "Quelles sont les principales initiatives couvertes par Soobu ?",
+      "answer": "Soobu recense des initiatives citoyennes couvrant toute la gamme du cycle électoral, de la sensibilisation des électeurs à l'observation des élections."
     },
     {
-      "question": "Comment puis-je accéder aux données de CISCAfrica ?",
-      "answer": "Les données agrégées par CISCAfrica seront accessibles via notre plateforme en ligne. Des détails sur l'accès seront fournis sur notre site web."
+      "question": "Comment puis-je accéder aux données de Soobu ?",
+      "answer": "Les données agrégées par Soobu seront accessibles via notre plateforme en ligne. Des détails sur l'accès seront fournis sur notre site web."
     },
     {
-      "question": "Quelle est la portée géographique de CISCAfrica ?",
-      "answer": "Le projet CISCAfrica couvre des initiatives citoyennes à travers le continent africain, avec un accent particulier sur les pays de la sous-région ouest-africaine."
+      "question": "Quelle est la portée géographique de Soobu ?",
+      "answer": "Le projet Soobu couvre des initiatives citoyennes à travers le continent africain, avec un accent particulier sur les pays de la sous-région ouest-africaine."
     }
   ]
 }

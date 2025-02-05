@@ -6,7 +6,7 @@ import enStrings from "@utils/navigation.ts";
 import frStrings from "@utils/fr/navigation.ts";
 import LanguagePicker from "@components/ui/LanguagePicker.astro";
 import { Image } from "astro:assets";
-import Logo from "../../../images/logob.avif";
+import Logo from "../../../images/logo-soobu.svg";
 import SecondaryCTA from "@/components/ui/buttons/SecondaryCTA.astro";
 
 // Select the correct translation based on the page's lang prop:
@@ -28,7 +28,7 @@ const newsletterButton =
   Astro.currentLocale === "fr" ? "S'inscrire" : "Subscribe";
 
 const secondaryBtn =
-  Astro.currentLocale === "fr" ? "Projet AHEAD" : "AHEAD Project";
+  Astro.currentLocale === "fr" ? "Projet AHEAD Africa" : "AHEAD Africa project";
 const secondaryBtnURL =
   Astro.currentLocale === "fr"
     ? "https://ahead.africa/fr/"
@@ -132,7 +132,7 @@ const secondaryBtnURL =
       href={homeUrl}
       aria-label="Brand"
     >
-      <Image src={Logo} alt="Logo" class="h-auto w-24" />
+      <Image src={Logo} alt="Logo" class="h-auto w-60" />
     </a>
     <div class="flex items-center justify-between">
       <!-- Collapse toggle for smaller screens -->
@@ -175,10 +175,6 @@ const secondaryBtnURL =
           </svg>
         </button>
       </div>
-      <!-- ThemeIcon component specifically for smaller screens -->
-      <span class="inline-block md:hidden">
-        <ThemeIcon />
-      </span>
     </div>
     <!-- Contains navigation links -->
     <div
@@ -209,10 +205,7 @@ const secondaryBtnURL =
           </span>
         </a>
         <LanguagePicker />
-        <!-- ThemeIcon component specifically for larger screens -->
-        <span class="hidden md:inline-block">
-          <ThemeIcon />
-        </span>
+
       </div>
     </div>
   </nav>

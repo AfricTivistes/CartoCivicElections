@@ -1,7 +1,7 @@
 import ogImageSrc from "@images/social.png";
 
 export const SITE = {
-  title: "CISCAfrica",
+  title: "SOOBU",
   tagline: "Mapping of CSO Initiatives",
   description: "The Mapping of CSO Initiatives by AfricTivistes is an interactive platform that centralizes and visualizes the initiatives of civil society organizations (CSOs) in Africa related to elections. This platform aims to promote transparency, integrity, and citizen participation in electoral processes, while facilitating collaborations among CSOs and sharing best practices in electoral governance.",
   description_short: "Platform for mapping civil society initiatives related to elections in Africa by AfricTivistes.",

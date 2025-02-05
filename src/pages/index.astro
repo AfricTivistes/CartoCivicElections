@@ -10,7 +10,7 @@ import FeaturesNavs from "@components/sections/features/FeaturesNavs.astro";
 import FAQ from "@components/sections/misc/FAQ.astro";
 import AnnouncementBanner from "@components/ui/banners/AnnouncementBanner.astro";
 import { africTivistes } from "@/data_files/fr/data";
-import heroImage from "@images/ciscafrica.png";
+import heroImage from "@images/hero.png";
 import faqs from "@data/faqs.json";
 import { features, featuresTabs, formulaireLink } from "@/data_files/features";
 import featureImage from "@images/image_ahead.png";
@@ -45,13 +45,13 @@ const avatarSrcs: Array<string> = [
   />
 
   <FeaturesMap
-    title="CISCAfrica: The database of citizens' electoral initiatives in Africa"
+    title="Soobu: The database of citizens' electoral initiatives in Africa"
   />
 
   <FeaturesGeneral features={features} />
 
   <FeaturesNavs
-    title=`<span class="text-primary-green dark:text-primary-green">CISCAfrica</span> platform challenges`
+    title=`<span class="text-primary-green dark:text-primary-green">Soobu</span> platform challenges`
     tabs={featuresTabs}
   />
 
