@@ -14,6 +14,7 @@ import discute from "public/discute.jpeg";
 import telling from "public/telling.jpeg";
 import pic from "public/photos-group.jpg";
 import africtivistes_logo from "public/partenaires/Africtivistes.svg";
+import Logo from "src/images/logo-soobu.png";
 import { features } from "@/data_files/fr/features";
 import { partenaires, issues } from "@/data_files/fr/data";
 import { SITE } from "@data/constants";
@@ -32,6 +33,7 @@ interface Article {
   imgOneAlt?: string;
   imgTwo?: any;
   imgTwoAlt?: string;
+  target?: string;
 }
 
 const articles: Article[] = [
@@ -57,12 +59,17 @@ const articles: Article[] = [
   },
   {
     isRightSection: true,
-    title: "",
-    subTitle:
-      "Dans le cadre de sa composante Démocratie, Élections et Gouvernance, AfricTivistes déploie la Cartographie des initiatives citoyennes électorales en Afrique dédiée à répertorier, valoriser et connecter ces contributions citoyennes du continent. Elle ambitionne d’inspirer l’action collective et de renforcer la gouvernance démocratique en Afrique. Elle s’inscrit également dans le projet panafricain AHEAD Africa, qui vise à améliorer l’intégrité électorale et à outiller la société civile pour renforcer les processus démocratiques.",
+    title: "Soobu AfricTivistes",
+    subTitle: `Dans le cadre de sa composante Démocratie, Élections et Gouvernance, AfricTivistes déploie l'initiative Sóobu AfricTivistes, Tech4Elections dédiée à cartographier, répertorier, valoriser et connecter ces contributions citoyennes à travers le continent. Cette initiative ambitionne d’inspirer l’action collective et de renforcer la gouvernance démocratique en Afrique. Le terme ”sóobu”, issu de la langue Wolof parlée en Afrique de l'Ouest, signifie "engagement, mobilisation". Il a été intégré dans le nom de l’initiative pour souligner l’engagement profond de la société civile dans la consolidation des processus électoraux et démocratiques sur le continent.
+    L’initiative s’inscrit également dans le projet panafricain AHEAD Africa, qui vise à améliorer l’intégrité électorale et à outiller la société civile pour renforcer les processus démocratiques.`,
+
     single: true,
-    imgOne: africtivistes_logo,
-    imgOneAlt: "AfricTivistes",
+    imgOne: Logo,
+    imgOneAlt: "Soobu",
+    btnExists: true,
+    btnTitle: "Plus sur AHEAD Africa",
+    btnURL: "https://ahead.africa/fr/",
+    target: "_blank",
   },
 ];
 
@@ -92,6 +99,7 @@ const pageTitle: string = `A Propos | ${SITE.title}`;
           btnExists={article.btnExists}
           btnTitle={article.btnTitle}
           btnURL={article.btnURL}
+          target={article.target}
         />
       ) : (
         <LeftSection
@@ -109,14 +117,14 @@ const pageTitle: string = `A Propos | ${SITE.title}`;
 
   <FeaturesGeneral2
     title="Objectifs "
-    subTitle="La plateforme a pour ambition de centraliser des données détaillées sur ces initiatives tout au long du cycle électoral, mettant en lumière leur rôle clé dans la promotion de processus transparents, fiables et apaisés. En valorisant ces actions citoyennes, elle crée un espace de collaboration et de partage. Par ailleurs, elle encourage la diffusion des bonnes pratiques, inspirant citoyens et acteurs politiques à travers des outils et données fiables, pour renforcer des processus électoraux inclusifs et respectueux des droits fondamentaux."
+    subTitle="La plateforme Sóobu AfricTivistes, Tech4Elections ambitionne de centraliser des données détaillées sur des initiatives citoyennes électorales tout au long du cycle électoral, mettant en lumière leur rôle clé dans la promotion de processus transparents, fiables et apaisés. En valorisant ces actions citoyennes, elle crée un espace de collaboration et de partage. Par ailleurs, elle encourage la diffusion des bonnes pratiques, inspirant citoyens et acteurs politiques à travers des outils et données fiables, pour renforcer des processus électoraux inclusifs et respectueux des droits fondamentaux."
     features={features}
     src={pic}
   />
 
   <Highlight
     title="Les enjeux de la plateforme"
-    subTitle="La plateforme répond à des enjeux de consolidation de la démocratie en Afrique. Face à la montée des défis tels que l'accaparement des institutions, la manipulation des constitutions, l’exclusion de groupes vulnérables, les fraudes, les cyber-menaces électorales, la désinformation, elle se positionne comme un outil stratégique pour renforcer la transparence et la confiance dans les processus électoraux"
+    subTitle="La plateforme Sóobu AfricTivistes, Tech4Elections répond à des enjeux de consolidation de la démocratie en Afrique. Face à la montée des défis tels que l'accaparement des institutions, la manipulation des constitutions, l’exclusion de groupes vulnérables, les fraudes, les cyber-menaces électorales, la désinformation, elle se positionne comme un outil stratégique pour renforcer la transparence et la confiance dans les processus électoraux. "
     highlights={issues}
   />
 

@@ -14,6 +14,7 @@ const {
   imgOneAlt,
   imgTwo,
   imgTwoAlt,
+  target,
 } = Astro.props;
 // Define TypeScript interface for the properties
 interface Props {
@@ -27,6 +28,7 @@ interface Props {
   imgOneAlt?: any;
   imgTwo?: any;
   imgTwoAlt?: any;
+  target?: string;
 }
 ---
 <!-- Root section of the component -->
@@ -47,7 +49,7 @@ interface Props {
       {subTitle}
     </p>
     <!-- Conditional rendering of the Primary Call-To-Action button if 'btnExists' is true -->
-    {btnExists ? <PrimaryCTA title={btnTitle} url={btnURL} /> : null}
+    {btnExists ? <PrimaryCTA title={btnTitle} url={btnURL} target={target} /> : null}
   </div>
   <!-- Conditionally render one or two images based on 'single' property -->
   {

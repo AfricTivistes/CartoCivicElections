@@ -1,11 +1,12 @@
 ---
 import Icon from "@components/ui/icons/Icon.astro";
 // Destructure the properties from Astro.props
-const { title, url, noArrow } = Astro.props;
+const { title, url, noArrow, target } = Astro.props;
 // Define TypeScript interface for the properties
 interface Props {
   title?: string;
   url?: string;
+  target?: string;
   noArrow?: boolean;
 }
 // Define CSS classes for styling the button
@@ -23,6 +24,7 @@ const ringClasses = "dark:ring-zinc-200";
 <a
   class={`${baseClasses} ${borderClasses} ${bgColorClasses} ${disableClasses} ${fontSizeClasses} ${ringClasses}`}
   href={url}
+  target={target || "_self"}
 >
   {title}
   <!-- Display the arrow based on the 'noArrow' property -->

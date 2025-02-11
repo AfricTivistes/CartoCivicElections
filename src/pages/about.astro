@@ -32,6 +32,7 @@ interface Article {
   imgOneAlt?: string;
   imgTwo?: any;
   imgTwoAlt?: string;
+  target?: string;
 }
 
 const articles: Article[] = [
@@ -57,19 +58,25 @@ const articles: Article[] = [
   },
   {
     isRightSection: true,
-    title: "",
-    subTitle:
-      "As part of its Democracy, Elections and Governance component, AfricTivistes is rolling out the Cartographie des initiatives citoyennes électorales en Afrique dedicated to mapping, promoting and connecting these citizen contributions from across the continent. Its aim is to inspire collective action and strengthen democratic governance in Africa. It is also part of the pan-African project AHEAD Africa, which aims to improve electoral integrity and equip civil society to strengthen democratic processes.",
+    title: "Soobu AfricTivistes",
+    subTitle: `As part of its Democracy, Elections and Governance component, AfricTivistes  is rolling out the Sóobu AfricTivistes, Tech4Elections initiative, dedicated to mapping, cataloguing, enhancing and connecting these citizen contributions across the continent. The initiative aims to inspire collective action and strengthen democratic governance in Africa. The word ‘sóobu’, from the Wolof language spoken in West Africa, means ‘commitment, mobilisation’. It has been incorporated into the name of the initiative to underline the commitment of civil society to consolidating electoral and democratic processes on the continent.
+
+    The initiative is also part of the pan-African project AHEAD Africa, which aims to improve electoral integrity and equip civil society to strengthen democratic processes.`,
+
     single: true,
     imgOne: Logo,
-    imgOneAlt: "AfricTivistes",
+    imgOneAlt: "Soobu",
+    btnExists: true,
+    btnTitle: "More about AHEAD Africa",
+    btnURL: "https://ahead.africa",
+    target: "_blank",
   },
 ];
 
-const pageTitle: string = `A Propos | ${SITE.title}`;
+const pageTitle: string = `About | ${SITE.title}`;
 ---
 
-<MainLayout lang="fr" title={pageTitle}>
+<MainLayout lang="en" title={pageTitle}>
   <!-- RightSection and LeftSection contain details about various services along with pertinent imagery.
   They alternate for variety in design.
   The 'btnExists' property is used to toggle the display of a button in these sections.
@@ -92,6 +99,7 @@ const pageTitle: string = `A Propos | ${SITE.title}`;
           btnExists={article.btnExists}
           btnTitle={article.btnTitle}
           btnURL={article.btnURL}
+          target={article.target}
         />
       ) : (
         <LeftSection
@@ -108,15 +116,15 @@ const pageTitle: string = `A Propos | ${SITE.title}`;
   }
 
   <FeaturesGeneral2
-    title="Objective "
-    subTitle="The aim of the Mapping Citizens' Election Initiatives in Africa platform is to centralise detailed data on these initiatives throughout the electoral cycle, highlighting their key role in promoting transparent, reliable and peaceful processes. By highlighting these citizen initiatives, it creates a space for collaboration and sharing. It also encourages the dissemination of good practice, inspiring citizens and political players through reliable tools and data, to strengthen electoral processes that are inclusive and respect fundamental rights"
+    title="Objective"
+    subTitle="The Sóobu AfricTivistes, Tech4Elections aims to centralise detailed data on the citizen election initiatives throughout the electoral cycle, highlighting their key role in promoting transparent, reliable and peaceful processes. By highlighting these citizen initiatives, it creates a space for collaboration and sharing. It also encourages the dissemination of good practice, inspiring citizens and political players through reliable tools and data, to strengthen electoral processes that are inclusive and respect fundamental rights."
     features={features}
     src={pic}
   />
 
   <Highlight
     title="Stakes"
-    subTitle="The Mapping of Citizens' Electoral Initiatives in Africa platform responds to the challenges of consolidating democracy in Africa. In light of rising governance failings such as institutional capture, manipulation of constitutions, exclusion of vulnerable groups, fraud, cyber electoral threats and disinformation, the platform is being positioned as a strategic tool for strengthening transparency and confidence in electoral processes."
+    subTitle="The Sóobu AfricTivistes, Tech4Elections platform responds to the challenges of consolidating democracy in Africa. In light of rising governance failings such as institutional capture, manipulation of constitutions, exclusion of vulnerable groups, fraud, cyber electoral threats and disinformation, the platform is being positioned as a strategic tool for strengthening transparency and confidence in electoral processes."
     highlights={issues}
   />
 
