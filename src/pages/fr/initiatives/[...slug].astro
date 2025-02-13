@@ -8,6 +8,9 @@ import { getCollection } from "astro:content";
 import { SITE } from "@data/constants";
 import { getAll } from "@/lib/contentNocodb.astro";
 import { slug } from "@/utils/slug";
+import FooterSocialLink from "@/components/ui/links/FooterSocialLink.astro";
+import Icon from "@/components/ui/icons/Icon.astro";
+import InitiativesGrid from "@/components/InitiativesGrid.jsx";
 
 // Global declaration for gsap animation library
 declare global {
@@ -37,17 +40,28 @@ export async function getStaticPaths() {
       "Si OUI, quels étaient les principaux partenaires",
       "Zone d'intervention des partenaires",
       "Quel a été leur apport",
+      "Cibles de l’initiative",
+      "Type d'organisation",
+      "zone géographique couverte par l'initiative",
+      "Pays de mise en oeuvre",
       "Avez-vous constaté des dysfonctionnements majeurs dans le processus électoral ?",
       "Si oui, quelle était la nature des dysfonctionnements",
       "Si oui, les avez-vous portés à la connaissance des autorités compétentes pour rectification",
       "Quelle suite a été réservée à votre signalement",
       "Les dysfonctionnements ont-ils affecté l'atteinte des objectifs de l'initiative",
+      "Les initiatives citoyennes électorales bénéficient-elles d'un environnement légal favorable dans votre contexte",
+      "difficultés avec les pouvoirs publics dans la réalisation de vos activités",
       "Est-ce-une initiative à plusieurs composantes1",
       "Voulez-vous soumettre une autre composante de votre initiative",
-      "Phase d'intervention du processus 1",
-      "Phase d'intervention du processus 3",
-      "Phase d'intervention du processus 4",
+      "Phases",
+      "Facebook",
+      "X",
+      "Linkedin",
+      "Ressources",
+      "Obligation de reconnaissance institutionnelle de l'initiative",
+      "Appréciation de la transparence du processus électoral",
     ],
+    where: "(Langue,eq,fr)",
   };
 
   const productEntries = await getAll(tableId, query);
@@ -132,7 +146,7 @@ const retourName =
           id="fadeInMoveRight"
           src={product["image-logo"]
             ? product["image-logo"][0].signedUrl
-            : "https://placehold.co/600x600?text=No+Image+Available"}
+            : "https://placehold.co/600x600?text=Soobu+No+Image+Available"}
           class="w-[600px]"
           alt={"image alt"}
           width="600"
@@ -319,6 +333,38 @@ const retourName =
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Quel a été leur apport"]}
             </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Cibles de l'initiative
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Cibles de l’initiative"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Type d'organisation
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Type d'organisation"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Zone géographique couverte
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["zone géographique couverte par l'initiative"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Pays de mise en oeuvre
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Pays de mise en oeuvre"]}
+            </p>
           </div>
           <div>
             <h2
@@ -373,6 +419,30 @@ const retourName =
                 ]
               }
             </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Environnement legal favorable ?
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Les initiatives citoyennes électorales bénéficient-elles d'un environnement légal favorable dans votre contexte"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Difficultés avec les pouvoirs publics dans la mise en oeuvre
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "difficultés avec les pouvoirs publics dans la réalisation de vos activités"
+                ]
+              }
+            </p>
           </div>
           <div>
             <h2
@@ -398,12 +468,34 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Phase d'intervention du processus
+              Phase d'intervention dans le processus
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Phase d'intervention du processus 1"]} |
-              {product["Phase d'intervention du processus 3"]} |
-              {product["Phase d'intervention du processus 4"]}
+              {product["Phases"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Obligations de reconnaissance
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Obligation de reconnaissance institutionnelle de l'initiative"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Appréciation de la transparence du processus electoral
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Appréciation de la transparence du processus électoral"
+                ]
+              }
             </p>
           </div>
         </div>
@@ -411,36 +503,100 @@ const retourName =
     </div>
 
     <div id="tabs-with-card-3" class="hidden" role="tabpanel">
-      <div class="mx-auto mb-20 flex w-full md:mb-28 2xl:w-4/5">
-        <div
-          class="relative left-12 top-12 z-10 overflow-hidden rounded-xl shadow-lg md:left-12 md:top-16 md:-ml-12 lg:ml-0"
+      <div
+        class="mx-auto max-w-[85rem] space-y-4 px-4 pb-10 text-center sm:px-6 lg:px-8 lg:pb-14"
+      >
+        <h2
+          class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+        >
+          Ressources et liens
+        </h2>
+        <ul
+          class="list-inside list-disc space-y-2 text-pretty text-neutral-600 dark:text-neutral-400"
         >
           {
-            product.data && product.data.blueprints.first && (
-              <Image
-                src={product.data.blueprints.first}
-                class="h-full w-full object-cover object-center"
-                alt="Blueprint Illustration"
-                format={"avif"}
-              />
+            product["Ressources"]?.map((resource, index) => (
+              <li key={index}>
+                <a
+                  href={resource.signedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="hover:underline"
+                >
+                  {resource.title}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+
+        <hr
+          class="my-12 border-t-2 border-neutral-300 dark:border-neutral-600"
+        />
+
+        <h2
+          class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+        >
+          Suivez l'initiative
+        </h2>
+        <div class="">
+          {
+            product["Facebook"] === "Non concernée" ||
+            product["Facebook"] === "En cours de création" ? (
+              <FooterSocialLink url="#">
+                <Icon name="facebookFooter" />
+              </FooterSocialLink>
+            ) : (
+              <FooterSocialLink url={product["Facebook"]}>
+                <Icon name="facebookFooter" />
+              </FooterSocialLink>
+            )
+          }
+          {
+            product["X"] === "Non concernée" ||
+            product["X"] === "En cours de création" ? (
+              <FooterSocialLink url="#">
+                <Icon name="xFooter" />
+              </FooterSocialLink>
+            ) : (
+              <FooterSocialLink url={product["X"]}>
+                <Icon name="xFooter" />
+              </FooterSocialLink>
+            )
+          }
+          {
+            product["Linkedin"] === "Non concernée" ||
+            product["Linkedin"] === "Vide" ? (
+              <FooterSocialLink url="#">
+                <Icon name="linkedIn" />
+              </FooterSocialLink>
+            ) : (
+              <FooterSocialLink url={product["Linkedin"]}>
+                <Icon name="linkedIn" />
+              </FooterSocialLink>
             )
           }
         </div>
-
-        <div class="relative right-12 overflow-hidden rounded-xl shadow-xl">
+        <div>
           {
-            product.data && product.data.blueprints.second && (
-              <Image
-                src={product.data.blueprints.second}
-                class="h-full w-full object-cover object-center"
-                alt="Blueprint Illustration"
-                format={"avif"}
-              />
+            product["Site web de l'initiative"] === "Vide" ? (
+              <p class="mt-5">
+                <PrimaryCTA title={"Site web de l'initiative"} url="#" />
+              </p>
+            ) : (
+              <p class="mt-5">
+                <PrimaryCTA
+                  title={"Site web de l'initiative"}
+                  url={product["Site web de l'initiative"]}
+                />
+              </p>
             )
           }
         </div>
       </div>
     </div>
+    <!-- Initiatives Grid Component 
+    <InitiativesGrid client:load initiatives={initiatives} /-->
   </div>
 
   <script>

@@ -2,6 +2,10 @@
   "subTitle": "Ask us any questions about our Soobu project and get factual answers.",
   "faqs": [
     {
+      "question": "Why Soobu ?",
+      "answer": "The word ‘sóobu’, from the Wolof language spoken in West Africa, means ‘commitment, mobilisation’. It has been incorporated into the name of the initiative to underline the commitment of civil society to consolidating electoral and democratic processes on the continent."
+    },
+    {
       "question": "How to contribute?",
       "answer": "To contribute, access the 'I contribute' section and fill out the form, or click on this [link](https://docs.google.com/forms/d/1Vdr3PbcZzwoGFT5-RIudQZVJ921ByHuphNSLvvMy07w/edit). You can also contact our teams via info@africtivistes.org for an interview."
     },
@@ -15,11 +19,11 @@
     },
     {
       "question": "What are the main initiatives covered by Soobu?",
-      "answer": "Soobu lists citizen initiatives covering the entire electoral cycle, from voter awareness to election observation."
+      "answer": "Soobu  identifies and documents citizen initiatives covering the entire electoral cycle, from voter awareness to election observation and  post-electoral activities."
     },
     {
       "question": "How can I access Soobu data?",
-      "answer": "The data aggregated by Soobu will be accessible through our online platform. Details on access will be provided on our website."
+      "answer": "The data aggregated by Soobu are accessible under Initiatives on this platform."
     },
     {
       "question": "What is the geographical scope of Soobu?",

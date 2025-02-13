@@ -17,7 +17,9 @@ const query = {
     "Pays",
     "Catégorie de l'initiative",
     "Thématique de l'initiative",
+    "Langue",
   ],
+  where: "(Langue,eq,fr)",
 };
 
 const rawInitiatives = await getAll(tableId, query);
@@ -28,6 +30,7 @@ const initiatives = Array.isArray(rawInitiatives?.list)
       title: initiative["Nom de l'initiative"] || "Initiative sans nom",
       country: initiative["Pays"] || "Pays non spécifié",
       category: initiative["Catégorie de l'initiative"] || "Non catégorisé",
+      langue: initiative["Langue"] || "Langue non spécifiée",
       description:
         initiative["Thématique de l'initiative"] ||
         "Description non disponible",
