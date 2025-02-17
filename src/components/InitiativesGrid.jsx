@@ -1,9 +1,37 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Card from './Card';
 
-const InitiativesGrid = ({ initiatives }) => {
+const InitiativesGrid = ({ initiatives, language }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tag = params.get('tags');
+    if (tag) {
+      if (countries.includes(tag)) {
+        setSelectedCountry(tag);
+      }
+      if (categories.includes(tag)) {
+        setSelectedCategory(tag);
+      }
+    }
+  }, []);
+
+  // Update URL when filters change
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
+    let newUrl = `${basePath}/initiatives`;
+
+    if (selectedCountry) {
+      newUrl += `?tags=${encodeURIComponent(selectedCountry)}`;
+    } else if (selectedCategory) {
+      newUrl += `?tags=${encodeURIComponent(selectedCategory)}`;
+    }
+
+    window.history.pushState({}, '', newUrl);
+  }, [selectedCategory, selectedCountry]);
 
   // Extract unique categories and countries
   const categories = useMemo(() => {
@@ -31,7 +59,7 @@ const InitiativesGrid = ({ initiatives }) => {
       <div className="flex flex-wrap gap-4 p-6 bg-gray-50 rounded-lg mb-6">
         <div className="flex-1 min-w-[200px]">
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-            Catégorie
+            {language === 'en' ? 'Category' : 'Catégorie'}
           </label>
           <select
             id="category"
@@ -39,7 +67,7 @@ const InitiativesGrid = ({ initiatives }) => {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
           >
-            <option value="">Toutes les catégories</option>
+            <option value="">{language === 'en' ? 'All categories' : 'Toutes les catégories'}</option>
             {categories.map((category) => (
               <option key={category} value={category}>
                 {category}
@@ -50,7 +78,7 @@ const InitiativesGrid = ({ initiatives }) => {
 
         <div className="flex-1 min-w-[200px]">
           <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
-            Pays
+            {language === 'en' ? 'Country' : 'Pays'}
           </label>
           <select
             id="country"
@@ -58,7 +86,7 @@ const InitiativesGrid = ({ initiatives }) => {
             onChange={(e) => setSelectedCountry(e.target.value)}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
           >
-            <option value="">Tous les pays</option>
+            <option value="">{language === 'en' ? 'All countries' : 'Tous les pays'}</option>
             {countries.map((country) => (
               <option key={country} value={country}>
                 {country}
