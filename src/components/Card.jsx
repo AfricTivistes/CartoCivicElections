@@ -16,8 +16,10 @@ const getCategoryColors = (category) => {
   }
 };
 
-const Card = ({ title, country, category, description }) => {
-  const link = `/initiatives/${slug(title)}`;
+
+const Card = ({ title, country, category, description, langue }) => {
+  const details = langue === 'fr' ? 'Voir les détails' : 'View details';
+  const link = langue === 'fr' ? `/fr/initiatives/${slug(title)}` : `/initiatives/${slug(title)}`;
   const categories = category.split(',').map(cat => cat.trim()).filter(Boolean);
 
   return (
@@ -44,7 +46,7 @@ const Card = ({ title, country, category, description }) => {
           ))}
         </div>
         
-        <SecondaryCTA title={"Voir les détails"} url={link} />
+        <SecondaryCTA title={details} url={link} />
       
       </div>
     </div>
