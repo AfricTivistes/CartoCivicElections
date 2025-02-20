@@ -27,8 +27,8 @@ const { title, subTitle, features, src, alt } = Astro.props;
     </h2>
     <p
       class="mb-4 max-w-prose text-pretty font-light text-neutral-600 dark:text-neutral-400 sm:text-lg"
+      set:html={subTitle}
     >
-      {subTitle}
     </p>
   </div>
 

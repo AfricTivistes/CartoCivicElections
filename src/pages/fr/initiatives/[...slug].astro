@@ -190,12 +190,8 @@ const retourName =
               </h3>
               <p
                 class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
+                set:html={product["Quels étaient les principaux objectifs de cette initiative citoyenne"]?.replace(/(\r\n|\n|\r)/gm, "<br>")}
               >
-                {
-                  product[
-                    "Quels étaient les principaux objectifs de cette initiative citoyenne"
-                  ]
-                }
               </p>
             </div>
 
@@ -257,13 +253,17 @@ const retourName =
     <div id="tabs-with-card-2" class="hidden" role="tabpanel">
       <div class="mx-auto max-w-[85rem] px-4 pb-10 sm:px-6 lg:px-8 lg:pb-14">
         <h3
-          class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+          class="text-base font-bold mt-3 text-neutral-800 dark:text-neutral-200 sm:text-lg"
         >
           Resume de l'initiative
         </h3>
-        {product["Résumé descriptif de l'initiative"]}
+        <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
+        set:html={product["Résumé descriptif de l'initiative"]?.replace(/(\r\n|\n|\r)/gm, "<br>")}
+        >
+        </p>
+
       </div>
-      <hr class="my-12 border-t-2 border-neutral-300 dark:border-neutral-600" />
+      <hr class="border-t-2 border-neutral-300 dark:border-neutral-600" />
 
       <div class="mx-auto max-w-[85rem] px-4 pb-10 sm:px-6 lg:px-8 lg:pb-14">
         <div
