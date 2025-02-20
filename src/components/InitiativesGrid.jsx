@@ -5,14 +5,6 @@ const InitiativesGrid = ({ initiatives }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
 
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const countryParam = params.get('country');
-    if (countryParam) {
-      setSelectedCountry(countryParam);
-    }
-  }, []);
-
   // Extract unique categories and countries
   const categories = useMemo(() => {
     const uniqueCategories = [...new Set(initiatives.map(initiative => initiative.category))];
