@@ -61,7 +61,7 @@ export async function getStaticPaths() {
       "Obligation de reconnaissance institutionnelle de l'initiative",
       "Appréciation de la transparence du processus électoral",
     ],
-    where: "(Langue,eq,fr)",
+    where: "(Status,eq,Traiter)~and(Langue,eq,fr)",
   };
 
   const productEntries = await getAll(tableId, query);

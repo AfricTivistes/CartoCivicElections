@@ -39,11 +39,7 @@ const Card = ({ title, country, category, description, langue }) => {
         </p>
 
         <div className="flex flex-wrap gap-2 mb-6">
-          {categories.map((cat, index) => (
-            <span key={index} className={`px-4 py-2 text-sm font-semibold rounded-full border transition-colors duration-300 ${getCategoryColors(cat)}`}>
-              {cat}
-            </span>
-          ))}
+          {category}
         </div>
         
         <SecondaryCTA title={details} url={link} />
