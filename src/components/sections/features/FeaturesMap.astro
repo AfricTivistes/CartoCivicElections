@@ -162,10 +162,8 @@ const { title } = Astro.props;
 
       // Add click handler for unclustered points
       map.on('click', 'unclustered-point', (e) => {
-        const { country } = e.features[0].properties;
-        const currentPath = window.location.pathname;
-        const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-        window.location.href = `${basePath}/initiatives?country=${encodeURIComponent(country)}`;
+        const { title } = e.features[0].properties;
+        window.location.href = `/initiatives`;
       });
     });
 

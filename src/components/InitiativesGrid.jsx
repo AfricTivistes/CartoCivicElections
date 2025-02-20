@@ -3,10 +3,7 @@ import Card from './Card';
 
 const InitiativesGrid = ({ initiatives }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('country') || '';
-  });
+  const [selectedCountry, setSelectedCountry] = useState('');
 
   // Extract unique categories and countries
   const categories = useMemo(() => {
