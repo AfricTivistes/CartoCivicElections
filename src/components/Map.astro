@@ -1,23 +1,35 @@
-map.on('load', async () => {
-  const response = await fetch('/api/map.json');
-  const data = await response.json();
-  
-  map.addSource('initiatives', {
-    type: 'geojson',
-    data: data
-  });
-
-  map.addLayer({
-    'id': 'points',
-    'type': 'circle',
-    'source': 'initiatives',
-    'paint': {
-      'circle-radius': 8,
-      'circle-color': '#FF6B6B',
-      'circle-stroke-width': 2,
-      'circle-stroke-color': '#fff'
+map.on('style.load', async () => {
+  try {
+    const response = await fetch('/api/map.json');
+    const data = await response.json();
+    
+    if (map.getSource('initiatives')) {
+      map.removeSource('initiatives');
     }
-  });
+    
+    map.addSource('initiatives', {
+      type: 'geojson',
+      data: data
+    });
+
+    if (map.getLayer('points')) {
+      map.removeLayer('points');
+    }
+
+    map.addLayer({
+      'id': 'points',
+      'type': 'circle',
+      'source': 'initiatives',
+      'paint': {
+        'circle-radius': 8,
+        'circle-color': '#FF6B6B',
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#fff'
+      }
+    });
+  } catch (error) {
+    console.error('Erreur lors du chargement des points:', error);
+  }
 
   map.on('click', 'points', (e) => {
     const coordinates = e.features[0].geometry.coordinates.slice();
