@@ -2,22 +2,22 @@
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 
-export async function GET({params, request}) {
-  const url = new URL(request.url);
-  const lang = url.searchParams.get('lang') || 'en';
-  
-  const tableId = "m9erh9bplb8jihp";
-  const query = {
-    viewId: "vwdobxvm00ayso6s",
-    fields: ["Pays"],
-    where: `(Status,eq,Traiter)~and(Langue,eq,${lang})`
-  };
+// Fetch initiatives data
+const tableId = "mrv8bch7o0jh5ld";
+const query = {
+  viewId: "vw793taeypy81he9",
+  fields: [
+    "Pays / Country"
+  ]
+};
 
+export async function GET({params, request}) {
   const Initiatives = await getAll(tableId, query);
 
+  // Process initiatives to get country data
   const countryData = {};
   Initiatives.list.forEach((initiative) => {
-    const country = initiative['Pays'];
+    const country = initiative['Pays / Country'];
     if (country) {
       if (!countryData[country]) {
         countryData[country] = {
@@ -28,10 +28,12 @@ export async function GET({params, request}) {
     }
   });
 
+  // Create features array for the map
   const points = {
     type: 'FeatureCollection',
     features: Object.entries(countryData).map(([country, data]) => {
       const coordinates = countryCoordinates[country];
+      console.log(`Processing country: ${country}, coordinates:`, coordinates);
       if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
         return {
           type: 'Feature',
@@ -41,18 +43,25 @@ export async function GET({params, request}) {
           },
           properties: {
             title: country,
-            description: `${data.count} initiative${data.count > 1 ? 's' : ''} ${lang === 'fr' ? 'en' : 'in'} ${country}`,
+            description: `${data.count} initiative${data.count > 1 ? 's' : ''} en ${country}`,
             count: data.count
           }
         };
       }
+      console.log(`Missing or invalid coordinates for country: ${country}`);
       return null;
     }).filter(Boolean)
   };
 
-  return new Response(JSON.stringify(points), {
-    headers: {
-      'Content-Type': 'application/json'
+  console.log('Generated GeoJSON:', JSON.stringify(points, null, 2));
+
+  return new Response(
+    JSON.stringify(points),
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
+      }
     }
-  });
+  );
 }
