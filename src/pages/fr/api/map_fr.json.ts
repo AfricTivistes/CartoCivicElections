@@ -2,7 +2,6 @@ import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 
 export async function GET({ params, request }) {
-  const url = new URL(request.url);
 
 
   const tableId = "m9erh9bplb8jihp";
@@ -15,7 +14,7 @@ export async function GET({ params, request }) {
       "Thématique de l'initiative",
       "Langue",
     ],
-    where: `(Status,eq,Traiter)~and(Langue,eq,en)`,
+    where: `(Status,eq,Traiter)~and(Langue,eq,fr)`,
   };
 
   const Initiatives = await getAll(tableId, query);
