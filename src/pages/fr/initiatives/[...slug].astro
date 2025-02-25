@@ -61,7 +61,7 @@ export async function getStaticPaths() {
       "Obligation de reconnaissance institutionnelle de l'initiative",
       "Appréciation de la transparence du processus électoral",
     ],
-    where: "(Langue,eq,fr)",
+    where: "(Status,eq,Traiter)~and(Langue,eq,fr)",
   };
 
   const productEntries = await getAll(tableId, query);
@@ -328,7 +328,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Apport partenaires
+              Appuis partenaires
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Quel a été leur apport"]}
@@ -448,7 +448,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Plusieurs composantes ?
+              L'initiative a-t-elle plusieurs composantes ?
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Est-ce-une initiative à plusieurs composantes1"]}
@@ -476,7 +476,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Obligations de reconnaissance
+              Obligations de reconnaissance institutionnelle de l'initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {

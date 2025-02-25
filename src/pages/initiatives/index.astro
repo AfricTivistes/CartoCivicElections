@@ -18,6 +18,7 @@ const query = {
     "Catégorie de l'initiative",
     "Thématique de l'initiative",
   ],
+  where: "(Status,eq,Traiter)~and(Langue,eq,en)",
 };
 
 const rawInitiatives = await getAll(tableId, query);
@@ -27,6 +28,7 @@ const initiatives = Array.isArray(rawInitiatives?.list)
   ? rawInitiatives.list.map((initiative) => ({
       title: initiative["Nom de l'initiative"] || "Initiative sans nom",
       country: initiative["Pays"] || "Pays non spécifié",
+      langue: initiative["Langue"] || "Langue non spécifiée",
       category: initiative["Catégorie de l'initiative"] || "Non catégorisé",
       description:
         initiative["Thématique de l'initiative"] ||
@@ -39,7 +41,7 @@ const initiatives = Array.isArray(rawInitiatives?.list)
   <div class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
     <!-- Header Section -->
     <div class="mb-8 text-center">
-      <h1 class="mb-4 text-4xl font-bold text-primary-600">{title}</h1>
+      <h1 class="text-primary-600 mb-4 text-4xl font-bold">{title}</h1>
       <p class="text-lg text-gray-600">{subTitle}</p>
     </div>
 

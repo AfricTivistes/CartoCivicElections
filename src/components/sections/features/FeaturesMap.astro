@@ -19,6 +19,7 @@ const { title } = Astro.props;
 
 <script>
   import maplibregl from 'maplibre-gl';
+  import { slug } from '@/utils/slug';
   
   // Initialize the map when the component mounts
   const initMap = () => {
@@ -139,6 +140,7 @@ const { title } = Astro.props;
         
         const coordinates = e.features[0].geometry.coordinates.slice();
         const { title, description, count } = e.features[0].properties;
+        const link = `/initiatives/${slug(title)}`;
         
         const popupContent = `
           <a href="/initiatives/${title.toLowerCase()}" class="block">
