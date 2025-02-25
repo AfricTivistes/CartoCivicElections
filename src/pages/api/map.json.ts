@@ -1,14 +1,14 @@
-
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 
 export async function GET({ params, request }) {
   const url = new URL(request.url);
   const pathname = url.pathname;
-  
+
   // Amélioration de la détection de la langue
-  const segments = pathname.split('/').filter(Boolean);
-  const lang = segments[0] === 'fr' ? 'fr' : 'en';
+  const segments = pathname.split("/").filter(Boolean);
+  const lang = segments[0] === "" ? "en" : "fr";
+  console.log(lang);
 
   const tableId = "m9erh9bplb8jihp";
   const query = {
@@ -46,7 +46,11 @@ export async function GET({ params, request }) {
     features: Object.entries(countryData)
       .map(([country, data]) => {
         const coordinates = countryCoordinates[country];
-        if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
+        if (
+          coordinates &&
+          Array.isArray(coordinates) &&
+          coordinates.length === 2
+        ) {
           return {
             type: "Feature",
             geometry: {
