@@ -8,6 +8,7 @@ interface Props {
 
 const { title, lang } = Astro.props;
 console.log(lang)
+const apiEndpoint = lang === 'fr' ? '/src/pages/fr/api/map_fr.json' : '/src/pages/api/map.json';
 
 ---
 
@@ -59,7 +60,7 @@ console.log(lang)
     let points;
 
     const fetchPoints = async () => {
-      const response = await fetch('/api/map.json');
+      const response = await fetch(apiEndpoint);
       points = await response.json();
     };
 
@@ -68,7 +69,7 @@ console.log(lang)
 
     map.on('load', () => {
       // Load GeoJSON data
-      fetch('/api/map.json')
+      fetch(apiEndpoint)
         .then((response) => response.json())
         .then((data) => {
           map.addSource('initiatives', {
