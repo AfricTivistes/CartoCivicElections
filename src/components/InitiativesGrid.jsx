@@ -24,16 +24,18 @@ const InitiativesGrid = ({ initiatives }) => {
     const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
     let newUrl = `${basePath}/initiatives/`;
 
+    // Conserver uniquement le filtre du pays
     if (selectedCountry) {
       newUrl += `?tags=${encodeURIComponent(selectedCountry)}`;
-    } else if (selectedCategory) {
-      newUrl += `?tags=${encodeURIComponent(selectedCategory)}`;
-    } else {
-      newUrl += '?tags='; // added to handle the case where no filter is selected.
     }
 
     window.history.pushState({}, '', newUrl);
-  }, [selectedCategory, selectedCountry]);
+  }, [selectedCountry]);
+
+  // Réinitialiser la catégorie quand le pays change
+  useEffect(() => {
+    setSelectedCategory('');
+  }, [selectedCountry]);
 
   // Extract unique categories and countries
   const categories = useMemo(() => {
