@@ -57,7 +57,7 @@ const { title } = Astro.props;
     map.on('load', async () => {
       const response = await fetch('/api/map.json');
       const points = await response.json();
-      
+
       // Add the source for clusters
       map.addSource('initiatives', {
         type: 'geojson',
