@@ -19,7 +19,7 @@ const query = {
     "Thématique de l'initiative",
     "Langue",
   ],
-  where: "(Status,eq,Traiter)~and(Langue,eq,fr)",
+  where: "(Langue,eq,fr)",
 };
 
 const rawInitiatives = await getAll(tableId, query);

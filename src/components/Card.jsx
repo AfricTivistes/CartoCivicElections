@@ -16,10 +16,8 @@ const getCategoryColors = (category) => {
   }
 };
 
-
-const Card = ({ title, country, category, description, langue }) => {
-  const details = langue === 'fr' ? 'Voir les détails' : 'View details';
-  const link = langue === 'fr' ? `/fr/initiatives/${slug(title)}` : `/initiatives/${slug(title)}`;
+const Card = ({ title, country, category, description }) => {
+  const link = `/initiatives/${slug(title)}`;
   const categories = category.split(',').map(cat => cat.trim()).filter(Boolean);
 
   return (
@@ -39,10 +37,14 @@ const Card = ({ title, country, category, description, langue }) => {
         </p>
 
         <div className="flex flex-wrap gap-2 mb-6">
-          {category}
+          {categories.map((cat, index) => (
+            <span key={index} className={`px-4 py-2 text-sm font-semibold rounded-full border transition-colors duration-300 ${getCategoryColors(cat)}`}>
+              {cat}
+            </span>
+          ))}
         </div>
         
-        <SecondaryCTA title={details} url={link} />
+        <SecondaryCTA title={"Voir les détails"} url={link} />
       
       </div>
     </div>

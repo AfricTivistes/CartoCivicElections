@@ -1,41 +1,12 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import Card from './Card';
 
 const InitiativesGrid = ({ initiatives }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('');
-
-  useEffect(() => {
+  const [selectedCountry, setSelectedCountry] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    const tag = params.get('tags');
-    if (tag) {
-      if (countries.includes(tag)) {
-        setSelectedCountry(tag);
-      }
-      if (categories.includes(tag)) {
-        setSelectedCategory(tag);
-      }
-    }
-  }, []);
-
-  // Update URL when filters change
-  useEffect(() => {
-    const currentPath = window.location.pathname;
-    const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-    let newUrl = `${basePath}/initiatives/`;
-
-    // Conserver uniquement le filtre du pays
-    if (selectedCountry) {
-      newUrl += `?tags=${encodeURIComponent(selectedCountry)}`;
-    }
-
-    window.history.pushState({}, '', newUrl);
-  }, [selectedCountry]);
-
-  // Réinitialiser la catégorie quand le pays change
-  useEffect(() => {
-    setSelectedCategory('');
-  }, [selectedCountry]);
+    return params.get('country') || '';
+  });
 
   // Extract unique categories and countries
   const categories = useMemo(() => {

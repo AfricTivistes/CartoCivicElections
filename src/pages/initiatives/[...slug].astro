@@ -60,7 +60,7 @@ export async function getStaticPaths() {
       "Obligation de reconnaissance institutionnelle de l'initiative",
       "Appréciation de la transparence du processus électoral",
     ],
-    where: "(Status,eq,Traiter)~and(Langue,eq,en)",
+    where: "(Langue,eq,en)",
   };
 
   const productEntries = await getAll(tableId, query);
@@ -447,7 +447,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Does the initiative have multi-components?
+              Multi-component initiative ?
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Est-ce-une initiative à plusieurs composantes1"]}

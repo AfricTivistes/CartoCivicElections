@@ -19,8 +19,7 @@ const { title } = Astro.props;
 
 <script>
   import maplibregl from 'maplibre-gl';
-  import { slug } from '@/utils/slug';
-
+  
   // Initialize the map when the component mounts
   const initMap = () => {
     const map = new maplibregl.Map({
@@ -50,122 +49,122 @@ const { title } = Astro.props;
     // Add navigation controls
     map.addControl(new maplibregl.NavigationControl());
 
-    map.on('load', async () => {
-      try {
-        const response = await fetch('/api/map.json');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+    // African countries data points
+
+    let points;
+
+    const fetchPoints = async () => {
+      const response = await fetch('/api/map.json');
+      points = await response.json();
+    };
+
+
+    const pointsPromise = fetchPoints();
+
+    map.on('load', () => {
+      // Add the source for clusters
+      map.addSource('initiatives', {
+        type: 'geojson',
+        data: points,
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 50
+      });
+
+      // Add cluster layer
+      map.addLayer({
+        id: 'clusters',
+        type: 'circle',
+        source: 'initiatives',
+        filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': [
+            'step',
+            ['get', 'point_count'],
+            '#FB923C', // Primary orange color for small clusters
+            10,
+            '#EA580C', // Darker orange for medium clusters
+            30,
+            '#9A3412' // Darkest orange for large clusters
+          ],
+          'circle-radius': [
+            'step',
+            ['get', 'point_count'],
+            20,
+            10,
+            30,
+            30,
+            40
+          ]
         }
-        const points = await response.json();
+      });
 
-        // Add the source for clusters
-        map.addSource('initiatives', {
-          type: 'geojson',
-          data: points,
-          cluster: true,
-          clusterMaxZoom: 14,
-          clusterRadius: 50
-        });
+      // Add cluster count
+      map.addLayer({
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'initiatives',
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          'text-size': 12
+        },
+        paint: {
+          'text-color': '#ffffff'
+        }
+      });
 
-        // Add cluster layer
-        map.addLayer({
-          id: 'clusters',
-          type: 'circle',
-          source: 'initiatives',
-          filter: ['has', 'point_count'],
-          paint: {
-            'circle-color': [
-              'step',
-              ['get', 'point_count'],
-              '#FB923C', // Primary orange color for small clusters
-              10,
-              '#EA580C', // Darker orange for medium clusters
-              30,
-              '#9A3412' // Darkest orange for large clusters
-            ],
-            'circle-radius': [
-              'step',
-              ['get', 'point_count'],
-              20,
-              10,
-              30,
-              30,
-              40
-            ]
-          }
-        });
+      // Add unclustered point layer
+      map.addLayer({
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'initiatives',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': '#FB923C',
+          'circle-radius': 8,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#fff'
+        }
+      });
 
-        // Add cluster count
-        map.addLayer({
-          id: 'cluster-count',
-          type: 'symbol',
-          source: 'initiatives',
-          filter: ['has', 'point_count'],
-          layout: {
-            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-            'text-size': 12
-          },
-          paint: {
-            'text-color': '#ffffff'
-          }
-        });
+      // Create a popup for individual points
+      const popup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false
+      });
 
-        // Add unclustered point layer
-        map.addLayer({
-          id: 'unclustered-point',
-          type: 'circle',
-          source: 'initiatives',
-          filter: ['!', ['has', 'point_count']],
-          paint: {
-            'circle-color': '#FB923C',
-            'circle-radius': 8,
-            'circle-stroke-width': 1,
-            'circle-stroke-color': '#fff'
-          }
-        });
+      map.on('mouseenter', 'unclustered-point', (e) => {
+        map.getCanvas().style.cursor = 'pointer';
+        
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const { title, description, count } = e.features[0].properties;
+        
+        const popupContent = `
+          <a href="/initiatives/${title.toLowerCase()}" class="block">
+            <h3 class="font-bold text-lg">${title}</h3>
+            <p class="text-sm">${description}</p>
+            <p class="text-sm mt-2">${count} initiative${count > 1 ? 's' : ''}</p>
+          </a>
+        `;
 
-        // Create a popup for individual points
-        const popup = new maplibregl.Popup({
-          closeButton: false,
-          closeOnClick: false
-        });
+        popup.setLngLat(coordinates)
+          .setHTML(popupContent)
+          .addTo(map);
+      });
 
-        map.on('mouseenter', 'unclustered-point', (e) => {
-          map.getCanvas().style.cursor = 'pointer';
+      map.on('mouseleave', 'unclustered-point', () => {
+        map.getCanvas().style.cursor = '';
+        popup.remove();
+      });
 
-          const coordinates = e.features[0].geometry.coordinates.slice();
-          const { title, description, count, country } = e.features[0].properties;
-          const link = `/initiatives/${slug(title)}`;
-
-          const popupContent = `
-            <a href="/initiatives/${title.toLowerCase()}" class="block">
-              <h3 class="font-bold text-lg">${title}</h3>
-              <p class="text-sm">${description}</p>
-              <p class="text-sm mt-2">${count} initiative${count > 1 ? 's' : ''}</p>
-            </a>
-          `;
-
-          popup.setLngLat(coordinates)
-            .setHTML(popupContent)
-            .addTo(map);
-        });
-
-        map.on('mouseleave', 'unclustered-point', () => {
-          map.getCanvas().style.cursor = '';
-          popup.remove();
-        });
-
-        // Add click handler for unclustered points
-        map.on('click', 'unclustered-point', (e) => {
-          const { country } = e.features[0].properties;
-          const currentPath = window.location.pathname;
-          const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-          window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(country)}`;
-        });
-      } catch (error) {
-        console.error("Error loading map data:", error);
-        // Add error handling, e.g., display an error message to the user.
-      }
+      // Add click handler for unclustered points
+      map.on('click', 'unclustered-point', (e) => {
+        const { country } = e.features[0].properties;
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
+        window.location.href = `${basePath}/initiatives?country=${encodeURIComponent(country)}`;
+      });
     });
 
     // Inspect a cluster on click
