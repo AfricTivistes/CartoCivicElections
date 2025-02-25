@@ -1,65 +1,72 @@
+
+---
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 
-export async function GET({ params, request }) {
+export async function GET({params, request}) {
+  // Détecter la langue à partir de l'URL
   const url = new URL(request.url);
-  const pathname = url.pathname;
-
-  const lang = pathname.startsWith("fr") ? "fr" : "en";
+  const path = url.pathname;
+  const lang = path.startsWith('/fr/') ? 'fr' : 'en';
 
   const tableId = "m9erh9bplb8jihp";
   const query = {
     viewId: "vwdobxvm00ayso6s",
-    fields: ["Pays"],
-    where: `(Status,eq,Traiter)~and(Langue,eq,${lang})`,
+    fields: [
+      "Nom de l'initiative",
+      "Pays",
+      "Catégorie de l'initiative",
+      "Thématique de l'initiative",
+      "Langue",
+    ],
+    where: `(Status,eq,Traiter)~and(Langue,eq,${lang})`
   };
 
   const Initiatives = await getAll(tableId, query);
 
+  // Process initiatives to get country data
   const countryData = {};
   Initiatives.list.forEach((initiative) => {
-    const country = initiative["Pays"];
+    const country = initiative['Pays'];
     if (country) {
       if (!countryData[country]) {
         countryData[country] = {
-          count: 0,
+          count: 1,
+          initiatives: [initiative]
         };
+      } else {
+        countryData[country].count += 1;
+        countryData[country].initiatives.push(initiative);
       }
-      countryData[country].count += 1;
     }
   });
 
+  // Create features array for the map
   const points = {
-    type: "FeatureCollection",
-    features: Object.entries(countryData)
-      .map(([country, data]) => {
-        const coordinates = countryCoordinates[country];
-        if (
-          coordinates &&
-          Array.isArray(coordinates) &&
-          coordinates.length === 2
-        ) {
-          return {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: coordinates,
-            },
-            properties: {
-              title: country,
-              description: `${data.count} initiative${data.count > 1 ? "s" : ""} ${lang === "fr" ? "en" : "in"} ${country}`,
-              count: data.count,
-            },
-          };
-        }
-        return null;
-      })
-      .filter(Boolean),
+    type: 'FeatureCollection',
+    features: Object.entries(countryData).map(([country, data]) => {
+      const coordinates = countryCoordinates[country];
+      if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: coordinates
+          },
+          properties: {
+            title: country,
+            description: `${data.count} initiative${data.count > 1 ? 's' : ''} ${lang === 'fr' ? 'en' : 'in'} ${country}`,
+            count: data.count
+          }
+        };
+      }
+      return null;
+    }).filter(Boolean)
   };
 
   return new Response(JSON.stringify(points), {
     headers: {
-      "Content-Type": "application/json",
-    },
+      'Content-Type': 'application/json'
+    }
   });
 }
