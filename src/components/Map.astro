@@ -1,3 +1,12 @@
+// Add popup on hover
+map.on('mouseenter', 'points', () => {
+  map.getCanvas().style.cursor = 'pointer';
+});
+
+map.on('mouseleave', 'points', () => {
+  map.getCanvas().style.cursor = '';
+});
+
 map.on('style.load', async () => {
   try {
     const response = await fetch('/api/map.json');
@@ -25,6 +34,15 @@ map.on('style.load', async () => {
         'circle-color': '#FF6B6B',
         'circle-stroke-width': 2,
         'circle-stroke-color': '#fff'
+      }
+    });
+
+    // Add click event
+    map.on('click', 'points', (e) => {
+      if (e.features.length > 0) {
+        const country = e.features[0].properties.title;
+        const basePath = window.location.pathname.startsWith('/fr') ? '/fr' : '';
+        window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(country)}`;
       }
     });
   } catch (error) {
