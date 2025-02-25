@@ -160,7 +160,7 @@ const { title } = Astro.props;
         const { country } = e.features[0].properties;
         const currentPath = window.location.pathname;
         const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-        window.location.replace(`${basePath}/initiatives/?tags=${encodeURIComponent(country)}`);
+        window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(country)}`;
       });
     });
 
