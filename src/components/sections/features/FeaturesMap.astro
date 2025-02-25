@@ -135,6 +135,36 @@ const { title } = Astro.props;
         closeOnClick: false
       });
 
+      // Animation des points
+      map.loadImage('/marker.png', (error, image) => {
+        if (error) throw error;
+        map.addImage('custom-marker', image);
+      });
+
+      map.on('sourcedata', (e) => {
+        if (e.sourceId === 'initiatives' && e.isSourceLoaded) {
+          map.getSource('initiatives').data.features.forEach((feature, i) => {
+            setTimeout(() => {
+              const el = document.createElement('div');
+              el.className = 'marker';
+              el.style.opacity = '0';
+              el.style.transform = 'scale(0)';
+              
+              new maplibregl.Marker(el)
+                .setLngLat(feature.geometry.coordinates)
+                .addTo(map);
+              
+              // Animation d'entrée
+              setTimeout(() => {
+                el.style.transition = 'all 0.3s ease-out';
+                el.style.opacity = '1';
+                el.style.transform = 'scale(1)';
+              }, 50);
+            }, i * 100);
+          });
+        }
+      });
+
       map.on('mouseenter', 'unclustered-point', (e) => {
         map.getCanvas().style.cursor = 'pointer';
 
