@@ -3,19 +3,15 @@ import countryCoordinates from "@/utils/pays.json";
 
 export async function GET({ params, request }) {
   const url = new URL(request.url);
+  const pathname = url.pathname;
 
+  const lang = pathname.startsWith("fr") ? "fr" : "en";
 
   const tableId = "m9erh9bplb8jihp";
   const query = {
     viewId: "vwdobxvm00ayso6s",
-    fields: [
-      "Nom de l'initiative",
-      "Pays",
-      "Catégorie de l'initiative",
-      "Thématique de l'initiative",
-      "Langue",
-    ],
-    where: `(Status,eq,Traiter)~and(Langue,eq,en)`,
+    fields: ["Pays"],
+    where: `(Status,eq,Traiter)~and(Langue,eq,fr)`,
   };
 
   const Initiatives = await getAll(tableId, query);
@@ -26,13 +22,10 @@ export async function GET({ params, request }) {
     if (country) {
       if (!countryData[country]) {
         countryData[country] = {
-          count: 1,
-          initiatives: [initiative],
+          count: 0,
         };
-      } else {
-        countryData[country].count += 1;
-        countryData[country].initiatives.push(initiative);
       }
+      countryData[country].count += 1;
     }
   });
 
@@ -54,7 +47,7 @@ export async function GET({ params, request }) {
             },
             properties: {
               title: country,
-              description: `${data.count} initiative${data.count > 1 ? "s" : ""} ${country}`,
+              description: `${data.count} initiative${data.count > 1 ? "s" : ""} ${lang === "fr" ? "en" : "in"} ${country}`,
               count: data.count,
             },
           };
