@@ -28,6 +28,8 @@ const InitiativesGrid = ({ initiatives }) => {
       newUrl += `?tags=${encodeURIComponent(selectedCountry)}`;
     } else if (selectedCategory) {
       newUrl += `?tags=${encodeURIComponent(selectedCategory)}`;
+    } else {
+      newUrl += '?tags='; // added to handle the case where no filter is selected.
     }
 
     window.history.pushState({}, '', newUrl);
