@@ -33,12 +33,13 @@ export async function GET({params, request}) {
     type: 'FeatureCollection',
     features: Object.entries(countryData).map(([country, data]) => {
       const coordinates = countryCoordinates[country];
-      if (coordinates) {
+      console.log(`Processing country: ${country}, coordinates:`, coordinates);
+      if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
         return {
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: [coordinates[0], coordinates[1]] // Assure le bon ordre longitude/latitude
+            coordinates: coordinates
           },
           properties: {
             title: country,
@@ -47,9 +48,12 @@ export async function GET({params, request}) {
           }
         };
       }
+      console.log(`Missing or invalid coordinates for country: ${country}`);
       return null;
     }).filter(Boolean)
   };
+
+  console.log('Generated GeoJSON:', JSON.stringify(points, null, 2));
 
   return new Response(
     JSON.stringify(points),
