@@ -1,18 +1,40 @@
-map.on('click', 'points', (e) => {
-  const coordinates = e.features[0].geometry.coordinates.slice();
-  const description = e.features[0].properties.description;
-  const country = e.features[0].properties.title;
+map.on('load', async () => {
+  const response = await fetch('/api/map.json');
+  const data = await response.json();
+  
+  map.addSource('initiatives', {
+    type: 'geojson',
+    data: data
+  });
 
-  while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-  }
+  map.addLayer({
+    'id': 'points',
+    'type': 'circle',
+    'source': 'initiatives',
+    'paint': {
+      'circle-radius': 8,
+      'circle-color': '#FF6B6B',
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#fff'
+    }
+  });
 
-  new mapboxgl.Popup()
-    .setLngLat(coordinates)
-    .setHTML(description)
-    .addTo(map);
+  map.on('click', 'points', (e) => {
+    const coordinates = e.features[0].geometry.coordinates.slice();
+    const description = e.features[0].properties.description;
+    const country = e.features[0].properties.title;
 
-  // Redirection vers la page des initiatives avec le pays en filtre
-  const basePath = window.location.pathname.startsWith('/fr') ? '/fr' : '';
-  window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(country)}`;
+    while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+      coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+    }
+
+    new mapboxgl.Popup()
+      .setLngLat(coordinates)
+      .setHTML(description)
+      .addTo(map);
+
+    // Redirection vers la page des initiatives avec le pays en filtre
+    const basePath = window.location.pathname.startsWith('/fr') ? '/fr' : '';
+    window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(country)}`;
+  });
 });
