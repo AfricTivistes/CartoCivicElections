@@ -4,7 +4,6 @@ import Card from './Card';
 const InitiativesGrid = ({ initiatives, language }) => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedCountry, setSelectedCountry] = useState('');
-  const apiEndpoint = language === 'fr' ? '/fr/api/map_fr.json' : '/api/map.json';
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
