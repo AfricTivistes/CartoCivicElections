@@ -20,7 +20,7 @@ const { title } = Astro.props;
 <script>
   import maplibregl from 'maplibre-gl';
   import { slug } from '@/utils/slug';
-
+  
   // Initialize the map when the component mounts
   const initMap = () => {
     const map = new maplibregl.Map({
@@ -137,11 +137,11 @@ const { title } = Astro.props;
 
       map.on('mouseenter', 'unclustered-point', (e) => {
         map.getCanvas().style.cursor = 'pointer';
-
+        
         const coordinates = e.features[0].geometry.coordinates.slice();
         const { title, description, count } = e.features[0].properties;
         const link = `/initiatives/${slug(title)}`;
-
+        
         const popupContent = `
           <a href="/initiatives/${title.toLowerCase()}" class="block">
             <h3 class="font-bold text-lg">${title}</h3>
@@ -163,9 +163,7 @@ const { title } = Astro.props;
       // Add click handler for unclustered points
       map.on('click', 'unclustered-point', (e) => {
         const { title } = e.features[0].properties;
-        const currentPath = window.location.pathname;
-        const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-        window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(title)}`;
+        window.location.href = `/initiatives`;
       });
     });
 
