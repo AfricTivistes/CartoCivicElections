@@ -53,7 +53,7 @@ const InitiativesGrid = ({ initiatives, language }) => {
   }, [initiatives]);
 
   const thematics = useMemo(() => {
-    const uniqueThematics = [...new Set(initiatives.map(initiative => initiative.thematic))];
+    const uniqueThematics = [...new Set(initiatives.map(initiative => initiative["Thématique de l'initiative"]))];
     return uniqueThematics.sort();
   }, [initiatives]);
 
@@ -62,7 +62,7 @@ const InitiativesGrid = ({ initiatives, language }) => {
     return initiatives.filter(initiative => {
       const matchCategory = !selectedCategory || initiative.category === selectedCategory;
       const matchCountry = !selectedCountry || initiative.country === selectedCountry;
-      const matchThematic = !selectedThematic || initiative.thematic === selectedThematic;
+      const matchThematic = !selectedThematic || initiative["Thématique de l'initiative"] === selectedThematic;
       return matchCategory && matchCountry && matchThematic;
     });
   }, [initiatives, selectedCategory, selectedCountry]);
