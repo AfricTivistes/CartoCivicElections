@@ -1,10 +1,8 @@
 
----
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 
-export async function GET({params, request}) {
-  // Détecter la langue à partir de l'URL
+export async function GET({ params, request }) {
   const url = new URL(request.url);
   const path = url.pathname;
   const lang = path.startsWith('/fr/') ? 'fr' : 'en';
@@ -24,7 +22,6 @@ export async function GET({params, request}) {
 
   const Initiatives = await getAll(tableId, query);
 
-  // Process initiatives to get country data
   const countryData = {};
   Initiatives.list.forEach((initiative) => {
     const country = initiative['Pays'];
@@ -41,7 +38,6 @@ export async function GET({params, request}) {
     }
   });
 
-  // Create features array for the map
   const points = {
     type: 'FeatureCollection',
     features: Object.entries(countryData).map(([country, data]) => {
