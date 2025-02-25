@@ -179,13 +179,11 @@ const { title } = Astro.props;
 
           // Add click handler for unclustered points
           map.on('click', 'unclustered-point', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+            if (!e.features || !e.features.length) return;
             const { title } = e.features[0].properties;
             const currentPath = window.location.pathname;
             const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-            const url = `${basePath}/initiatives?tags=${encodeURIComponent(title)}`;
-            window.location.href = url;
+            window.location.href = `${basePath}/initiatives?tags=${encodeURIComponent(title)}`;
           });
         });
 
