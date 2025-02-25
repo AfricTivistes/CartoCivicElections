@@ -30,12 +30,7 @@ const InitiativesGrid = ({ initiatives }) => {
       newUrl += `?tags=${encodeURIComponent(selectedCategory)}`;
     }
 
-    // Utiliser replaceState au lieu de pushState pour éviter d'ajouter des entrées dans l'historique
-    window.history.replaceState(
-      { country: selectedCountry, category: selectedCategory }, 
-      '', 
-      newUrl
-    );
+    window.history.pushState({}, '', newUrl);
   }, [selectedCategory, selectedCountry]);
 
   // Extract unique categories and countries
