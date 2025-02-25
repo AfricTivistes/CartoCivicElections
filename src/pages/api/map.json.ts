@@ -5,10 +5,9 @@ export async function GET({ params, request }) {
   const url = new URL(request.url);
   const pathname = url.pathname;
 
-  // Amélioration de la détection de la langue
-  const segments = pathname.split("/").filter(Boolean);
-  const lang = segments[0] === "" ? "en" : "fr";
-  console.log(lang);
+  // Détection de la langue basée sur le chemin
+  const lang = pathname.includes('/fr/') ? 'fr' : 'en';
+  console.log('Current language:', lang);
 
   const tableId = "m9erh9bplb8jihp";
   const query = {
