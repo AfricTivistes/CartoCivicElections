@@ -50,84 +50,53 @@ const { title } = Astro.props;
     // Add navigation controls
     map.addControl(new maplibregl.NavigationControl());
 
-    // African countries data points
-
-    let points;
-
-    const fetchPoints = async () => {
-      const response = await fetch('/api/map.json');
-      points = await response.json();
-    };
-
-
-    const pointsPromise = fetchPoints();
 
     map.on('load', () => {
-      // Add the source for clusters
+      // Add source and layer for points
       map.addSource('initiatives', {
         type: 'geojson',
-        data: points,
+        data: '/api/map.json',
         cluster: true,
         clusterMaxZoom: 14,
         clusterRadius: 50
       });
 
-      // Add cluster layer
       map.addLayer({
         id: 'clusters',
         type: 'circle',
         source: 'initiatives',
         filter: ['has', 'point_count'],
         paint: {
-          'circle-color': [
-            'step',
-            ['get', 'point_count'],
-            '#FB923C', // Primary orange color for small clusters
-            10,
-            '#EA580C', // Darker orange for medium clusters
-            30,
-            '#9A3412' // Darkest orange for large clusters
-          ],
-          'circle-radius': [
-            'step',
-            ['get', 'point_count'],
-            20,
-            10,
-            30,
-            30,
-            40
-          ]
+          'circle-color': '#51bbd6',
+          'circle-radius': 20
         }
       });
 
-      // Add cluster count
-      map.addLayer({
-        id: 'cluster-count',
-        type: 'symbol',
-        source: 'initiatives',
-        filter: ['has', 'point_count'],
-        layout: {
-          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-          'text-size': 12
-        },
-        paint: {
-          'text-color': '#ffffff'
-        }
-      });
-
-      // Add unclustered point layer
       map.addLayer({
         id: 'unclustered-point',
         type: 'circle',
         source: 'initiatives',
         filter: ['!', ['has', 'point_count']],
         paint: {
-          'circle-color': '#FB923C',
+          'circle-color': '#11b4da',
           'circle-radius': 8,
           'circle-stroke-width': 1,
           'circle-stroke-color': '#fff'
         }
       });
+
+      // Add click handler for unclustered points
+      map.on('click', 'unclustered-point', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const { country } = e.features[0].properties;
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
+        const url = `${basePath}/initiatives/?tags=${encodeURIComponent(country)}`;
+        history.pushState(null, '', url);
+        window.dispatchEvent(new PopStateEvent('popstate'));
+      });
+
 
       // Create a popup for individual points
       const popup = new maplibregl.Popup({
@@ -160,40 +129,33 @@ const { title } = Astro.props;
         popup.remove();
       });
 
-      // Add click handler for unclustered points
-      map.on('click', 'unclustered-point', (e) => {
-        const { country } = e.features[0].properties;
-        const currentPath = window.location.pathname;
-        const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-        window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(country)}`;
+
+      // Inspect a cluster on click
+      map.on('click', 'clusters', (e) => {
+        const features = map.queryRenderedFeatures(e.point, {
+          layers: ['clusters']
+        });
+        const clusterId = features[0].properties.cluster_id;
+        map.getSource('initiatives').getClusterExpansionZoom(
+          clusterId,
+          (err, zoom) => {
+            if (err) return;
+
+            map.easeTo({
+              center: features[0].geometry.coordinates,
+              zoom: zoom
+            });
+          }
+        );
       });
-    });
 
-    // Inspect a cluster on click
-    map.on('click', 'clusters', (e) => {
-      const features = map.queryRenderedFeatures(e.point, {
-        layers: ['clusters']
+      // Show pointer cursor on hover
+      map.on('mouseenter', 'clusters', () => {
+        map.getCanvas().style.cursor = 'pointer';
       });
-      const clusterId = features[0].properties.cluster_id;
-      map.getSource('initiatives').getClusterExpansionZoom(
-        clusterId,
-        (err, zoom) => {
-          if (err) return;
-
-          map.easeTo({
-            center: features[0].geometry.coordinates,
-            zoom: zoom
-          });
-        }
-      );
-    });
-
-    // Show pointer cursor on hover
-    map.on('mouseenter', 'clusters', () => {
-      map.getCanvas().style.cursor = 'pointer';
-    });
-    map.on('mouseleave', 'clusters', () => {
-      map.getCanvas().style.cursor = '';
+      map.on('mouseleave', 'clusters', () => {
+        map.getCanvas().style.cursor = '';
+      });
     });
   };
 
