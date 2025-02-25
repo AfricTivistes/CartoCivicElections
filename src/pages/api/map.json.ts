@@ -3,10 +3,10 @@ import countryCoordinates from "@/utils/pays.json";
 
 export async function GET({ params, request }) {
   const url = new URL(request.url);
-  const pathname = url.pathname;
-
-  // Détection de la langue basée sur le chemin
-  const lang = pathname.includes('/fr/') ? 'fr' : 'en';
+  const referer = request.headers.get('referer') || '';
+  
+  // Détection de la langue basée sur le referer
+  const lang = referer.includes('/fr') ? 'fr' : 'en';
   console.log('Current language:', lang);
 
   const tableId = "m9erh9bplb8jihp";
