@@ -1,12 +1,15 @@
-
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 
-export async function GET() {
-  const tableId = "m9erh9bplb8jihp";
-  const segments = Astro.url.pathname.split('/');
-  const lang = segments.includes('fr') ? 'fr' : 'en';
+export async function GET({ params, request }) {
+  const url = new URL(request.url);
+  const referer = request.headers.get('referer') || '';
+  
+  // Détection de la langue basée sur le referer
+  const lang = referer.includes('/fr') ? 'fr' : 'en';
+  console.log('Current language:', lang);
 
+  const tableId = "m9erh9bplb8jihp";
   const query = {
     viewId: "vwdobxvm00ayso6s",
     fields: [
@@ -19,25 +22,34 @@ export async function GET() {
     where: `(Status,eq,Traiter)~and(Langue,eq,${lang})`,
   };
 
-  try {
-    const data = await getAll(tableId, query);
-    
-    // Group initiatives by country
-    const countryData = data.reduce((acc, initiative) => {
-      const country = initiative["Pays"];
-      if (!acc[country]) {
-        acc[country] = [];
-      }
-      acc[country].push(initiative);
-      return acc;
-    }, {});
+  const Initiatives = await getAll(tableId, query);
 
-    // Create GeoJSON
-    const geojson = {
-      type: "FeatureCollection",
-      features: Object.entries(countryData).map(([country, data]) => {
+  const countryData = {};
+  Initiatives.list.forEach((initiative) => {
+    const country = initiative["Pays"];
+    if (country) {
+      if (!countryData[country]) {
+        countryData[country] = {
+          count: 1,
+          initiatives: [initiative],
+        };
+      } else {
+        countryData[country].count += 1;
+        countryData[country].initiatives.push(initiative);
+      }
+    }
+  });
+
+  const points = {
+    type: "FeatureCollection",
+    features: Object.entries(countryData)
+      .map(([country, data]) => {
         const coordinates = countryCoordinates[country];
-        if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
+        if (
+          coordinates &&
+          Array.isArray(coordinates) &&
+          coordinates.length === 2
+        ) {
           return {
             type: "Feature",
             geometry: {
@@ -46,27 +58,19 @@ export async function GET() {
             },
             properties: {
               title: country,
-              description: `${data.length} initiative${data.length > 1 ? 's' : ''} dans ce pays`,
-              count: data.length,
+              description: `${data.count} initiative${data.count > 1 ? "s" : ""} ${lang === "fr" ? "en" : "in"} ${country}`,
+              count: data.count,
             },
           };
         }
         return null;
-      }).filter(Boolean),
-    };
+      })
+      .filter(Boolean),
+  };
 
-    return new Response(JSON.stringify(geojson), {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return new Response(JSON.stringify({ error: "Failed to fetch data" }), {
-      status: 500,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-  }
+  return new Response(JSON.stringify(points), {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
 }
