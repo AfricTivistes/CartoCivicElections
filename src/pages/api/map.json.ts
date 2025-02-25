@@ -1,31 +1,28 @@
+
+import type { APIRoute } from 'astro';
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 
-export async function GET({ params, request }) {
+export const GET: APIRoute = async ({ params, request }) => {
   const url = new URL(request.url);
-  const referer = request.headers.get('referer') || '';
+  const pathSegments = url.pathname.split('/');
   
-  // Détection de la langue basée sur le referer
-  const lang = referer.includes('/fr') ? 'fr' : 'en';
-  console.log('Current language:', lang);
+  // Détection de langue basée sur le chemin complet de l'URL
+  const lang = url.pathname.startsWith('/fr/') || pathSegments.includes('fr') ? 'fr' : 'en';
+  console.log('Current language:', lang, 'Path:', url.pathname);
 
   const tableId = "m9erh9bplb8jihp";
   const query = {
     viewId: "vwdobxvm00ayso6s",
-    fields: [
-      "Nom de l'initiative",
-      "Pays",
-      "Catégorie de l'initiative",
-      "Thématique de l'initiative",
-      "Langue",
-    ],
+    fields: ["Title", "Pays", "Status", "Langue"],
     where: `(Status,eq,Traiter)~and(Langue,eq,${lang})`,
   };
 
-  const Initiatives = await getAll(tableId, query);
-
+  const data = await getAll(tableId, query);
+  
+  // Création des points pour la carte
   const countryData = {};
-  Initiatives.list.forEach((initiative) => {
+  data.list.forEach((initiative) => {
     const country = initiative["Pays"];
     if (country) {
       if (!countryData[country]) {
@@ -45,11 +42,7 @@ export async function GET({ params, request }) {
     features: Object.entries(countryData)
       .map(([country, data]) => {
         const coordinates = countryCoordinates[country];
-        if (
-          coordinates &&
-          Array.isArray(coordinates) &&
-          coordinates.length === 2
-        ) {
+        if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
           return {
             type: "Feature",
             geometry: {
@@ -58,7 +51,7 @@ export async function GET({ params, request }) {
             },
             properties: {
               title: country,
-              description: `${data.count} initiative${data.count > 1 ? "s" : ""} ${lang === "fr" ? "en" : "in"} ${country}`,
+              description: `${data.count} initiative${data.count > 1 ? "s" : ""} ${lang === "fr" ? "dans ce pays" : "in this country"}`,
               count: data.count,
             },
           };
@@ -73,4 +66,4 @@ export async function GET({ params, request }) {
       "Content-Type": "application/json",
     },
   });
-}
+};
