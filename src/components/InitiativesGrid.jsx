@@ -22,7 +22,7 @@ const InitiativesGrid = ({ initiatives, language }) => {
   useEffect(() => {
     const currentPath = window.location.pathname;
     const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-    let newUrl = `${basePath}/initiatives/`;
+    let newUrl = `${basePath}/initiatives`;
 
     if (selectedCountry) {
       newUrl += `?tags=${encodeURIComponent(selectedCountry)}`;
