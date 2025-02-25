@@ -1,0 +1,18 @@
+map.on('click', 'points', (e) => {
+  const coordinates = e.features[0].geometry.coordinates.slice();
+  const description = e.features[0].properties.description;
+  const country = e.features[0].properties.title;
+
+  while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+  }
+
+  new mapboxgl.Popup()
+    .setLngLat(coordinates)
+    .setHTML(description)
+    .addTo(map);
+
+  // Redirection vers la page des initiatives avec le pays en filtre
+  const basePath = window.location.pathname.startsWith('/fr') ? '/fr' : '';
+  window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(country)}`;
+});
