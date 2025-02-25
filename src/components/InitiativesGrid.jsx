@@ -2,9 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import Card from './Card';
 
 const InitiativesGrid = ({ initiatives }) => {
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState("");
-  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCountry, setSelectedCountry] = useState('');
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -21,6 +20,7 @@ const InitiativesGrid = ({ initiatives }) => {
 
   // Update URL when filters change
   useEffect(() => {
+    const currentPath = window.location.pathname;
     const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
     let newUrl = `${basePath}/initiatives/`;
 
@@ -59,7 +59,7 @@ const InitiativesGrid = ({ initiatives }) => {
       <div className="flex flex-wrap gap-4 p-6 bg-gray-50 rounded-lg mb-6">
         <div className="flex-1 min-w-[200px]">
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-            {currentPath.startsWith('/fr') ? 'Catégorie' : 'Category'}
+            Catégorie
           </label>
           <select
             id="category"
@@ -67,7 +67,7 @@ const InitiativesGrid = ({ initiatives }) => {
             onChange={(e) => setSelectedCategory(e.target.value)}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
           >
-            <option value="">{currentPath.startsWith('/fr') ? 'Toutes les catégories' : 'All categories'}</option>
+            <option value="">Toutes les catégories</option>
             {categories.map((category) => (
               <option key={category} value={category}>
                 {category}
@@ -78,7 +78,7 @@ const InitiativesGrid = ({ initiatives }) => {
 
         <div className="flex-1 min-w-[200px]">
           <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
-            {currentPath.startsWith('/fr') ? 'Pays' : 'Country'}
+            Pays
           </label>
           <select
             id="country"
@@ -86,7 +86,7 @@ const InitiativesGrid = ({ initiatives }) => {
             onChange={(e) => setSelectedCountry(e.target.value)}
             className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"
           >
-            <option value="">{currentPath.startsWith('/fr') ? 'Tous les pays' : 'All countries'}</option>
+            <option value="">Tous les pays</option>
             {countries.map((country) => (
               <option key={country} value={country}>
                 {country}
