@@ -8,14 +8,18 @@ const InitiativesGrid = ({ initiatives, language }) => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const tag = params.get('tags');
-    if (tag) {
-      if (countries.includes(tag)) {
-        setSelectedCountry(tag);
-      }
-      if (categories.includes(tag)) {
-        setSelectedCategory(tag);
-      }
+    const country = params.get('country');
+    const category = params.get('category');
+    const thematic = params.get('thematic');
+
+    if (country && countries.includes(country)) {
+      setSelectedCountry(country);
+    }
+    if (category && categories.includes(category)) {
+      setSelectedCategory(category);
+    }
+    if (thematic && thematics.includes(thematic)) {
+      setSelectedThematic(thematic);
     }
   }, []);
 
@@ -24,15 +28,18 @@ const InitiativesGrid = ({ initiatives, language }) => {
     const currentPath = window.location.pathname;
     const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
     let newUrl = `${basePath}/initiatives`;
+    const params = [];
 
-    if (selectedCountry) {
-      newUrl += `?tags=${encodeURIComponent(selectedCountry)}`;
-    } else if (selectedCategory) {
-      newUrl += `?tags=${encodeURIComponent(selectedCategory)}`;
+    if (selectedCountry) params.push(`country=${encodeURIComponent(selectedCountry)}`);
+    if (selectedCategory) params.push(`category=${encodeURIComponent(selectedCategory)}`);
+    if (selectedThematic) params.push(`thematic=${encodeURIComponent(selectedThematic)}`);
+
+    if (params.length > 0) {
+      newUrl += `?${params.join('&')}`;
     }
 
     window.history.pushState({}, '', newUrl);
-  }, [selectedCategory, selectedCountry]);
+  }, [selectedCategory, selectedCountry, selectedThematic]);
 
   // Extract unique categories and countries
   const categories = useMemo(() => {
