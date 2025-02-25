@@ -4,16 +4,15 @@ import countryCoordinates from "@/utils/pays.json";
 
 export async function GET({ params, request }) {
   const url = new URL(request.url);
-  const path = url.pathname;
-  const lang = path.startsWith('/fr') ? 'fr' : 'en';
-  console.log(lang)
+  const pathname = url.pathname;
+  const lang = pathname.includes('/fr/') ? 'fr' : 'en';
 
   const tableId = "m9erh9bplb8jihp";
   const query = {
     viewId: "vwdobxvm00ayso6s",
     fields: [
       "Nom de l'initiative",
-      "Pays",
+      "Pays", 
       "Catégorie de l'initiative",
       "Thématique de l'initiative",
       "Langue",
