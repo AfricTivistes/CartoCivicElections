@@ -3,9 +3,12 @@ import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 interface Props {
   title?: string;
+  lang?: string;
 }
 
-const { title } = Astro.props;
+const { title, lang } = Astro.props;
+console.log(lang)
+
 ---
 
 <section class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full">
