@@ -1,25 +1,27 @@
-
-import type { APIRoute } from 'astro';
+import type { APIRoute } from "astro";
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 
 export const GET: APIRoute = async ({ params, request }) => {
   const url = new URL(request.url);
-  const pathSegments = url.pathname.split('/');
-  
+  const pathSegments = url.pathname.split("/");
+
   // Détection de langue basée sur le chemin complet de l'URL
-  const lang = url.pathname.startsWith('/fr/') || pathSegments.includes('fr') ? 'fr' : 'en';
-  console.log('Current language:', lang, 'Path:', url.pathname);
+  const lang =
+    url.pathname.startsWith("/fr/") || pathSegments.includes("fr")
+      ? "fr"
+      : "en";
+  console.log("Current language:", lang, "Path:", url.pathname);
 
   const tableId = "m9erh9bplb8jihp";
   const query = {
     viewId: "vwdobxvm00ayso6s",
-    fields: ["Title", "Pays", "Status", "Langue"],
-    where: `(Status,eq,Traiter)~and(Langue,eq,${lang})`,
+    fields: ["Pays"],
+    where: `(Status,eq,Traiter)~and(Langue,eq,fr)`,
   };
 
   const data = await getAll(tableId, query);
-  
+
   // Création des points pour la carte
   const countryData = {};
   data.list.forEach((initiative) => {
@@ -42,7 +44,11 @@ export const GET: APIRoute = async ({ params, request }) => {
     features: Object.entries(countryData)
       .map(([country, data]) => {
         const coordinates = countryCoordinates[country];
-        if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
+        if (
+          coordinates &&
+          Array.isArray(coordinates) &&
+          coordinates.length === 2
+        ) {
           return {
             type: "Feature",
             geometry: {
