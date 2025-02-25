@@ -1,4 +1,5 @@
 ---
+import { t } from "i18next";
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 interface Props {
@@ -7,6 +8,7 @@ interface Props {
 
 const { title } = Astro.props;
 ---
+
 <section class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full">
   <h1
     class="block text-balance text-center text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-200 sm:text-4xl lg:text-6xl lg:leading-tight"
@@ -14,191 +16,59 @@ const { title } = Astro.props;
     <!-- About Fragment: https://docs.astro.build/en/basics/astro-syntax/#fragments -->
     <Fragment set:html={title} />
   </h1>
-  <div id="map" class="h-[600px] w-full rounded-lg md:mb-4"></div>
+  <div class="relative w-full h-[500px] bg-gray-100 rounded-lg overflow-hidden" id="map"></div>
 </section>
 
 <script>
-  import maplibregl from 'maplibre-gl';
-  import { slug } from '@/utils/slug';
-  
-  // Initialize the map when the component mounts
-  const initMap = () => {
-    const map = new maplibregl.Map({
-      container: 'map',
-      style: {
-        version: 8,
-        sources: {
-          'osm': {
-            type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-            tileSize: 256,
-            attribution: '© OpenStreetMap Contributors'
-          }
-        },
-        layers: [{
-          id: 'osm',
-          type: 'raster',
-          source: 'osm',
-          minzoom: 0,
-          maxzoom: 19
-        }]
-      },
-      center: [20, 0], // Center of Africa
-      zoom: 3
-    });
+  import mapboxgl from 'mapbox-gl';
 
-    // Add navigation controls
-    map.addControl(new maplibregl.NavigationControl());
+  // Configuration de la carte
+  mapboxgl.accessToken = 'votre_token_mapbox'; // Replace with your actual Mapbox access token
 
-    // African countries data points
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v11',
+    center: [17.5, 14.5],
+    zoom: 2.5
+  });
 
-    let points;
-
-    const fetchPoints = async () => {
-      const response = await fetch('/api/map.json');
-      points = await response.json();
-    };
-
-
-    const pointsPromise = fetchPoints();
-
-    map.on('load', () => {
-      // Add the source for clusters
-      map.addSource('initiatives', {
+  // Attendre que la carte soit chargée
+  map.on('load', async () => {
+    try {
+      // Ajout de la source vide
+      map.addSource('points', {
         type: 'geojson',
-        data: points,
-        cluster: true,
-        clusterMaxZoom: 14,
-        clusterRadius: 50
-      });
-
-      // Add cluster layer
-      map.addLayer({
-        id: 'clusters',
-        type: 'circle',
-        source: 'initiatives',
-        filter: ['has', 'point_count'],
-        paint: {
-          'circle-color': [
-            'step',
-            ['get', 'point_count'],
-            '#FB923C', // Primary orange color for small clusters
-            10,
-            '#EA580C', // Darker orange for medium clusters
-            30,
-            '#9A3412' // Darkest orange for large clusters
-          ],
-          'circle-radius': [
-            'step',
-            ['get', 'point_count'],
-            20,
-            10,
-            30,
-            30,
-            40
-          ]
+        data: {
+          type: 'FeatureCollection',
+          features: []
         }
       });
 
-      // Add cluster count
+      // Ajout de la couche pour les points
       map.addLayer({
-        id: 'cluster-count',
-        type: 'symbol',
-        source: 'initiatives',
-        filter: ['has', 'point_count'],
-        layout: {
-          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-          'text-size': 12
-        },
-        paint: {
-          'text-color': '#ffffff'
-        }
-      });
-
-      // Add unclustered point layer
-      map.addLayer({
-        id: 'unclustered-point',
+        id: 'points',
         type: 'circle',
-        source: 'initiatives',
-        filter: ['!', ['has', 'point_count']],
+        source: 'points',
         paint: {
-          'circle-color': '#FB923C',
           'circle-radius': 8,
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#fff'
+          'circle-color': '#6EC770',
+          'circle-opacity': 0.8
         }
       });
 
-      // Create a popup for individual points
-      const popup = new maplibregl.Popup({
-        closeButton: false,
-        closeOnClick: false
-      });
+      // Chargement asynchrone des points
+      const response = await fetch('/api/map.json');
+      const points = await response.json();
 
-      map.on('mouseenter', 'unclustered-point', (e) => {
-        map.getCanvas().style.cursor = 'pointer';
-        
-        const coordinates = e.features[0].geometry.coordinates.slice();
-        const { title, description, count } = e.features[0].properties;
-        const link = `/initiatives/${slug(title)}`;
-        
-        const popupContent = `
-          <a href="/initiatives/${title.toLowerCase()}" class="block">
-            <h3 class="font-bold text-lg">${title}</h3>
-            <p class="text-sm">${description}</p>
-            <p class="text-sm mt-2">${count} initiative${count > 1 ? 's' : ''}</p>
-          </a>
-        `;
+      // Mise à jour de la source avec les points chargés
+      map.getSource('points').setData(points);
 
-        popup.setLngLat(coordinates)
-          .setHTML(popupContent)
-          .addTo(map);
-      });
-
-      map.on('mouseleave', 'unclustered-point', () => {
-        map.getCanvas().style.cursor = '';
-        popup.remove();
-      });
-
-      // Add click handler for unclustered points
-      map.on('click', 'unclustered-point', (e) => {
-        const { title } = e.features[0].properties;
-        window.location.href = `/initiatives`;
-      });
-    });
-
-    // Inspect a cluster on click
-    map.on('click', 'clusters', (e) => {
-      const features = map.queryRenderedFeatures(e.point, {
-        layers: ['clusters']
-      });
-      const clusterId = features[0].properties.cluster_id;
-      map.getSource('initiatives').getClusterExpansionZoom(
-        clusterId,
-        (err, zoom) => {
-          if (err) return;
-
-          map.easeTo({
-            center: features[0].geometry.coordinates,
-            zoom: zoom
-          });
-        }
-      );
-    });
-
-    // Show pointer cursor on hover
-    map.on('mouseenter', 'clusters', () => {
-      map.getCanvas().style.cursor = 'pointer';
-    });
-    map.on('mouseleave', 'clusters', () => {
-      map.getCanvas().style.cursor = '';
-    });
-  };
-
-  // Initialize map when component mounts
-  document.addEventListener('DOMContentLoaded', initMap);
+    } catch (error) {
+      console.error('Erreur lors du chargement des points:', error);
+    }
+  });
 </script>
 
 <style is:global>
-  @import 'maplibre-gl/dist/maplibre-gl.css';
+  @import 'mapbox-gl/dist/mapbox-gl.css';
 </style>
