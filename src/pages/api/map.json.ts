@@ -5,7 +5,8 @@ import countryCoordinates from "@/utils/pays.json";
 export async function GET({ params, request }) {
   const url = new URL(request.url);
   const path = url.pathname;
-  const lang = path.startsWith('/fr/') ? 'fr' : 'en';
+  const lang = path.startsWith('/fr') ? 'fr' : 'en';
+  console.log(lang)
 
   const tableId = "m9erh9bplb8jihp";
   const query = {
