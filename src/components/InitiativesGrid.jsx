@@ -2,8 +2,9 @@ import { useState, useMemo, useEffect } from 'react';
 import Card from './Card';
 
 const InitiativesGrid = ({ initiatives }) => {
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -20,7 +21,6 @@ const InitiativesGrid = ({ initiatives }) => {
 
   // Update URL when filters change
   useEffect(() => {
-    const currentPath = window.location.pathname;
     const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
     let newUrl = `${basePath}/initiatives/`;
 
