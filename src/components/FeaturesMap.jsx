@@ -4,6 +4,14 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
+// Correction des icônes Leaflet qui ne chargent pas par défaut
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
 const FeaturesMap = ({ language }) => {
   const [mapData, setMapData] = useState(null);
   const apiEndpoint = language === 'fr' ? '/fr/api/map_fr.json' : '/api/map.json';
@@ -15,13 +23,6 @@ const FeaturesMap = ({ language }) => {
       .catch(error => console.error('Error fetching map data:', error));
   }, [language, apiEndpoint]);
 
-  const customIcon = new L.Icon({
-    iconUrl: '/marker.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-  });
-
   if (!mapData) {
     return <div>Loading map...</div>;
   }
@@ -30,14 +31,13 @@ const FeaturesMap = ({ language }) => {
     <MapContainer
       center={[4.3947, 18.5582]}
       zoom={3}
-      style={{ height: '100%', width: '100%' }}
+      style={{ height: '500px', width: '100%' }}
     >
       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
       {mapData.features.map((feature, index) => (
         <Marker
           key={index}
           position={[...feature.geometry.coordinates].reverse()}
-          icon={customIcon}
         >
           <Popup>
             <h3>{feature.properties.title}</h3>
