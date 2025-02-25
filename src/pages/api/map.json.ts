@@ -1,6 +1,7 @@
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 
+
 export async function GET({ params, request }) {
   const url = new URL(request.url);
   const referer = request.headers.get('referer') || '';
