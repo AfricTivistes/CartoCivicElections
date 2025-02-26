@@ -95,7 +95,6 @@ export async function getStaticPaths() {
 
   const productEntries = await getAll(tableId, query);
 
-  //console.log(productEntries);
   return productEntries.list.map((product) => {
     const initiativeName = product["Nom de l'initiative"];
     const imageLogo = product["image-logo"];
