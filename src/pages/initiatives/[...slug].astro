@@ -28,9 +28,6 @@ declare global {
 export async function getStaticPaths() {
   const { tableId, query } = getInitiativeQuery('en');
   const productEntries = await getAll(tableId, query);
-      "Pays",
-      "Thématique de l'initiative",
-      "Quels étaient les principaux objectifs de cette initiative citoyenne",
       "Catégorie de l'initiative",
       "Site web de l'initiative",
       "Type d'élection",
