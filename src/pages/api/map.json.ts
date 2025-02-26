@@ -1,40 +1,41 @@
+
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
-interface Props {
-  title?: string;
-}
 
-// Fetch initiatives data
-const tableId = "mrv8bch7o0jh5ld";
-const query = {
-  viewId: "vw793taeypy81he9",
-  fields: ["Pays / Country"],
-};
+let cachedPoints = null;
+let lastCacheTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-const Initiatives = await getAll(tableId, query);
-
-// Process initiatives to get country data
-const countryData = {};
-Initiatives.list.forEach((initiative) => {
-  const country = initiative["Pays / Country"];
-  if (country) {
-    if (!countryData[country]) {
-      countryData[country] = {
-        count: 0,
-      };
-    }
-    countryData[country].count += 1;
+export async function GET({ params, request }) {
+  const now = Date.now();
+  
+  if (cachedPoints && (now - lastCacheTime) < CACHE_DURATION) {
+    return new Response(JSON.stringify(cachedPoints));
   }
-});
 
-// Create features array for the map
-const points = {
-  type: "FeatureCollection",
-  features: Object.entries(countryData)
-    .map(([country, data]) => {
-      const coordinates = countryCoordinates[country];
-      if (coordinates) {
-        return {
+  const tableId = "mrv8bch7o0jh5ld";
+  const query = {
+    viewId: "vw793taeypy81he9",
+    fields: ["Pays / Country"],
+  };
+
+  const Initiatives = await getAll(tableId, query);
+  
+  const countryData = {};
+  Initiatives.list.forEach((initiative) => {
+    const country = initiative["Pays / Country"];
+    if (country) {
+      countryData[country] = (countryData[country] || { count: 0 });
+      countryData[country].count += 1;
+    }
+  });
+
+  cachedPoints = {
+    type: "FeatureCollection",
+    features: Object.entries(countryData)
+      .map(([country, data]) => {
+        const coordinates = countryCoordinates[country];
+        return coordinates ? {
           type: "Feature",
           geometry: {
             type: "Point",
@@ -46,13 +47,11 @@ const points = {
             country: country,
             count: data.count,
           },
-        };
-      }
-      return null;
-    })
-    .filter(Boolean),
-};
+        } : null;
+      })
+      .filter(Boolean),
+  };
 
-export async function GET({ params, request }) {
-  return new Response(JSON.stringify(points));
+  lastCacheTime = now;
+  return new Response(JSON.stringify(cachedPoints));
 }
