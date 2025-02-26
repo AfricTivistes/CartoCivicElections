@@ -26,10 +26,7 @@ declare global {
 }
 // This gets the static paths for all the unique products "Nom de l'initiative" qui est une clé de "product"
 export async function getStaticPaths() {
-  const tableId = "m9erh9bplb8jihp";
-  const query = {
-    viewId: "vwdobxvm00ayso6s",
-    fields: [
+  const { tableId, query } = await getInitiativeQuery('en');
       "image-logo",
       "Type d'organisation",
       "Nom de l'initiative",
