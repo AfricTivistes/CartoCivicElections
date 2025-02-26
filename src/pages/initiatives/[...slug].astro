@@ -1,3 +1,4 @@
+
 ---
 // Import section components
 import MainLayout from "@/layouts/MainLayout.astro";
@@ -10,8 +11,8 @@ import { getAll } from "@/lib/contentNocodb.astro";
 import { slug } from "@/utils/slug";
 import FooterSocialLink from "@/components/ui/links/FooterSocialLink.astro";
 import Icon from "@/components/ui/icons/Icon.astro";
+import InitiativesGrid from "@/components/InitiativesGrid.jsx";
 import SimilarInitiatives from "@/components/SimilarInitiatives.jsx";
-import { getAll } from "@/lib/contentNocodb.astro";
 
 // Fetch initiatives data
 const tableId = "m9erh9bplb8jihp";
@@ -20,7 +21,7 @@ const query = {
   fields: [
     "Nom de l'initiative",
     "Pays",
-    "Catégorie de l'initiative",
+    "Catégorie de l'initiative", 
     "Thématique de l'initiative",
     "Langue",
   ],
@@ -32,11 +33,11 @@ const rawInitiatives = await getAll(tableId, query);
 // Format initiatives data
 const initiatives = Array.isArray(rawInitiatives?.list)
   ? rawInitiatives.list.map((initiative) => ({
-      title: initiative["Nom de l'initiative"] || "Initiative sans nom",
-      country: initiative["Pays"] || "Pays non spécifié",
-      langue: initiative["Langue"] || "Langue non spécifiée",
-      category: initiative["Catégorie de l'initiative"] || "Non catégorisé",
-      thematic: initiative["Thématique de l'initiative"] || "Non spécifié",
+      title: initiative["Nom de l'initiative"] || "Unnamed Initiative",
+      country: initiative["Pays"] || "Country not specified",
+      category: initiative["Catégorie de l'initiative"] || "Uncategorized",
+      langue: initiative["Langue"] || "Language not specified",
+      thematic: initiative["Thématique de l'initiative"] || "Not specified",
     }))
   : [];
 
@@ -46,7 +47,8 @@ declare global {
     gsap: any;
   }
 }
-// This gets the static paths for all the unique products "Nom de l'initiative" qui est une clé de "product"
+
+// This gets the static paths for all initiatives
 export async function getStaticPaths() {
   const tableId = "m9erh9bplb8jihp";
   const query = {
@@ -64,11 +66,11 @@ export async function getStaticPaths() {
       "Type d'élection",
       "Date de début",
       "Date de fin",
-      "L’initiative a-t-elle été soutenue par des partenaires ?",
+      "L'initiative a-t-elle été soutenue par des partenaires ?",
       "Si OUI, quels étaient les principaux partenaires",
       "Zone d'intervention des partenaires",
       "Quel a été leur apport",
-      "Cibles de l’initiative",
+      "Cibles de l'initiative",
       "Type d'organisation",
       "zone géographique couverte par l'initiative",
       "Pays de mise en oeuvre",
@@ -94,7 +96,6 @@ export async function getStaticPaths() {
 
   const productEntries = await getAll(tableId, query);
 
-  //console.log(productEntries);
   return productEntries.list.map((product) => {
     const initiativeName = product["Nom de l'initiative"];
     const imageLogo = product["image-logo"];
@@ -112,12 +113,8 @@ const { product } = Astro.props;
 
 const pageTitle: string = `${product["Nom de l'initiative"]} | ${SITE.title}`;
 
-const initiativeLink =
-  Astro.currentLocale === "fr" ? "/fr/initiatives" : "/initiatives";
-const retourName =
-  Astro.currentLocale === "fr"
-    ? "Retour sur la liste des initiatives"
-    : "Back to initiatives list";
+const initiativeLink = "/initiatives";
+const retourName = "Back to initiatives list";
 ---
 
 <MainLayout title={pageTitle}>
@@ -196,7 +193,7 @@ const retourName =
           { title: "Summary", id: "summary", dataTab: "#tabs-with-card-1" },
           { title: "Details", id: "details", dataTab: "#tabs-with-card-2" },
           {
-            title: "Resources & Useful links",
+            title: "Resources and Links",
             id: "resources",
             dataTab: "#tabs-with-card-3",
           },
@@ -229,7 +226,7 @@ const retourName =
                   <h3
                     class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
                   >
-                    Type of election
+                    Election Type
                   </h3>
                   <p class="mt-1 text-neutral-600 dark:text-neutral-400">
                     {product["Type d'élection"]}
@@ -240,7 +237,7 @@ const retourName =
                 <h3
                   class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
                 >
-                  Type of organisation
+                  Organization Type
                 </h3>
                 <p class="mt-1 text-neutral-600 dark:text-neutral-400">
                   {product["Type d'organisation"]}
@@ -281,17 +278,15 @@ const retourName =
     <div id="tabs-with-card-2" class="hidden" role="tabpanel">
       <div class="mx-auto max-w-[85rem] px-4 pb-10 sm:px-6 lg:px-8 lg:pb-14">
         <h3
-          class="mt-3 text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+          class="text-base font-bold mt-3 text-neutral-800 dark:text-neutral-200 sm:text-lg"
         >
           Initiative Summary
         </h3>
-        <p
-          class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
-          set:html={product["Résumé descriptif de l'initiative"]?.replace(
-            /(\r\n|\n|\r)/gm,
-            "<br>"
-          )}
-        />
+        <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
+        set:html={product["Résumé descriptif de l'initiative"]?.replace(/(\r\n|\n|\r)/gm, "<br>")}
+        >
+        </p>
+
       </div>
       <hr class="border-t-2 border-neutral-300 dark:border-neutral-600" />
 
@@ -330,19 +325,19 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Partners of the initiative
+              Initiative Partners
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {
                 product[
-                  "L’initiative a-t-elle été soutenue par des partenaires ?"
+                  "L'initiative a-t-elle été soutenue par des partenaires ?"
                 ]
               }
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Main partners
+              Main Partners
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Si OUI, quels étaient les principaux partenaires"]}
@@ -350,7 +345,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Partners’ intervention area
+              Partners Area of Intervention
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Zone d'intervention des partenaires"]}
@@ -358,7 +353,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Partners’ contribution
+              Partner Support
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Quel a été leur apport"]}
@@ -366,15 +361,15 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Target of the initiative
+              Initiative Targets
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Cibles de l’initiative"]}
+              {product["Cibles de l'initiative"]}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Type of organisation
+              Organization Type
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Type d'organisation"]}
@@ -382,7 +377,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Geographical area initiative covers
+              Geographic Coverage
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["zone géographique couverte par l'initiative"]}
@@ -390,7 +385,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Country of implementation
+              Implementation Country
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Pays de mise en oeuvre"]}
@@ -400,7 +395,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Electoral process irregularity
+              Process Malfunction
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {
@@ -412,7 +407,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Types of irregularity
+              Nature of Malfunctions
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Si oui, quelle était la nature des dysfonctionnements"]}
@@ -420,7 +415,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Irregularity reported to authorities
+              Malfunction Reported to Authorities
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {
@@ -432,7 +427,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Response after reporting
+              Follow-up After Report
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Quelle suite a été réservée à votre signalement"]}
@@ -440,7 +435,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Impact on the Initiative
+              Impact on Initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {
@@ -452,7 +447,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Conducive legal environment ?
+              Favorable Legal Environment?
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {
@@ -464,7 +459,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Challenges with public authorities in implementation
+              Difficulties with Public Authorities in Implementation
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {
@@ -478,7 +473,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Does the initiative have multi-components?
+              Does the Initiative Have Multiple Components?
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Est-ce-une initiative à plusieurs composantes1"]}
@@ -498,7 +493,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Electoral process intervention phase
+              Process Intervention Phase
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Phases"]}
@@ -506,7 +501,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Mandatory registration
+              Initiative Institutional Recognition Requirements
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {
@@ -518,7 +513,7 @@ const retourName =
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Assess transparency of the electoral process
+              Assessment of Electoral Process Transparency
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {
@@ -539,7 +534,7 @@ const retourName =
         <h2
           class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
         >
-          Resources & links
+          Resources and Links
         </h2>
         <ul
           class="list-inside list-disc space-y-2 text-pretty text-neutral-600 dark:text-neutral-400"
@@ -567,7 +562,7 @@ const retourName =
         <h2
           class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
         >
-          Follow the initiative
+          Follow the Initiative
         </h2>
         <div class="">
           {
@@ -596,7 +591,7 @@ const retourName =
           }
           {
             product["Linkedin"] === "Non concernée" ||
-            product["Linkedin"] === "En cours de création" ? (
+            product["Linkedin"] === "Vide" ? (
               <FooterSocialLink url="#">
                 <Icon name="linkedIn" />
               </FooterSocialLink>
@@ -611,12 +606,12 @@ const retourName =
           {
             product["Site web de l'initiative"] === "Vide" ? (
               <p class="mt-5">
-                <PrimaryCTA title={"Website of the initiative"} url="#" />
+                <PrimaryCTA title={"Initiative Website"} url="#" />
               </p>
             ) : (
               <p class="mt-5">
                 <PrimaryCTA
-                  title={"Website of the initiative"}
+                  title={"Initiative Website"}
                   url={product["Site web de l'initiative"]}
                 />
               </p>
@@ -625,7 +620,10 @@ const retourName =
         </div>
       </div>
     </div>
+
   </div>
+
+  <SimilarInitiatives client:load currentInitiative={product} allInitiatives={initiatives} language="en" />
 
   <script>
     import { gsap } from "gsap";
@@ -686,39 +684,9 @@ const retourName =
 
     timeline.to("#overlay", { duration: 1, autoAlpha: 0, delay: 0.2 });
   </script>
-
-  <!-- Tabs Container -->
-  <div class="mt-12" data-tab-group>
-    <div class="flex flex-wrap gap-4 mb-8">
-      <button
-        data-target="#details"
-        class="active bg-neutral-100 hover:border-transparent text-orange-400 dark:text-orange-300 px-6 py-3 rounded-lg transition-all duration-300"
-      >
-        <span>Details</span>
-      </button>
-      <button
-        data-target="#resources"
-        class="hover:bg-neutral-100 hover:border-transparent text-neutral-800 dark:text-neutral-200 px-6 py-3 rounded-lg transition-all duration-300"
-      >
-        <span>Resources & Useful Links</span>
-      </button>
-    </div>
-
-    <div id="details" class="tab-content prose dark:prose-invert max-w-none">
-      <slot />
-    </div>
-
-    <div id="resources" class="tab-content prose dark:prose-invert max-w-none hidden">
-      <h2>Resources</h2>
-      <p>Coming soon...</p>
-    </div>
-  </div>
-
-  <SimilarInitiatives client:load currentInitiative={product} allInitiatives={initiatives} language="en" />
-
   <script>
     document.addEventListener("DOMContentLoaded", function () {
-      function setButtonInactive(btn, activeButton) {
+      function setButtonInactive(btn: any, activeButton: any) {
         if (btn !== activeButton) {
           btn.classList.remove(
             "active",
@@ -743,11 +711,11 @@ const retourName =
         }
       }
 
-      function activateButton(button) {
+      function activateButton(button: any) {
         button.classList.add(
           "active",
           "bg-neutral-100",
-          "hover:border-transparent",
+          ",hover:border-transparent",
           "dark:bg-white/[.05]"
         );
 
@@ -766,7 +734,11 @@ const retourName =
         );
       }
 
-      function changeHeadingStyle(button, addClasses, removeClasses) {
+      function changeHeadingStyle(
+        button: any,
+        addClasses: any,
+        removeClasses: any
+      ) {
         let heading = button.querySelector("span");
         if (heading) {
           heading.classList.remove(...removeClasses);
