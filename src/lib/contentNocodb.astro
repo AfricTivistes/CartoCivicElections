@@ -35,7 +35,7 @@ export const getAll = async (tableId: string, query: object = {}) => {
     let totalRows = 0;
     
     // Délai minimal entre les requêtes (en ms) pour respecter la limite de 5 req/sec
-    const REQUEST_DELAY = 250; // 250ms = 4 requêtes par seconde max
+    const REQUEST_DELAY = 300; // 300ms ~ 3 requêtes par seconde pour plus de sécurité
     const baseParams = {
       viewId: query?.viewId,
       fields: query?.fields,
