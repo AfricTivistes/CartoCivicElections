@@ -8,10 +8,10 @@ export async function getInitiatives(language: string = 'fr') {
     fields: [
       "Nom de l'initiative",
       "Pays",
-      "Catégorie de l'initiative",
+      "Catégorie de l'initiative", 
       "Thématique de l'initiative",
       "Langue",
-      "Description",
+      "Résumé descriptif de l'initiative"
     ],
     where: `(Status,eq,Traiter)~and(Langue,eq,${language})`,
   };
@@ -22,10 +22,10 @@ export async function getInitiatives(language: string = 'fr') {
     ? rawInitiatives.list.map((initiative) => ({
         title: initiative["Nom de l'initiative"] || "Initiative sans nom",
         country: initiative["Pays"] || "Pays non spécifié",
-        langue: initiative["Langue"] || "Langue non spécifiée",
+        langue: initiative["Langue"] || "Langue non spécifiée", 
         category: initiative["Catégorie de l'initiative"] || "Non catégorisé",
         thematic: initiative["Thématique de l'initiative"] || "Non spécifié",
-        description: initiative["Description"] || "Description non disponible",
+        description: initiative["Résumé descriptif de l'initiative"] || "Description non disponible",
       }))
     : [];
 }
