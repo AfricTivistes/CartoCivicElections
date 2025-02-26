@@ -10,26 +10,62 @@ import { getAll } from "@/lib/contentNocodb.astro";
 import { slug } from "@/utils/slug";
 import FooterSocialLink from "@/components/ui/links/FooterSocialLink.astro";
 import Icon from "@/components/ui/icons/Icon.astro";
-import InitiativesGrid from "@/components/InitiativesGrid.jsx";
-import SimilarInitiatives from "@/components/SimilarInitiatives.jsx";
 
-// This gets the static paths for all the unique products
+// Global declaration for gsap animation library
+declare global {
+  interface Window {
+    gsap: any;
+  }
+}
+// This gets the static paths for all the unique products "Nom de l'initiative" qui est une clé de "product"
 export async function getStaticPaths() {
   const tableId = "m9erh9bplb8jihp";
   const query = {
     viewId: "vwdobxvm00ayso6s",
     fields: [
+      "image-logo",
+      "Type d'organisation",
       "Nom de l'initiative",
+      "Résumé descriptif de l'initiative",
       "Pays",
-      "Catégorie de l'initiative",
       "Thématique de l'initiative",
-      "Description"
+      "Quels étaient les principaux objectifs de cette initiative citoyenne",
+      "Catégorie de l'initiative",
+      "Site web de l'initiative",
+      "Type d'élection",
+      "Date de début",
+      "Date de fin",
+      "L’initiative a-t-elle été soutenue par des partenaires ?",
+      "Si OUI, quels étaient les principaux partenaires",
+      "Zone d'intervention des partenaires",
+      "Quel a été leur apport",
+      "Cibles de l’initiative",
+      "Type d'organisation",
+      "zone géographique couverte par l'initiative",
+      "Pays de mise en oeuvre",
+      "Avez-vous constaté des dysfonctionnements majeurs dans le processus électoral ?",
+      "Si oui, quelle était la nature des dysfonctionnements",
+      "Si oui, les avez-vous portés à la connaissance des autorités compétentes pour rectification",
+      "Quelle suite a été réservée à votre signalement",
+      "Les dysfonctionnements ont-ils affecté l'atteinte des objectifs de l'initiative",
+      "Les initiatives citoyennes électorales bénéficient-elles d'un environnement légal favorable dans votre contexte",
+      "difficultés avec les pouvoirs publics dans la réalisation de vos activités",
+      "Est-ce-une initiative à plusieurs composantes1",
+      "Voulez-vous soumettre une autre composante de votre initiative",
+      "Phases",
+      "Facebook",
+      "X",
+      "Linkedin",
+      "Ressources",
+      "Obligation de reconnaissance institutionnelle de l'initiative",
+      "Appréciation de la transparence du processus électoral",
     ],
     where: "(Status,eq,Traiter)~and(Langue,eq,en)",
   };
 
   const productEntries = await getAll(tableId, query);
 
+  //console.log(productEntries);
   return productEntries.list.map((product) => {
     const initiativeName = product["Nom de l'initiative"];
     const imageLogo = product["image-logo"];
@@ -47,8 +83,12 @@ const { product } = Astro.props;
 
 const pageTitle: string = `${product["Nom de l'initiative"]} | ${SITE.title}`;
 
-const initiativeLink = "/initiatives";
-const retourName = "Back to initiatives list";
+const initiativeLink =
+  Astro.currentLocale === "fr" ? "/fr/initiatives" : "/initiatives";
+const retourName =
+  Astro.currentLocale === "fr"
+    ? "Retour sur la liste des initiatives"
+    : "Back to initiatives list";
 ---
 
 <MainLayout title={pageTitle}>
@@ -127,7 +167,7 @@ const retourName = "Back to initiatives list";
           { title: "Summary", id: "summary", dataTab: "#tabs-with-card-1" },
           { title: "Details", id: "details", dataTab: "#tabs-with-card-2" },
           {
-            title: "Resources and Links",
+            title: "Resources & Useful links",
             id: "resources",
             dataTab: "#tabs-with-card-3",
           },
@@ -149,7 +189,7 @@ const retourName = "Back to initiatives list";
               </h3>
               <p
                 class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
-                set:html={product["What were the main objectives of this citizen initiative"]?.replace(/(\r\n|\n|\r)/gm, "<br>")}
+                set:html={product["Quels étaient les principaux objectifs de cette initiative citoyenne"]?.replace(/(\r\n|\n|\r)/gm, "<br>")}
               >
               </p>
             </div>
@@ -163,7 +203,7 @@ const retourName = "Back to initiatives list";
                     Type of election
                   </h3>
                   <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                    {product["Type of election"]}
+                    {product["Type d'élection"]}
                   </p>
                 </div>
               </div>
@@ -171,10 +211,10 @@ const retourName = "Back to initiatives list";
                 <h3
                   class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
                 >
-                  Type of organization
+                  Type of organisation
                 </h3>
                 <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                  {product["Type of organization"]}
+                  {product["Type d'organisation"]}
                 </p>
               </div>
               <div>
@@ -189,7 +229,7 @@ const retourName = "Back to initiatives list";
               </div>
               <div>
                 {
-                  product["Initiative website"] === "Empty" ? (
+                  product["Site web de l'initiative"] === "Vide" ? (
                     <p class="mt-5">
                       <PrimaryCTA title={"Website"} url="#" />
                     </p>
@@ -197,7 +237,7 @@ const retourName = "Back to initiatives list";
                     <p class="mt-5">
                       <PrimaryCTA
                         title={"Website"}
-                        url={product["Initiative website"]}
+                        url={product["Site web de l'initiative"]}
                       />
                     </p>
                   )
@@ -212,15 +252,17 @@ const retourName = "Back to initiatives list";
     <div id="tabs-with-card-2" class="hidden" role="tabpanel">
       <div class="mx-auto max-w-[85rem] px-4 pb-10 sm:px-6 lg:px-8 lg:pb-14">
         <h3
-          class="text-base font-bold mt-3 text-neutral-800 dark:text-neutral-200 sm:text-lg"
+          class="mt-3 text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
         >
           Initiative Summary
         </h3>
-        <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
-        set:html={product["Description"]?.replace(/(\r\n|\n|\r)/gm, "<br>")}
-        >
-        </p>
-
+        <p
+          class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
+          set:html={product["Résumé descriptif de l'initiative"]?.replace(
+            /(\r\n|\n|\r)/gm,
+            "<br>"
+          )}
+        />
       </div>
       <hr class="border-t-2 border-neutral-300 dark:border-neutral-600" />
 
@@ -235,7 +277,7 @@ const retourName = "Back to initiatives list";
               Start Date 🗓️
             </h3>
             <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Start date"]}
+              {product["Date de début"]}
             </p>
           </div>
           <div class="text-center">
@@ -245,7 +287,7 @@ const retourName = "Back to initiatives list";
               End Date 🗓️
             </h3>
             <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["End date"]}
+              {product["Date de fin"]}
             </p>
           </div>
         </div>
@@ -259,134 +301,158 @@ const retourName = "Back to initiatives list";
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Initiative Partners
+              Partners of the initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Was the initiative supported by partners"]}
+              {
+                product[
+                  "L’initiative a-t-elle été soutenue par des partenaires ?"
+                ]
+              }
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Main Partners
+              Main partners
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["If YES, who were the main partners"]}
+              {product["Si OUI, quels étaient les principaux partenaires"]}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Partner Intervention Zone
+              Partners’ intervention area
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Partner intervention zone"]}
+              {product["Zone d'intervention des partenaires"]}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Partner Support
+              Partners’ contribution
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["What was their contribution"]}
+              {product["Quel a été leur apport"]}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Initiative Targets
+              Target of the initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Initiative targets"]}
+              {product["Cibles de l’initiative"]}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Type of Organization
+              Type of organisation
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Type of organization"]}
+              {product["Type d'organisation"]}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Geographical Area Covered
+              Geographical area initiative covers
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Geographical area covered by the initiative"]}
+              {product["zone géographique couverte par l'initiative"]}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Country of Implementation
+              Country of implementation
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Country of implementation"]}
-            </p>
-          </div>
-          <div>
-            <h2
-              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
-            >
-              Process Dysfunction
-            </h2>
-            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Have you noticed any major dysfunctions in the electoral process"]}
-            </p>
-            <h2
-              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
-            >
-              Nature of Dysfunctions
-            </h2>
-            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["If yes, what was the nature of the dysfunctions"]}
-            </p>
-            <h2
-              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
-            >
-              Dysfunction Reported to Authorities
-            </h2>
-            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["If yes, did you bring them to the attention of the competent authorities for rectification"]}
-            </p>
-            <h2
-              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
-            >
-              Follow-up After Report
-            </h2>
-            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["What follow-up was given to your report"]}
-            </p>
-            <h2
-              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
-            >
-              Impact on Initiatives
-            </h2>
-            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Did the dysfunctions affect the achievement of the initiative's objectives"]}
-            </p>
-            <h2
-              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
-            >
-              Favorable Legal Environment?
-            </h2>
-            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Do electoral citizen initiatives benefit from a favorable legal environment in your context"]}
-            </p>
-            <h2
-              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
-            >
-              Difficulties with Public Authorities in Implementation
-            </h2>
-            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["difficulties with public authorities in carrying out your activities"]}
+              {product["Pays de mise en oeuvre"]}
             </p>
           </div>
           <div>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Is this a Multi-component Initiative?
+              Electoral process irregularity
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Is this a multi-component initiative1"]}
+              {
+                product[
+                  "Avez-vous constaté des dysfonctionnements majeurs dans le processus électoral ?"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Types of irregularity
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Si oui, quelle était la nature des dysfonctionnements"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Irregularity reported to authorities
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Si oui, les avez-vous portés à la connaissance des autorités compétentes pour rectification"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Response after reporting
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Quelle suite a été réservée à votre signalement"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Impact on the Initiative
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Les dysfonctionnements ont-ils affecté l'atteinte des objectifs de l'initiative"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Conducive legal environment ?
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Les initiatives citoyennes électorales bénéficient-elles d'un environnement légal favorable dans votre contexte"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Challenges with public authorities in implementation
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "difficultés avec les pouvoirs publics dans la réalisation de vos activités"
+                ]
+              }
+            </p>
+          </div>
+          <div>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Does the initiative have multi-components?
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Est-ce-une initiative à plusieurs composantes1"]}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -394,12 +460,16 @@ const retourName = "Back to initiatives list";
               Other Components
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Do you want to submit another component of your initiative"]}
+              {
+                product[
+                  "Voulez-vous soumettre une autre composante de votre initiative"
+                ]
+              }
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Intervention Phase in the Process
+              Electoral process intervention phase
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
               {product["Phases"]}
@@ -407,18 +477,26 @@ const retourName = "Back to initiatives list";
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Obligations of Institutional Recognition of the Initiative
+              Mandatory registration
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Obligation of institutional recognition of the initiative"]}
+              {
+                product[
+                  "Obligation de reconnaissance institutionnelle de l'initiative"
+                ]
+              }
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
-              Assessment of Electoral Process Transparency
+              Assess transparency of the electoral process
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Assessment of electoral process transparency"]}
+              {
+                product[
+                  "Appréciation de la transparence du processus électoral"
+                ]
+              }
             </p>
           </div>
         </div>
@@ -432,13 +510,13 @@ const retourName = "Back to initiatives list";
         <h2
           class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
         >
-          Resources and Links
+          Resources & links
         </h2>
         <ul
           class="list-inside list-disc space-y-2 text-pretty text-neutral-600 dark:text-neutral-400"
         >
           {
-            product["Resources"]?.map((resource, index) => (
+            product["Ressources"]?.map((resource, index) => (
               <li key={index}>
                 <a
                   href={resource.signedUrl}
@@ -460,11 +538,11 @@ const retourName = "Back to initiatives list";
         <h2
           class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
         >
-          Follow the Initiative
+          Follow the initiative
         </h2>
         <div class="">
           {
-            product["Facebook"] === "Not applicable" ||
+            product["Facebook"] === "Non concernée" ||
             product["Facebook"] === "En cours de création" ? (
               <FooterSocialLink url="#">
                 <Icon name="facebookFooter" />
@@ -476,7 +554,7 @@ const retourName = "Back to initiatives list";
             )
           }
           {
-            product["X"] === "Not applicable" ||
+            product["X"] === "Non concernée" ||
             product["X"] === "En cours de création" ? (
               <FooterSocialLink url="#">
                 <Icon name="xFooter" />
@@ -488,8 +566,8 @@ const retourName = "Back to initiatives list";
             )
           }
           {
-            product["Linkedin"] === "Not applicable" ||
-            product["Linkedin"] === "Empty" ? (
+            product["Linkedin"] === "Non concernée" ||
+            product["Linkedin"] === "En cours de création" ? (
               <FooterSocialLink url="#">
                 <Icon name="linkedIn" />
               </FooterSocialLink>
@@ -502,15 +580,15 @@ const retourName = "Back to initiatives list";
         </div>
         <div>
           {
-            product["Initiative website"] === "Empty" ? (
+            product["Site web de l'initiative"] === "Vide" ? (
               <p class="mt-5">
-                <PrimaryCTA title={"Initiative Website"} url="#" />
+                <PrimaryCTA title={"Website of the initiative"} url="#" />
               </p>
             ) : (
               <p class="mt-5">
                 <PrimaryCTA
-                  title={"Initiative Website"}
-                  url={product["Initiative website"]}
+                  title={"Website of the initiative"}
+                  url={product["Site web de l'initiative"]}
                 />
               </p>
             )
@@ -519,8 +597,6 @@ const retourName = "Back to initiatives list";
       </div>
     </div>
   </div>
-
-  <SimilarInitiatives client:load currentInitiative={product} allInitiatives={initiatives} language="en" />
 
   <script>
     import { gsap } from "gsap";
