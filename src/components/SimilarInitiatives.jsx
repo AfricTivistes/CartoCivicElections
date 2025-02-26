@@ -1,55 +1,43 @@
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 import Card from './Card';
 
 const SimilarInitiatives = ({ currentInitiative, allInitiatives, language }) => {
-  const [similarInitiatives, setSimilarInitiatives] = useState([]);
+  const similarInitiatives = useMemo(() => {
+    // Filtrer l'initiative courante
+    const otherInitiatives = allInitiatives.filter(
+      (initiative) => initiative.title !== currentInitiative.title
+    );
 
-  useEffect(() => {
-    const getSimilarInitiatives = () => {
-      if (!allInitiatives || !currentInitiative) {
-        return [];
-      }
+    // Trouver les initiatives de la même catégorie
+    const sameCategory = otherInitiatives
+      .filter((initiative) => initiative.category === currentInitiative.category)
+      .slice(0, 3);
 
-      // Filtrer les initiatives ne correspondant pas à celle en cours
-      const filteredInitiatives = allInitiatives.filter(initiative => 
-        initiative.title !== currentInitiative.title
-      );
+    // Trouver les initiatives du même pays
+    const sameCountry = otherInitiatives
+      .filter(
+        (initiative) =>
+          initiative.country === currentInitiative.country &&
+          !sameCategory.includes(initiative)
+      )
+      .slice(0, 3);
 
-      // Trier par catégorie puis par pays
-      const withScores = filteredInitiatives.map(initiative => {
-        let score = 0;
-        
-        // Score plus élevé pour la même catégorie
-        if (initiative.category === currentInitiative.category) {
-          score += 3;
-        }
-        
-        // Score additionnel pour le même pays
-        if (initiative.country === currentInitiative.country) {
-          score += 2;
-        }
+    // Si on n'a pas assez d'initiatives, compléter avec des initiatives aléatoires
+    const remaining = 6 - (sameCategory.length + sameCountry.length);
+    let random = [];
+    if (remaining > 0) {
+      random = otherInitiatives
+        .filter(
+          (initiative) =>
+            !sameCategory.includes(initiative) && !sameCountry.includes(initiative)
+        )
+        .sort(() => Math.random() - 0.5)
+        .slice(0, remaining);
+    }
 
-        // Score additionnel pour la même thématique
-        if (initiative.thematic === currentInitiative.thematic) {
-          score += 1;
-        }
-
-        return { ...initiative, score };
-      });
-
-      // Trier par score décroissant et prendre les 6 premiers
-      return withScores
-        .sort((a, b) => b.score - a.score)
-        .slice(0, 6);
-    };
-
-    setSimilarInitiatives(getSimilarInitiatives());
+    return [...sameCategory, ...sameCountry, ...random];
   }, [currentInitiative, allInitiatives]);
-
-  if (!similarInitiatives.length) {
-    return null;
-  }
 
   return (
     <div className="mt-12">
