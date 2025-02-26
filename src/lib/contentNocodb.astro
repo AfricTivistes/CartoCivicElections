@@ -1,3 +1,4 @@
+
 ---
 import { api } from './api/nocodb';
 
@@ -13,6 +14,9 @@ interface ApiResponse {
   pageInfo: PageInfo;
 }
 
+// Fonction utilitaire pour ajouter un délai
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const getData = async (tableId: string, query: object = {}) => {
   try {
     const response = await api.get(`/api/v2/tables/${tableId}/records`, { params: query });
@@ -23,11 +27,7 @@ export const getData = async (tableId: string, query: object = {}) => {
   }
 };
 
-export // Fonction utilitaire pour ajouter un délai
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-// Fonction pour limiter les requêtes API
-const getAll = async (tableId: string, query: object = {}) => {
+export const getAll = async (tableId: string, query: object = {}) => {
   try {
     let allRecords = [];
     let page = 1;
