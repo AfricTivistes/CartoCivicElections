@@ -1,45 +1,77 @@
 ---
 // Import section components
 import MainLayout from "@/layouts/MainLayout.astro";
+import ProductTabBtn from "@components/ui/buttons/ProductTabBtn.astro";
+import PrimaryCTA from "@components/ui/buttons/PrimaryCTA.astro";
+import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
+import { SITE } from "@data/constants";
 import { getAll } from "@/lib/contentNocodb.astro";
 import { slug } from "@/utils/slug";
-import SimilarInitiatives from "@/components/SimilarInitiatives";
+import FooterSocialLink from "@/components/ui/links/FooterSocialLink.astro";
+import Icon from "@/components/ui/icons/Icon.astro";
 
-// Get initiatives 
-const tableId = "m9erh9bplb8jihp";
-const query = {
-  viewId: "vwdobxvm00ayso6s",
-  fields: [
-    "Nom de l'initiative",
-    "Pays",
-    "Catégorie de l'initiative",
-    "Thématique de l'initiative",
-    "Description",
-    "image-logo",
-    "Type d'organisation",
-    "Résumé descriptif de l'initiative",
-    "Quels étaient les principaux objectifs de cette initiative citoyenne",
-    "Cible de l'initiative",
-    "Type d'organisation",
-    "Zone d'intervention",
-    "Pays de mise en œuvre",
-    "Date de début",
-    "Date de fin",
-    "Site web de l'initiative",
-    "Facebook",
-    "X",
-    "Linkedin"
-  ],
-  where: "(Status,eq,Traiter)~and(Langue,eq,en)",
-};
-
+// Global declaration for gsap animation library
+declare global {
+  interface Window {
+    gsap: any;
+  }
+}
+// This gets the static paths for all the unique products "Nom de l'initiative" qui est une clé de "product"
 export async function getStaticPaths() {
+  const tableId = "m9erh9bplb8jihp";
+  const query = {
+    viewId: "vwdobxvm00ayso6s",
+    fields: [
+      "image-logo",
+      "Type d'organisation",
+      "Nom de l'initiative",
+      "Résumé descriptif de l'initiative",
+      "Pays",
+      "Thématique de l'initiative",
+      "Quels étaient les principaux objectifs de cette initiative citoyenne",
+      "Catégorie de l'initiative",
+      "Site web de l'initiative",
+      "Type d'élection",
+      "Date de début",
+      "Date de fin",
+      "L’initiative a-t-elle été soutenue par des partenaires ?",
+      "Si OUI, quels étaient les principaux partenaires",
+      "Zone d'intervention des partenaires",
+      "Quel a été leur apport",
+      "Cibles de l’initiative",
+      "Type d'organisation",
+      "zone géographique couverte par l'initiative",
+      "Pays de mise en oeuvre",
+      "Avez-vous constaté des dysfonctionnements majeurs dans le processus électoral ?",
+      "Si oui, quelle était la nature des dysfonctionnements",
+      "Si oui, les avez-vous portés à la connaissance des autorités compétentes pour rectification",
+      "Quelle suite a été réservée à votre signalement",
+      "Les dysfonctionnements ont-ils affecté l'atteinte des objectifs de l'initiative",
+      "Les initiatives citoyennes électorales bénéficient-elles d'un environnement légal favorable dans votre contexte",
+      "difficultés avec les pouvoirs publics dans la réalisation de vos activités",
+      "Est-ce-une initiative à plusieurs composantes1",
+      "Voulez-vous soumettre une autre composante de votre initiative",
+      "Phases",
+      "Facebook",
+      "X",
+      "Linkedin",
+      "Ressources",
+      "Obligation de reconnaissance institutionnelle de l'initiative",
+      "Appréciation de la transparence du processus électoral",
+    ],
+    where: "(Status,eq,Traiter)~and(Langue,eq,en)",
+  };
+
   const productEntries = await getAll(tableId, query);
 
+  //console.log(productEntries);
   return productEntries.list.map((product) => {
     const initiativeName = product["Nom de l'initiative"];
-    const productSlug = slug(initiativeName);
+    const imageLogo = product["image-logo"];
 
+    const productSlug =
+      typeof initiativeName === "string" ? slug(initiativeName) : "";
     return {
       params: { slug: productSlug },
       props: { product },
@@ -49,228 +81,524 @@ export async function getStaticPaths() {
 
 const { product } = Astro.props;
 
-const pageTitle: string = `${product["Nom de l'initiative"]} | Initiative Details`;
+const pageTitle: string = `${product["Nom de l'initiative"]} | ${SITE.title}`;
 
-const initiativeLink = "/initiatives";
-const retourName = "Back to initiatives list";
-
-const rawInitiatives = await getAll(tableId, query);
-const initiatives = rawInitiatives.list.map((initiative) => ({
-  title: initiative["Nom de l'initiative"],
-  country: initiative["Pays"],
-  category: initiative["Catégorie de l'initiative"],
-  thematic: initiative["Thématique de l'initiative"],
-  langue: 'en'
-}));
+const initiativeLink =
+  Astro.currentLocale === "fr" ? "/fr/initiatives" : "/initiatives";
+const retourName =
+  Astro.currentLocale === "fr"
+    ? "Retour sur la liste des initiatives"
+    : "Back to initiatives list";
 ---
 
 <MainLayout title={pageTitle}>
-  <div class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-    <div class="max-w-4xl mx-auto">
+  <div id="overlay" class="fixed inset-0 bg-neutral-200 dark:bg-neutral-800">
+  </div>
+
+  <section
+    class="mx-auto flex max-w-[85rem] flex-col px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full"
+  >
+    <div>
       <a
         href={initiativeLink}
-        class="mb-6 inline-flex items-center gap-x-1 text-sm text-primary-600 hover:text-primary-800"
+        class="mb-4 flex items-center text-primary-green dark:text-primary-green"
       >
         <svg
-          class="flex-shrink-0 w-4 h-4"
           xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
+          class="h-6 w-6"
           fill="none"
+          viewBox="0 0 24 24"
           stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
         >
-          <path d="m15 18-6-6 6-6"></path>
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"></path>
         </svg>
-        {retourName}
+        <span class="ml-2">{retourName}</span>
       </a>
-
-      <div class="content-center text-center">
-        <div>
-          <h1
-            class="block text-4xl font-bold tracking-tighter text-neutral-800 dark:text-neutral-200 sm:text-5xl md:text-6xl lg:text-7xl"
-          >
-            {product["Nom de l'initiative"]}
-          </h1>
-          <h2
-            class="text-balance text-3xl tracking-tight text-neutral-800 dark:text-neutral-200 md:leading-tight lg:text-4xl"
-          >
-            {product["Pays"]}
-          </h2>
-        </div>
-        <div>
-          <p
-            id="fadeText"
-            class="mb-8 max-w-prose text-pretty font-light text-neutral-700 dark:text-neutral-300 sm:text-xl"
-          >
-            {product["Thématique de l'initiative"]}
-          </p>
-        </div>
+      <p
+        id="fadeText"
+        class="mb-8 max-w-prose text-pretty font-light text-neutral-700 dark:text-neutral-300 sm:text-xl"
+      >
+        {product["Thématique de l'initiative"]}
+      </p>
+    </div>
+    <div
+      class="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0"
+    >
+      <div id="fadeInUp">
+        <h1
+          class="block text-4xl font-bold tracking-tighter text-neutral-800 dark:text-neutral-200 sm:text-5xl md:text-6xl lg:text-7xl"
+        >
+          {product["Nom de l'initiative"]}
+        </h1>
+        <h2
+          class="text-balance text-3xl tracking-tight text-neutral-800 dark:text-neutral-200 md:leading-tight lg:text-4xl"
+        >
+          {product["Pays"]}
+        </h2>
       </div>
+      <div>
+        <Image
+          id="fadeInMoveRight"
+          src={product["image-logo"]
+            ? product["image-logo"][0].signedUrl
+            : "https://placehold.co/600x600?text=Soobu+No+Image+Available"}
+          class="w-[600px]"
+          alt={"image alt"}
+          width="600"
+          height="600"
+          loading={"eager"}
+        />
+      </div>
+    </div>
+  </section>
 
-      <div class="mt-12 grid gap-8 md:grid-cols-2">
-        <div class="border-b border-neutral-200 pb-8 dark:border-neutral-700">
-          <h3 class="mb-4 text-lg font-bold text-neutral-800 dark:text-neutral-200">
-            Initiative Details
-          </h3>
-          <div class="grid gap-6">
-            <div>
-              <h3 class="text-sm font-bold uppercase tracking-wide text-neutral-800 dark:text-neutral-200">
-                Category
+  <div class="mx-auto max-w-[85rem] px-4 pt-10 sm:px-6 lg:px-8 lg:pt-14">
+    <nav
+      class="mx-auto grid max-w-6xl gap-y-px sm:flex sm:gap-x-4 sm:gap-y-0"
+      aria-label="Tabs"
+      role="tablist"
+    >
+      {
+        [
+          { title: "Summary", id: "summary", dataTab: "#tabs-with-card-1" },
+          { title: "Details", id: "details", dataTab: "#tabs-with-card-2" },
+          {
+            title: "Resources & Useful links",
+            id: "resources",
+            dataTab: "#tabs-with-card-3",
+          },
+        ].map((tab, index) => (
+          <ProductTabBtn title={tab.title} id={tab.id} dataTab={tab.dataTab} />
+        ))
+      }
+    </nav>
+
+    <div class="">
+      <div id="tabs-with-card-1" role="tabpanel">
+        <div class="mx-auto max-w-[85rem] px-4 pt-10 sm:px-6 lg:px-8 lg:pt-14">
+          <div class="grid gap-12 md:grid-cols-2">
+            <div class="lg:w-3/4">
+              <h3
+                class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+              >
+                Objectives
               </h3>
-              <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                {product["Catégorie de l'initiative"]}
+              <p
+                class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
+                set:html={product["Quels étaient les principaux objectifs de cette initiative citoyenne"]?.replace(/(\r\n|\n|\r)/gm, "<br>")}
+              >
               </p>
             </div>
-            <div>
-              <h3 class="text-sm font-bold uppercase tracking-wide text-neutral-800 dark:text-neutral-200">
-                Organization Type
-              </h3>
-              <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                {product["Type d'organisation"]}
-              </p>
-            </div>
-            <div>
-              <h3 class="text-sm font-bold uppercase tracking-wide text-neutral-800 dark:text-neutral-200">
-                Target Audience
-              </h3>
-              <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                {product["Cible de l'initiative"]}
-              </p>
-            </div>
-            <div>
-              <h3 class="text-sm font-bold uppercase tracking-wide text-neutral-800 dark:text-neutral-200">
-                Implementation Area
-              </h3>
-              <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                {product["Zone d'intervention"]}
-              </p>
-            </div>
-            <div>
-              <h3 class="text-sm font-bold uppercase tracking-wide text-neutral-800 dark:text-neutral-200">
-                Implementation Country
-              </h3>
-              <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                {product["Pays de mise en œuvre"]}
-              </p>
-            </div>
-            <div>
-              <h3 class="text-sm font-bold uppercase tracking-wide text-neutral-800 dark:text-neutral-200">
-                Duration
-              </h3>
-              <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                From {product["Date de début"]} to {product["Date de fin"]}
-              </p>
+
+            <div class="space-y-6 lg:space-y-5">
+              <div class="flex">
+                <div>
+                  <h3
+                    class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+                  >
+                    Type of election
+                  </h3>
+                  <p class="mt-1 text-neutral-600 dark:text-neutral-400">
+                    {product["Type d'élection"]}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <h3
+                  class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+                >
+                  Type of organisation
+                </h3>
+                <p class="mt-1 text-neutral-600 dark:text-neutral-400">
+                  {product["Type d'organisation"]}
+                </p>
+              </div>
+              <div>
+                <h3
+                  class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+                >
+                  Category
+                </h3>
+                <p class="mt-1 text-neutral-600 dark:text-neutral-400">
+                  {product["Catégorie de l'initiative"]}
+                </p>
+              </div>
+              <div>
+                {
+                  product["Site web de l'initiative"] === "Vide" ? (
+                    <p class="mt-5">
+                      <PrimaryCTA title={"Website"} url="#" />
+                    </p>
+                  ) : (
+                    <p class="mt-5">
+                      <PrimaryCTA
+                        title={"Website"}
+                        url={product["Site web de l'initiative"]}
+                      />
+                    </p>
+                  )
+                }
+              </div>
             </div>
           </div>
         </div>
-
-        <div class="border-b border-neutral-200 pb-8 dark:border-neutral-700">
-          <h3 class="mb-4 text-lg font-bold text-neutral-800 dark:text-neutral-200">
-            Links & Social Media
-          </h3>
-          <div class="grid gap-6">
-            {
-              product["Site web de l'initiative"] && (
-                <div>
-                  <h3 class="text-sm font-bold uppercase tracking-wide text-neutral-800 dark:text-neutral-200">
-                    Website
-                  </h3>
-                  <a
-                    href={product["Site web de l'initiative"]}
-                    class="mt-1 text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Visit Website
-                  </a>
-                </div>
-              )
-            }
-            {
-              product["Facebook"] && (
-                <div>
-                  <h3 class="text-sm font-bold uppercase tracking-wide text-neutral-800 dark:text-neutral-200">
-                    Facebook
-                  </h3>
-                  <a
-                    href={product["Facebook"]}
-                    class="mt-1 text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Facebook Page
-                  </a>
-                </div>
-              )
-            }
-            {
-              product["X"] && (
-                <div>
-                  <h3 class="text-sm font-bold uppercase tracking-wide text-neutral-800 dark:text-neutral-200">
-                    X (Twitter)
-                  </h3>
-                  <a
-                    href={product["X"]}
-                    class="mt-1 text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    X Profile
-                  </a>
-                </div>
-              )
-            }
-            {
-              product["Linkedin"] && (
-                <div>
-                  <h3 class="text-sm font-bold uppercase tracking-wide text-neutral-800 dark:text-neutral-200">
-                    LinkedIn
-                  </h3>
-                  <a
-                    href={product["Linkedin"]}
-                    class="mt-1 text-primary-600 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-400"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    LinkedIn Page
-                  </a>
-                </div>
-              )
-            }
-          </div>
-        </div>
       </div>
+    </div>
 
-      <div class="mt-12">
-        <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-200">
+    <div id="tabs-with-card-2" class="hidden" role="tabpanel">
+      <div class="mx-auto max-w-[85rem] px-4 pb-10 sm:px-6 lg:px-8 lg:pb-14">
+        <h3
+          class="mt-3 text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+        >
           Initiative Summary
         </h3>
-        <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
-        set:html={product["Description"]?.replace(/(\r\n|\n|\r)/gm, "<br>")}
-        >
-        </p>
+        <p
+          class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
+          set:html={product["Résumé descriptif de l'initiative"]?.replace(
+            /(\r\n|\n|\r)/gm,
+            "<br>"
+          )}
+        />
       </div>
+      <hr class="border-t-2 border-neutral-300 dark:border-neutral-600" />
 
-      <div class="mt-12">
-        <h3 class="text-lg font-bold text-neutral-800 dark:text-neutral-200">
-          Main Objectives
-        </h3>
-        <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
-        set:html={product["Quels étaient les principaux objectifs de cette initiative citoyenne"]?.replace(/(\r\n|\n|\r)/gm, "<br>")}
+      <div class="mx-auto max-w-[85rem] px-4 pb-10 sm:px-6 lg:px-8 lg:pb-14">
+        <div
+          class="grid grid-cols-1 items-center justify-center gap-12 md:grid-cols-2"
         >
-        </p>
+          <div class="text-center">
+            <h3
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Start Date 🗓️
+            </h3>
+            <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Date de début"]}
+            </p>
+          </div>
+          <div class="text-center">
+            <h3
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              End Date 🗓️
+            </h3>
+            <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Date de fin"]}
+            </p>
+          </div>
+        </div>
+        <hr
+          class="my-12 border-t-2 border-neutral-300 dark:border-neutral-600"
+        />
+        <div
+          class="mt-5 grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-8 lg:grid-cols-3 lg:gap-12"
+        >
+          <div>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Partners of the initiative
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "L’initiative a-t-elle été soutenue par des partenaires ?"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Main partners
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Si OUI, quels étaient les principaux partenaires"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Partners’ intervention area
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Zone d'intervention des partenaires"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Partners’ contribution
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Quel a été leur apport"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Target of the initiative
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Cibles de l’initiative"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Type of organisation
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Type d'organisation"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Geographical area initiative covers
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["zone géographique couverte par l'initiative"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Country of implementation
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Pays de mise en oeuvre"]}
+            </p>
+          </div>
+          <div>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Electoral process irregularity
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Avez-vous constaté des dysfonctionnements majeurs dans le processus électoral ?"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Types of irregularity
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Si oui, quelle était la nature des dysfonctionnements"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Irregularity reported to authorities
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Si oui, les avez-vous portés à la connaissance des autorités compétentes pour rectification"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Response after reporting
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Quelle suite a été réservée à votre signalement"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Impact on the Initiative
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Les dysfonctionnements ont-ils affecté l'atteinte des objectifs de l'initiative"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Conducive legal environment ?
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Les initiatives citoyennes électorales bénéficient-elles d'un environnement légal favorable dans votre contexte"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Challenges with public authorities in implementation
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "difficultés avec les pouvoirs publics dans la réalisation de vos activités"
+                ]
+              }
+            </p>
+          </div>
+          <div>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Does the initiative have multi-components?
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Est-ce-une initiative à plusieurs composantes1"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Other Components
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Voulez-vous soumettre une autre composante de votre initiative"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Electoral process intervention phase
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {product["Phases"]}
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Mandatory registration
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Obligation de reconnaissance institutionnelle de l'initiative"
+                ]
+              }
+            </p>
+            <h2
+              class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+            >
+              Assess transparency of the electoral process
+            </h2>
+            <p class="text-pretty text-neutral-600 dark:text-neutral-400">
+              {
+                product[
+                  "Appréciation de la transparence du processus électoral"
+                ]
+              }
+            </p>
+          </div>
+        </div>
       </div>
+    </div>
 
-      <SimilarInitiatives client:load currentInitiative={product} allInitiatives={initiatives} language="en" />
+    <div id="tabs-with-card-3" class="hidden" role="tabpanel">
+      <div
+        class="mx-auto max-w-[85rem] space-y-4 px-4 pb-10 text-center sm:px-6 lg:px-8 lg:pb-14"
+      >
+        <h2
+          class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+        >
+          Resources & links
+        </h2>
+        <ul
+          class="list-inside list-disc space-y-2 text-pretty text-neutral-600 dark:text-neutral-400"
+        >
+          {
+            product["Ressources"]?.map((resource, index) => (
+              <li key={index}>
+                <a
+                  href={resource.signedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="hover:underline"
+                >
+                  {resource.title}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+
+        <hr
+          class="my-12 border-t-2 border-neutral-300 dark:border-neutral-600"
+        />
+
+        <h2
+          class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
+        >
+          Follow the initiative
+        </h2>
+        <div class="">
+          {
+            product["Facebook"] === "Non concernée" ||
+            product["Facebook"] === "En cours de création" ? (
+              <FooterSocialLink url="#">
+                <Icon name="facebookFooter" />
+              </FooterSocialLink>
+            ) : (
+              <FooterSocialLink url={product["Facebook"]}>
+                <Icon name="facebookFooter" />
+              </FooterSocialLink>
+            )
+          }
+          {
+            product["X"] === "Non concernée" ||
+            product["X"] === "En cours de création" ? (
+              <FooterSocialLink url="#">
+                <Icon name="xFooter" />
+              </FooterSocialLink>
+            ) : (
+              <FooterSocialLink url={product["X"]}>
+                <Icon name="xFooter" />
+              </FooterSocialLink>
+            )
+          }
+          {
+            product["Linkedin"] === "Non concernée" ||
+            product["Linkedin"] === "En cours de création" ? (
+              <FooterSocialLink url="#">
+                <Icon name="linkedIn" />
+              </FooterSocialLink>
+            ) : (
+              <FooterSocialLink url={product["Linkedin"]}>
+                <Icon name="linkedIn" />
+              </FooterSocialLink>
+            )
+          }
+        </div>
+        <div>
+          {
+            product["Site web de l'initiative"] === "Vide" ? (
+              <p class="mt-5">
+                <PrimaryCTA title={"Website of the initiative"} url="#" />
+              </p>
+            ) : (
+              <p class="mt-5">
+                <PrimaryCTA
+                  title={"Website of the initiative"}
+                  url={product["Site web de l'initiative"]}
+                />
+              </p>
+            )
+          }
+        </div>
+      </div>
     </div>
   </div>
-</MainLayout>
 
-<script>
+  <script>
     import { gsap } from "gsap";
 
     type AnimationSettings = {
@@ -409,4 +737,4 @@ const initiatives = rawInitiatives.list.map((initiative) => ({
       });
     });
   </script>
-</replit_final_file>
+</MainLayout>
