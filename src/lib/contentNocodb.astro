@@ -23,12 +23,19 @@ export const getData = async (tableId: string, query: object = {}) => {
   }
 };
 
-export const getAll = async (tableId: string, query: object = {}) => {
+export // Fonction utilitaire pour ajouter un délai
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Fonction pour limiter les requêtes API
+const getAll = async (tableId: string, query: object = {}) => {
   try {
     let allRecords = [];
     let page = 1;
     let hasMore = true;
     let totalRows = 0;
+    
+    // Délai minimal entre les requêtes (en ms) pour respecter la limite de 5 req/sec
+    const REQUEST_DELAY = 250; // 250ms = 4 requêtes par seconde max
     const baseParams = {
       viewId: query?.viewId,
       fields: query?.fields,
@@ -75,8 +82,8 @@ export const getAll = async (tableId: string, query: object = {}) => {
         
         allRecords = [...allRecords, ...data.list];
         
-        // Pause courte entre les requêtes pour éviter la surcharge
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Délai entre les requêtes pour respecter la limite de rate
+        await delay(REQUEST_DELAY);
         
       } catch (error) {
         console.error(`Erreur lors de la récupération de la page ${page}:`, error);
