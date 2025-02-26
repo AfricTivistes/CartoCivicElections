@@ -147,14 +147,12 @@ const retourName =
         </svg>
         <span class="ml-2">{retourName}</span>
       </a>
-      <a href={`/initiatives?tags=${encodeURIComponent(product["Thématique de l'initiative"])}`} class="hover:text-primary-600">
-        <p
-          id="fadeText"
-          class="mb-8 max-w-prose text-pretty font-light text-neutral-700 dark:text-neutral-300 sm:text-xl"
-        >
-          {product["Thématique de l'initiative"]}
-        </p>
-      </a>
+      <p
+        id="fadeText"
+        class="mb-8 max-w-prose text-pretty font-light text-neutral-700 dark:text-neutral-300 sm:text-xl"
+      >
+        {product["Thématique de l'initiative"]}
+      </p>
     </div>
     <div
       class="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0"
@@ -165,13 +163,11 @@ const retourName =
         >
           {product["Nom de l'initiative"]}
         </h1>
-        <a href={`/initiatives?tags=${encodeURIComponent(product["Pays"])}`} class="hover:text-primary-600">
-          <h2
-            class="text-balance text-3xl tracking-tight text-neutral-800 dark:text-neutral-200 md:leading-tight lg:text-4xl"
-          >
-            {product["Pays"]}
-          </h2>
-        </a>
+        <h2
+          class="text-balance text-3xl tracking-tight text-neutral-800 dark:text-neutral-200 md:leading-tight lg:text-4xl"
+        >
+          {product["Pays"]}
+        </h2>
       </div>
       <div>
         <Image
