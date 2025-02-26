@@ -63,14 +63,14 @@ const InitiativesGrid = ({ initiatives, language }) => {
   }, [initiatives]);
 
   const filteredInitiatives = useMemo(() => {
-    if (!selectedCategory && !selectedCountry && !selectedThematic) {
-      return initiatives;
-    }
     return initiatives.filter((initiative) => {
-      if (selectedCategory && initiative.category !== selectedCategory) return false;
-      if (selectedCountry && initiative.country !== selectedCountry) return false;
-      if (selectedThematic && initiative.thematic !== selectedThematic) return false;
-      return true;
+      const matchCategory =
+        !selectedCategory || initiative.category === selectedCategory;
+      const matchCountry =
+        !selectedCountry || initiative.country === selectedCountry;
+      const matchThematic =
+        !selectedThematic || initiative.thematic === selectedThematic;
+      return matchCategory && matchCountry && matchThematic;
     });
   }, [initiatives, selectedCategory, selectedCountry, selectedThematic]);
 
