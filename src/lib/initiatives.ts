@@ -40,15 +40,14 @@ export const initiativeFields = [
   "Appréciation de la transparence du processus électoral",
 ];
 
-export async function getInitiativeQuery(language: string) {
-  return {
-    tableId: "m9erh9bplb8jihp",
-    query: {
-      viewId: "vwdobxvm00ayso6s",
-      fields: initiativeFields,
-      where: `(Status,eq,Traiter)~and(Langue,eq,${language})`,
-    }
+export function getInitiativeQuery(language: string) {
+  const tableId = "m9erh9bplb8jihp";
+  const query = {
+    viewId: "vwdobxvm00ayso6s",
+    fields: initiativeFields,
+    where: `(Status,eq,Traiter)~and(Langue,eq,${language})`,
   };
+  return { tableId, query };
 }
 
 export async function getInitiatives(language: string = 'fr') {
