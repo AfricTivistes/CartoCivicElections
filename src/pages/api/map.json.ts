@@ -1,65 +1,61 @@
+
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
+interface Props {
+  title?: string;
+}
 
-export async function GET({ params, request }) {
-  const url = new URL(request.url);
-  const pathname = url.pathname;
+// Fetch initiatives data
+const tableId = "mrv8bch7o0jh5ld";
+const query = {
+  viewId: "vw793taeypy81he9",
+  fields: [
+    "Pays / Country"
+  ]
+};
 
-  const lang = pathname.startsWith("fr") ? "fr" : "en";
+const Initiatives = await getAll(tableId, query);
 
-  const tableId = "m9erh9bplb8jihp";
-  const query = {
-    viewId: "vwdobxvm00ayso6s",
-    fields: ["Pays"],
-    where: `(Status,eq,Traiter)~and(Langue,eq,fr)`,
-  };
-
-  const Initiatives = await getAll(tableId, query);
-
-  const countryData = {};
-  Initiatives.list.forEach((initiative) => {
-    const country = initiative["Pays"];
-    if (country) {
-      if (!countryData[country]) {
-        countryData[country] = {
-          count: 0,
-        };
-      }
-      countryData[country].count += 1;
+// Process initiatives to get country data
+const countryData = {};
+Initiatives.list.forEach((initiative) => {
+  const country = initiative['Pays / Country'];
+  if (country) {
+    if (!countryData[country]) {
+      countryData[country] = {
+        count: 0
+      };
     }
-  });
+    countryData[country].count += 1;
+  }
+});
 
-  const points = {
-    type: "FeatureCollection",
-    features: Object.entries(countryData)
-      .map(([country, data]) => {
-        const coordinates = countryCoordinates[country];
-        if (
-          coordinates &&
-          Array.isArray(coordinates) &&
-          coordinates.length === 2
-        ) {
-          return {
-            type: "Feature",
-            geometry: {
-              type: "Point",
-              coordinates: coordinates,
-            },
-            properties: {
-              title: country,
-              description: `${data.count} initiative${data.count > 1 ? "s" : ""} ${lang === "fr" ? "en" : "in"} ${country}`,
-              count: data.count,
-            },
-          };
+// Create features array for the map
+const points = {
+  type: 'FeatureCollection',
+  features: Object.entries(countryData).map(([country, data]) => {
+    const coordinates = countryCoordinates[country];
+    if (coordinates) {
+      return {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [coordinates[0], coordinates[1]].reverse(), // Inverser les coordonnées
+        },
+        properties: {
+          title: country,
+          description: `Initiatives en ${country}`,
+          country: country,
+          count: data.count
         }
-        return null;
-      })
-      .filter(Boolean),
-  };
+      };
+    }
+    return null;
+  }).filter(Boolean)
+};
 
-  return new Response(JSON.stringify(points), {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+export async function GET({params, request}) {
+  return new Response(
+    JSON.stringify(points)
+  )
 }

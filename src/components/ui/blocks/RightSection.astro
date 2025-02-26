@@ -45,8 +45,9 @@ interface Props {
     <!-- Subtitle of the section -->
     <p
       class="mb-4 max-w-prose text-pretty font-light text-neutral-600 dark:text-neutral-400 sm:text-lg"
+       set:html={subTitle}
     >
-      {subTitle}
+     
     </p>
     <!-- Conditional rendering of the Primary Call-To-Action button if 'btnExists' is true -->
     {btnExists ? <PrimaryCTA title={btnTitle} url={btnURL} target={target} /> : null}

@@ -30,9 +30,8 @@ const initiatives = Array.isArray(rawInitiatives?.list)
       country: initiative["Pays"] || "Pays non spécifié",
       langue: initiative["Langue"] || "Langue non spécifiée",
       category: initiative["Catégorie de l'initiative"] || "Non catégorisé",
-      description:
-        initiative["Thématique de l'initiative"] ||
-        "Description non disponible",
+      thematic: initiative["Thématique de l'initiative"] || "Non spécifié",
+      description: initiative["Description"] || "Description non disponible",
     }))
   : [];
 ---
@@ -46,6 +45,6 @@ const initiatives = Array.isArray(rawInitiatives?.list)
     </div>
 
     <!-- Initiatives Grid Component -->
-    <InitiativesGrid client:load initiatives={initiatives} language = {"en"} />
+    <InitiativesGrid client:load initiatives={initiatives} language={"en"} />
   </div>
 </MainLayout>

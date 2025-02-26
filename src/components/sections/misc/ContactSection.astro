@@ -51,6 +51,12 @@ const content4 =
   Astro.currentLocale === "fr"
     ? "Préférez-vous le texte écrit ? Envoyez-nous un e-mail à"
     : "Prefer the written word? Drop us an email at";
+const firstName = Astro.currentLocale === "fr" ? "Prénom" : "First Name";
+const lastName = Astro.currentLocale === "fr" ? "Nom" : "Last Name";
+const message =
+  Astro.currentLocale === "fr"
+    ? "Envoyer le message"
+    : "Send message";
 ---
 
 <!-- Contact Us -->
@@ -81,12 +87,12 @@ const content4 =
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <TextInput
                 id="hs-firstname-contacts"
-                label="First Name"
+                label={firstName}
                 name="hs-firstname-contacts"
               />
               <TextInput
                 id="hs-lastname-contacts"
-                label="Last Name"
+                label={lastName}
                 name="hs-firstname-contacts"
               />
             </div>
@@ -100,7 +106,7 @@ const content4 =
           </div>
 
           <div class="mt-4 grid">
-            <AuthBtn title="Send Message" />
+            <AuthBtn title={message} />
           </div>
 
         </form>
