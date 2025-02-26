@@ -6,6 +6,7 @@ import enStrings from "@utils/navigation.ts";
 import frStrings from "@utils/fr/navigation.ts";
 import Icon from "@components/ui/icons/Icon.astro";
 import ue from "public/partenaires/eu-logo.png";
+import ue_fr from "public/partenaires/eu-logo-fr.png";
 import AfricTivistes from "public/partenaires/Africtivistes.svg";
 import { SITE } from "@data/constants";
 import Logo from "../../../images/logob.avif";
@@ -15,6 +16,7 @@ import PrimaryCTA from "@/components/ui/buttons/PrimaryCTA.astro";
 // Select the correct translation based on the page's lang prop:
 const strings = Astro.currentLocale === "fr" ? frStrings : enStrings;
 const homeUrl = Astro.currentLocale === "fr" ? "/fr" : "/";
+const ueLogo = Astro.currentLocale === "fr" ? ue_fr : ue;
 
 // Define the variables that will be used in this component
 const sectionThreeTitle: string =
@@ -53,7 +55,7 @@ const dev = Astro.currentLocale === "fr" ? "Par" : "By";
             aria-label="Brand"
           >
             <Image src={Logo} alt="Logo" class="mb-4 h-auto w-32" />
-            <Image src={ue} alt="EU Logo" class="h-auto w-32" />
+            <Image src={ueLogo} alt="EU Logo" class="h-auto w-32" />
           </a>
           <p class="mt-4 text-sm text-neutral-600 dark:text-neutral-400">
             {description}

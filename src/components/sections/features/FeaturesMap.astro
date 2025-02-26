@@ -7,7 +7,6 @@ interface Props {
 
 const { title } = Astro.props;
 ---
-
 <section class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full">
   <h1
     class="block text-balance text-center text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-200 sm:text-4xl lg:text-6xl lg:leading-tight"
@@ -64,158 +63,138 @@ const { title } = Astro.props;
     const pointsPromise = fetchPoints();
 
     map.on('load', () => {
-      // Load GeoJSON data
-      fetch('/api/map.json')
-        .then((response) => response.json())
-        .then((data) => {
-          map.addSource('initiatives', {
-            type: 'geojson',
-            data: data,
-            cluster: true,
-            clusterMaxZoom: 14,
-            clusterRadius: 50,
-          });
-
-          // Add layers only after source is loaded
-          map.addLayer({
-            id: 'clusters',
-            type: 'circle',
-            source: 'initiatives',
-            filter: ['has', 'point_count'],
-            paint: {
-              'circle-color': '#FF5836',
-              'circle-radius': 20
-            }
-          });
-
-          map.addLayer({
-            id: 'unclustered-point',
-            type: 'circle',
-            source: 'initiatives',
-            filter: ['!', ['has', 'point_count']],
-            paint: {
-              'circle-color': '#FF5836',
-              'circle-radius': 10,
-              'circle-stroke-width': 2,
-              'circle-stroke-color': '#fff'
-            }
-          });
-
-
-          // Add cluster count
-          map.addLayer({
-            id: 'cluster-count',
-            type: 'symbol',
-            source: 'initiatives',
-            filter: ['has', 'point_count'],
-            layout: {
-              'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-              'text-size': 12
-            },
-            paint: {
-              'text-color': '#ffffff'
-            }
-          });
-
-          // Create a popup for individual points
-          const popup = new maplibregl.Popup({
-            closeButton: false,
-            closeOnClick: false
-          });
-
-          // Animation des points
-          map.loadImage('/marker.png', (error, image) => {
-            if (error) throw error;
-            map.addImage('custom-marker', image);
-          });
-
-          map.on('sourcedata', (e) => {
-            if (e.sourceId === 'initiatives' && e.isSourceLoaded) {
-              map.getSource('initiatives').data.features.forEach((feature, i) => {
-                setTimeout(() => {
-                  const el = document.createElement('div');
-                  el.className = 'marker';
-                  el.style.opacity = '0';
-                  el.style.transform = 'scale(0)';
-
-                  new maplibregl.Marker(el)
-                    .setLngLat(feature.geometry.coordinates)
-                    .addTo(map);
-
-                  // Animation d'entrée
-                  setTimeout(() => {
-                    el.style.transition = 'all 0.3s ease-out';
-                    el.style.opacity = '1';
-                    el.style.transform = 'scale(1)';
-                  }, 50);
-                }, i * 100);
-              });
-            }
-          });
-
-          map.on('mouseenter', 'unclustered-point', (e) => {
-            map.getCanvas().style.cursor = 'pointer';
-
-            const coordinates = e.features[0].geometry.coordinates.slice();
-            const { title, description, count } = e.features[0].properties;
-            const link = `/initiatives/${slug(title)}`;
-
-            const popupContent = `
-              <a href="/initiatives/${title.toLowerCase()}" class="block">
-                <h3 class="font-bold text-lg">${title}</h3>
-                <p class="text-sm">${description}</p>
-                <p class="text-sm mt-2">${count} initiative${count > 1 ? 's' : ''}</p>
-              </a>
-            `;
-
-            popup.setLngLat(coordinates)
-              .setHTML(popupContent)
-              .addTo(map);
-          });
-
-          map.on('mouseleave', 'unclustered-point', () => {
-            map.getCanvas().style.cursor = '';
-            popup.remove();
-          });
-
-          // Add click handler for unclustered points
-          map.on('click', 'unclustered-point', (e) => {
-            if (!e.features || !e.features.length) return;
-            const { title } = e.features[0].properties;
-            const currentPath = window.location.pathname;
-            const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-            window.location.href = `${basePath}/initiatives?tags=${encodeURIComponent(title)}`;
-          });
-        });
-
-      // Inspect a cluster on click
-      map.on('click', 'clusters', (e) => {
-        const features = map.queryRenderedFeatures(e.point, {
-          layers: ['clusters']
-        });
-        const clusterId = features[0].properties.cluster_id;
-        map.getSource('initiatives').getClusterExpansionZoom(
-          clusterId,
-          (err, zoom) => {
-            if (err) return;
-
-            map.easeTo({
-              center: features[0].geometry.coordinates,
-              zoom: zoom
-            });
-          }
-        );
+      // Add the source for clusters
+      map.addSource('initiatives', {
+        type: 'geojson',
+        data: points,
+        cluster: true,
+        clusterMaxZoom: 14,
+        clusterRadius: 50
       });
 
-      // Show pointer cursor on hover
-      map.on('mouseenter', 'clusters', () => {
+      // Add cluster layer
+      map.addLayer({
+        id: 'clusters',
+        type: 'circle',
+        source: 'initiatives',
+        filter: ['has', 'point_count'],
+        paint: {
+          'circle-color': [
+            'step',
+            ['get', 'point_count'],
+            '#FB923C', // Primary orange color for small clusters
+            10,
+            '#EA580C', // Darker orange for medium clusters
+            30,
+            '#9A3412' // Darkest orange for large clusters
+          ],
+          'circle-radius': [
+            'step',
+            ['get', 'point_count'],
+            20,
+            10,
+            30,
+            30,
+            40
+          ]
+        }
+      });
+
+      // Add cluster count
+      map.addLayer({
+        id: 'cluster-count',
+        type: 'symbol',
+        source: 'initiatives',
+        filter: ['has', 'point_count'],
+        layout: {
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          'text-size': 12
+        },
+        paint: {
+          'text-color': '#ffffff'
+        }
+      });
+
+      // Add unclustered point layer
+      map.addLayer({
+        id: 'unclustered-point',
+        type: 'circle',
+        source: 'initiatives',
+        filter: ['!', ['has', 'point_count']],
+        paint: {
+          'circle-color': '#FB923C',
+          'circle-radius': 8,
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#fff'
+        }
+      });
+
+      // Create a popup for individual points
+      const popup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false
+      });
+
+      map.on('mouseenter', 'unclustered-point', (e) => {
         map.getCanvas().style.cursor = 'pointer';
+
+        const coordinates = e.features[0].geometry.coordinates.slice();
+        const { title, description, count, country } = e.features[0].properties;
+        const link = `/initiatives/${slug(title)}`;
+
+        const popupContent = `
+          <a href="/initiatives/${title.toLowerCase()}" class="block">
+            <h3 class="font-bold text-lg">${title}</h3>
+            <p class="text-sm">${description}</p>
+            <p class="text-sm mt-2">${count} initiative${count > 1 ? 's' : ''}</p>
+          </a>
+        `;
+
+        popup.setLngLat(coordinates)
+          .setHTML(popupContent)
+          .addTo(map);
       });
-      map.on('mouseleave', 'clusters', () => {
+
+      map.on('mouseleave', 'unclustered-point', () => {
         map.getCanvas().style.cursor = '';
+        popup.remove();
+      });
+
+      // Add click handler for unclustered points
+      map.on('click', 'unclustered-point', (e) => {
+        const { country } = e.features[0].properties;
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
+        window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(country)}`;
       });
     });
 
+    // Inspect a cluster on click
+    map.on('click', 'clusters', (e) => {
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: ['clusters']
+      });
+      const clusterId = features[0].properties.cluster_id;
+      map.getSource('initiatives').getClusterExpansionZoom(
+        clusterId,
+        (err, zoom) => {
+          if (err) return;
+
+          map.easeTo({
+            center: features[0].geometry.coordinates,
+            zoom: zoom
+          });
+        }
+      );
+    });
+
+    // Show pointer cursor on hover
+    map.on('mouseenter', 'clusters', () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+    map.on('mouseleave', 'clusters', () => {
+      map.getCanvas().style.cursor = '';
+    });
   };
 
   // Initialize map when component mounts
