@@ -8,35 +8,9 @@ const title: string = "Initiatives Citoyennes";
 const subTitle: string =
   "Découvrez et soutenez les initiatives citoyennes pour des élections transparentes et équitables à travers l'Afrique";
 
-// Fetch initiatives data
-const tableId = "m9erh9bplb8jihp";
-const query = {
-  viewId: "vwdobxvm00ayso6s",
-  fields: [
-    "Nom de l'initiative",
-    "Pays",
-    "Catégorie de l'initiative",
-    "Thématique de l'initiative",
-    "Langue",
-  ],
-  where: "(Status,eq,Traiter)~and(Langue,eq,fr)",
-};
+import { getInitiatives } from "@/lib/initiatives";
 
-const rawInitiatives = await getAll(tableId, query);
-
-// Format initiatives data
-const initiatives = Array.isArray(rawInitiatives?.list)
-  ? rawInitiatives.list.map((initiative) => ({
-      title: initiative["Nom de l'initiative"] || "Initiative sans nom",
-      country: initiative["Pays"] || "Pays non spécifié",
-      category: initiative["Catégorie de l'initiative"] || "Non catégorisé",
-      langue: initiative["Langue"] || "Langue non spécifiée",
-      thematic: initiative["Thématique de l'initiative"] || "Non spécifié",
-      description:
-        initiative["Thématique de l'initiative"] ||
-        "Description non disponible",
-    }))
-  : [];
+const initiatives = await getInitiatives("fr");
 ---
 
 <MainLayout title={title}>
