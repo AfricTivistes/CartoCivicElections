@@ -1,55 +1,63 @@
 
-import { useState, useEffect } from 'react';
-import Card from './Card.jsx';
+import { useMemo } from 'react';
+import Card from './Card';
 
-export default function SimilarInitiatives({ currentInitiative, allInitiatives, language }) {
-  const [similarInitiatives, setSimilarInitiatives] = useState([]);
-  const [isClient, setIsClient] = useState(false);
+const SimilarInitiatives = ({ currentInitiative, allInitiatives, language }) => {
+  const similarInitiatives = useMemo(() => {
+    // Filtrer l'initiative courante
+    const otherInitiatives = allInitiatives.filter(
+      (initiative) => initiative.title !== currentInitiative.title
+    );
 
-  // Exécuter le filtrage uniquement côté client
-  useEffect(() => {
-    setIsClient(true);
-    
-    if (currentInitiative && allInitiatives && allInitiatives.length > 0) {
-      // Filtrer pour exclure l'initiative courante et trouver des initiatives similaires
-      const filtered = allInitiatives.filter(initiative => {
-        // Exclure l'initiative actuelle
-        if (initiative.title === currentInitiative["Nom de l'initiative"]) {
-          return false;
-        }
-        
-        // Chercher par pays ou catégorie similaire
-        return initiative.country === currentInitiative.Pays || 
-               initiative.category === currentInitiative["Catégorie de l'initiative"];
-      });
-      
-      // Limiter à 3 initiatives similaires maximum
-      setSimilarInitiatives(filtered.slice(0, 3));
+    // Trouver les initiatives de la même catégorie
+    const sameCategory = otherInitiatives
+      .filter((initiative) => initiative.category === currentInitiative.category)
+      .slice(0, 3);
+
+    // Trouver les initiatives du même pays
+    const sameCountry = otherInitiatives
+      .filter(
+        (initiative) =>
+          initiative.country === currentInitiative.country &&
+          !sameCategory.includes(initiative)
+      )
+      .slice(0, 3);
+
+    // Si on n'a pas assez d'initiatives, compléter avec des initiatives aléatoires
+    const remaining = 6 - (sameCategory.length + sameCountry.length);
+    let random = [];
+    if (remaining > 0) {
+      random = otherInitiatives
+        .filter(
+          (initiative) =>
+            !sameCategory.includes(initiative) && !sameCountry.includes(initiative)
+        )
+        .sort(() => Math.random() - 0.5)
+        .slice(0, remaining);
     }
+
+    return [...sameCategory, ...sameCountry, ...random];
   }, [currentInitiative, allInitiatives]);
-
-  // Si nous sommes côté serveur ou si nous n'avons pas d'initiatives similaires, ne rien afficher
-  if (!isClient || similarInitiatives.length === 0) {
-    return null;
-  }
-
-  const titleText = language === 'fr' ? 'Initiatives similaires' : 'Similar Initiatives';
 
   return (
     <div className="mt-12">
-      <h2 className="text-2xl font-bold text-center mb-8">{titleText}</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-[85rem] mx-auto px-4 sm:px-6 lg:px-8 pb-14">
-        {similarInitiatives.map((initiative, index) => (
+      <h2 className="text-2xl font-bold mb-6">
+        {language === 'fr' ? 'Initiatives similaires' : 'Similar initiatives'}
+      </h2>
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {similarInitiatives.map((initiative) => (
           <Card
-            key={`similar-${index}-${initiative.title}`}
+            key={initiative.title}
             title={initiative.title}
             country={initiative.country}
             category={initiative.category}
-            description={initiative.description}
-            language={language}
+            description={initiative.thematic}
+            langue={initiative.langue}
           />
         ))}
       </div>
     </div>
   );
-}
+};
+
+export default SimilarInitiatives;
