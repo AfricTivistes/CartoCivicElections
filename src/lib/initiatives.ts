@@ -1,6 +1,25 @@
 import { getAll } from "./contentNocodb.astro";
 import { slug } from "@/utils/slug";
 
+/**
+ * Fonction utilitaire pour limiter les requêtes à un certain taux (rate limiting)
+ * @param ms Temps d'attente en millisecondes entre les requêtes
+ */
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+/**
+ * Wrapper pour les appels à l'API avec rate limiting
+ * @param fetcher Fonction de récupération de données
+ * @param args Arguments pour la fonction de récupération
+ * @param rateLimit Délai entre les requêtes en ms (200ms = 5 requêtes/seconde)
+ */
+async function rateLimitedFetch(fetcher: Function, args: any[], rateLimit: number = 200) {
+  // Attendre le délai spécifié avant d'exécuter la requête
+  await delay(rateLimit);
+  // Exécuter la requête
+  return await fetcher(...args);
+}
+
 // Fonction pour récupérer la liste des initiatives avec les informations de base
 export async function getInitiatives(language: string = "fr") {
   const tableId = "m9erh9bplb8jihp";
@@ -17,7 +36,8 @@ export async function getInitiatives(language: string = "fr") {
     where: `(Status,eq,Traiter)~and(Langue,eq,${language})`,
   };
 
-  const rawInitiatives = await getAll(tableId, query);
+  // Utiliser la fonction avec rate limiting
+  const rawInitiatives = await rateLimitedFetch(getAll, [tableId, query]);
 
   return Array.isArray(rawInitiatives?.list)
     ? rawInitiatives.list.map((initiative) => ({
@@ -38,7 +58,6 @@ export function getInitiativeQuery(language: string = "fr") {
   const tableId = "m9erh9bplb8jihp";
   const query = {
     viewId: "vwdobxvm00ayso6s",
-
     where: `(Status,eq,Traiter)~and(Langue,eq,${language})`,
   };
 
@@ -48,7 +67,8 @@ export function getInitiativeQuery(language: string = "fr") {
 // Fonction pour récupérer les détails des initiatives et les convertir en chemins statiques
 export async function getInitiativeDetails(language: string = "fr") {
   const { tableId, query } = getInitiativeQuery(language);
-  const productEntries = await getAll(tableId, query);
+  // Utiliser la fonction avec rate limiting
+  const productEntries = await rateLimitedFetch(getAll, [tableId, query]);
 
   if (!productEntries?.list) return [];
 
