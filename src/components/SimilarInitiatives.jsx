@@ -23,7 +23,8 @@ const SimilarInitiatives = ({ currentInitiative, allInitiatives, language }) => 
       )
       .slice(0, 3);
 
-    // Si on n'a pas assez d'initiatives, compléter avec des initiatives aléatoires
+    // Si on n'a pas assez d'initiatives, compléter avec des initiatives ordonnées par titre
+    // Utilisation d'un tri déterministe au lieu de Math.random() pour éviter les erreurs d'hydratation
     const remaining = 6 - (sameCategory.length + sameCountry.length);
     let random = [];
     if (remaining > 0) {
@@ -32,7 +33,7 @@ const SimilarInitiatives = ({ currentInitiative, allInitiatives, language }) => 
           (initiative) =>
             !sameCategory.includes(initiative) && !sameCountry.includes(initiative)
         )
-        .sort(() => Math.random() - 0.5)
+        .sort((a, b) => a.title.localeCompare(b.title)) // Tri alphabétique déterministe
         .slice(0, remaining);
     }
 
