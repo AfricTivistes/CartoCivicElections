@@ -1,18 +1,19 @@
+
 import { getAll } from "./contentNocodb.astro";
 import { slug } from "@/utils/slug";
 
 // Fonction pour récupérer la liste des initiatives avec les informations de base
-export async function getInitiatives(language: string = "fr") {
+export async function getInitiatives(language: string = 'fr') {
   const tableId = "m9erh9bplb8jihp";
   const query = {
     viewId: "vwdobxvm00ayso6s",
     fields: [
       "Nom de l'initiative",
       "Pays",
-      "Catégorie de l'initiative",
+      "Catégorie de l'initiative", 
       "Thématique de l'initiative",
       "Langue",
-      "Résumé descriptif de l'initiative",
+      "Résumé descriptif de l'initiative"
     ],
     where: `(Status,eq,Traiter)~and(Langue,eq,${language})`,
   };
@@ -23,18 +24,16 @@ export async function getInitiatives(language: string = "fr") {
     ? rawInitiatives.list.map((initiative) => ({
         title: initiative["Nom de l'initiative"] || "Initiative sans nom",
         country: initiative["Pays"] || "Pays non spécifié",
-        langue: initiative["Langue"] || "Langue non spécifiée",
+        langue: initiative["Langue"] || "Langue non spécifiée", 
         category: initiative["Catégorie de l'initiative"] || "Non catégorisé",
         thematic: initiative["Thématique de l'initiative"] || "Non spécifié",
-        description:
-          initiative["Résumé descriptif de l'initiative"] ||
-          "Description non disponible",
+        description: initiative["Résumé descriptif de l'initiative"] || "Description non disponible",
       }))
     : [];
 }
 
 // Fonction pour récupérer la requête de base des détails d'initiative
-export function getInitiativeQuery(language: string = "fr") {
+export function getInitiativeQuery(language: string = 'fr') {
   const tableId = "m9erh9bplb8jihp";
   const query = {
     viewId: "vwdobxvm00ayso6s",
@@ -78,57 +77,24 @@ export function getInitiativeQuery(language: string = "fr") {
     ],
     where: `(Status,eq,Traiter)~and(Langue,eq,${language})`,
   };
-
+  
   return { tableId, query };
 }
 
 // Fonction pour récupérer les détails des initiatives et les convertir en chemins statiques
-export async function getInitiativeDetails(language: string = "fr") {
+export async function getInitiativeDetails(language: string = 'fr') {
   const { tableId, query } = getInitiativeQuery(language);
-
-  // Utilisation du wrapper avec limitation de débit
-  const productEntries = await getRateLimitedAll(tableId, query);
-
+  const productEntries = await getAll(tableId, query);
+  
   if (!productEntries?.list) return [];
-
+  
   return productEntries.list.map((product) => {
     const initiativeName = product["Nom de l'initiative"];
-    const productSlug =
-      typeof initiativeName === "string" ? slug(initiativeName) : "";
-
+    const productSlug = typeof initiativeName === "string" ? slug(initiativeName) : "";
+    
     return {
       params: { slug: productSlug },
       props: { product },
     };
   });
-}
-
-// Implémentation du rate limiting pour respecter la limite de 5 requêtes par seconde
-// On utilise un système de file d'attente avec délai contrôlé
-let lastRequestTime = 0;
-const minTimeBetweenRequests = 200; // 200ms = 5 requêtes par seconde maximum
-
-async function getRateLimitedAll(tableId, query) {
-  // Calculer le délai nécessaire depuis la dernière requête
-  const now = Date.now();
-  const timeElapsedSinceLastRequest = now - lastRequestTime;
-  const timeToWait = Math.max(0, minTimeBetweenRequests - timeElapsedSinceLastRequest);
-  
-  // Si nécessaire, attendre avant d'envoyer la requête
-  if (timeToWait > 0) {
-    await new Promise(resolve => setTimeout(resolve, timeToWait));
-  }
-  
-  // Mettre à jour le temps de la dernière requête
-  lastRequestTime = Date.now();
-  
-  // Exécuter la requête
-  try {
-    const response = await getAll(tableId, query);
-    return response;
-  } catch (error) {
-    console.error("Erreur lors de la récupération des données:", error.message);
-    // En cas d'erreur, retourner un objet avec une liste vide
-    return { list: [] };
-  }
 }
