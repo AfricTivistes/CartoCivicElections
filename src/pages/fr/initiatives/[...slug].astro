@@ -548,7 +548,7 @@ const retourName =
     <InitiativesGrid client:load initiatives={initiatives} /-->
   </div>
 
-  <SimilarInitiatives client:load currentInitiative={product} allInitiatives={initiatives} language="fr" />
+  <SimilarInitiatives client:only="react" currentInitiative={product} allInitiatives={initiatives} language="fr" />
 
   <script>
     import { gsap } from "gsap";
