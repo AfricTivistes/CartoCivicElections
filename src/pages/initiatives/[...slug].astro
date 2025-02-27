@@ -12,11 +12,12 @@ import FooterSocialLink from "@/components/ui/links/FooterSocialLink.astro";
 import Icon from "@/components/ui/icons/Icon.astro";
 import InitiativesGrid from "@/components/InitiativesGrid.jsx";
 import SimilarInitiatives from "@/components/SimilarInitiatives.jsx";
+import { getAll } from "@/lib/contentNocodb.astro";
 
 import { getInitiatives } from "@/lib/initiatives";
 import { getInitiativeDetails } from "@/lib/initiatives"; // Assuming this function exists
 
-const initiatives = await getInitiatives("en");
+const initiatives = await getInitiatives("fr");
 
 // Global declaration for gsap animation library
 declare global {
@@ -254,7 +255,11 @@ const retourName =
               Partners of the initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              Information not available
+              {
+                product[
+                  "L’initiative a-t-elle été soutenue par des partenaires ?"
+                ]
+              }
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -286,7 +291,7 @@ const retourName =
               Target of the initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              Information not available
+              {product["Cibles de l’initiative"]}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"

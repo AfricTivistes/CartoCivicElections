@@ -11,8 +11,7 @@ export default defineConfig({
   // https://docs.astro.build/en/guides/images/#authorizing-remote-images
   site: "https://initiative4elections.tech/",
   image: {
-    domains: ["images.unsplash.com", "placehold.co"],
-    remotePatterns: [{ protocol: "https" }],
+    domains: ["images.unsplash.com"],
   },
   // i18n: {
   //   defaultLocale: "en",
