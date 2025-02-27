@@ -14,8 +14,8 @@ interface ApiResponse {
   pageInfo: PageInfo;
 }
 
-// File d'attente pour les requêtes
-class RequestQueue {
+// Déplacer la classe hors du frontmatter pour qu'elle soit accessible comme export
+export class RequestQueue {
   private queue: Array<{
     resolve: (value: any) => void;
     reject: (reason?: any) => void;
@@ -68,7 +68,8 @@ class RequestQueue {
   }
 }
 
-const requestQueue = new RequestQueue();
+// Exporter l'instance pour qu'elle soit accessible depuis d'autres fichiers
+export const requestQueue = new RequestQueue();
 
 export const getData = async (tableId: string, query: object = {}) => {
   try {
