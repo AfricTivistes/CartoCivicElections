@@ -1,99 +1,62 @@
-import { slug } from "@/utils/slug";
-import SecondaryCTA from "@components/ui/buttons/SecondaryCTA";
+import { useState, useEffect } from 'react';
+import { slug } from '../utils/slug.js';
 
-const Card = ({ title, country, category, description, langue, logo = "" }) => {
-  const details = langue === "fr" ? "Voir les détails" : "View details";
-  const link =
-    langue === "fr"
-      ? `/fr/initiatives/${slug(title)}`
-      : `/initiatives/${slug(title)}`;
-  const basePath = langue === "fr" ? "/fr/initiatives" : "/initiatives";
+export default function Card({ title, country, category, description, language }) {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null;
+  }
+
+  const cardSlug = slug(title);
+  const initiativeLink = language === 'fr' 
+    ? `/fr/initiatives/${cardSlug}`
+    : `/initiatives/${cardSlug}`;
+
+  const readMoreText = language === 'fr' ? 'Lire plus' : 'Read more';
 
   return (
-    <div className="to-orange-50 transform overflow-hidden rounded-lg border border-gray-100 bg-gradient-to-br from-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-      <div className="flex h-full flex-col p-8">
-        <a href={link}>
-          <h3 className="mb-6 text-2xl font-bold text-gray-900">{title}</h3>
-        </a>
-
-        <div className="mb-4 flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="text-primary-500 mr-2 h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z"
-              clipRule="evenodd"
-            />
-          </svg>
+    <div className="group flex flex-col h-full bg-white border border-gray-200 shadow-sm rounded-xl dark:bg-neutral-800 dark:border-neutral-700 dark:shadow-neutral-700/[.7]">
+      <div className="p-4 md:p-6 h-full flex flex-col">
+        <span className="block mb-1 text-xs font-semibold uppercase text-orange-400 dark:text-orange-300">
+          {category || "Non catégorisé"}
+        </span>
+        <h3 className="text-xl font-semibold text-balance text-neutral-600 dark:text-neutral-200">
+          {title || "Initiative sans titre"}
+        </h3>
+        <p className="mt-3 text-neutral-500 dark:text-neutral-400">
+          {country || "Pays non spécifié"}
+        </p>
+        <p className="mt-4 text-neutral-600 dark:text-neutral-400 line-clamp-3">
+          {description || "Description non disponible"}
+        </p>
+        <div className="mt-auto">
           <a
-            href={`${basePath}?tags=${encodeURIComponent(country)}`}
-            className="text-primary-700 text-lg hover:underline"
+            href={initiativeLink}
+            className="mt-5 inline-flex items-center gap-x-1 text-sm font-medium text-primary-green hover:text-emerald-600 disabled:opacity-50 disabled:pointer-events-none dark:text-primary-green dark:hover:text-emerald-500"
           >
-            {country}
+            {readMoreText}
+            <svg
+              className="flex-shrink-0 w-4 h-4"
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m9 18 6-6-6-6" />
+            </svg>
           </a>
         </div>
-
-        <div className="mb-4 flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="text-primary-500 mr-2 h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-            <path
-              fillRule="evenodd"
-              d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <a
-            href={`${basePath}?tags=${encodeURIComponent(category)}`}
-            className="text-primary-700 hover:underline"
-          >
-            {category}
-          </a>
-        </div>
-
-        <div className="mb-6 flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="text-primary-500 mr-2 h-5 w-5"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <a
-            href={`${basePath}?tags=${encodeURIComponent(description)}`}
-            className="hover:text-primary-600 text-gray-600"
-          >
-            {description}
-          </a>
-        </div>
-
-        {logo && (
-          <div className="mb-4">
-            <img
-              src={logo}
-              alt={`Logo de ${title}`}
-              className="h-16 w-16 object-contain"
-            />
-          </div>
-        )}
-
-        <SecondaryCTA title={details} url={link} />
       </div>
     </div>
   );
-};
-
-export default Card;
+}
