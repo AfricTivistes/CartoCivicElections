@@ -34,60 +34,88 @@ export const getAll = async (tableId: string, query: object = {}) => {
     let hasMore = true;
     let totalRows = 0;
     
-    // Délai minimal entre les requêtes (en ms) pour respecter la limite de 5 req/sec
-    const REQUEST_DELAY = 300; // 300ms ~ 3 requêtes par seconde pour plus de sécurité
+    // Configuration pour respecter la limite de 5 req/sec avec backoff exponentiel
+    const MIN_DELAY = 300; // Délai minimal entre requêtes (ms)
+    const MAX_RETRIES = 5;  // Nombre maximal de tentatives en cas d'erreur 429
+    const BACKOFF_FACTOR = 1.5; // Facteur multiplicatif pour l'attente entre les tentatives
+    
     const baseParams = {
       viewId: query?.viewId,
       fields: query?.fields,
       where: query?.where
     };
     
-    // Première requête pour obtenir le nombre total d'enregistrements
-    const firstResponse = await api.get(`/api/v2/tables/${tableId}/records`, {
-      params: {
-        ...baseParams,
-        limit: 100,
-        page: 1
+    // Première requête pour obtenir le nombre total d'enregistrements (avec retry)
+    try {
+      const firstData = await fetchWithRetry(1);
+      
+      if (!firstData.pageInfo) {
+        throw new Error('Format de réponse API invalide : pageInfo manquant');
       }
-    });
-    
-    const firstData = firstResponse.data as ApiResponse;
-    if (!firstData.pageInfo) {
-      throw new Error('Format de réponse API invalide : pageInfo manquant');
+      
+      totalRows = firstData.pageInfo.totalRows;
+      allRecords = [...firstData.list];
+      
+      // Délai après la première requête
+      await delay(MIN_DELAY);
+    } catch (error) {
+      console.error("Erreur lors de la récupération de la première page:", error);
+      throw new Error(`Échec de la récupération des données initiales: ${error.message}`);
     }
-    
-    totalRows = firstData.pageInfo.totalRows;
-    allRecords = [...firstData.list];
     
     // Calcul du nombre total de pages
     const totalPages = Math.ceil(totalRows / 100);
+    
+    // Fonction pour faire une requête avec retry en cas d'erreur 429
+    const fetchWithRetry = async (pageNumber) => {
+      let currentDelay = MIN_DELAY;
+      let retries = 0;
+      
+      while (retries <= MAX_RETRIES) {
+        try {
+          const response = await api.get(`/api/v2/tables/${tableId}/records`, {
+            params: {
+              ...baseParams,
+              limit: 100,
+              page: pageNumber
+            }
+          });
+          
+          return response.data;
+        } catch (error) {
+          if (error.response && error.response.status === 429 && retries < MAX_RETRIES) {
+            retries++;
+            const waitTime = currentDelay * Math.pow(BACKOFF_FACTOR, retries - 1);
+            console.log(`Rate limit atteint (429). Tentative ${retries}/${MAX_RETRIES}. Attente de ${waitTime}ms avant nouvel essai...`);
+            await delay(waitTime);
+          } else {
+            throw error;
+          }
+        }
+      }
+      
+      throw new Error(`Échec après ${MAX_RETRIES} tentatives pour la page ${pageNumber}`);
+    };
     
     // Récupération des pages restantes
     while (page < totalPages) {
       page++;
       
       try {
-        const response = await api.get(`/api/v2/tables/${tableId}/records`, {
-          params: {
-            ...baseParams,
-            limit: 100,
-            page: page
-          }
-        });
+        const data = await fetchWithRetry(page);
         
-        const data = response.data as ApiResponse;
         if (!data.list) {
           throw new Error(`Format de réponse API invalide pour la page ${page}`);
         }
         
         allRecords = [...allRecords, ...data.list];
         
-        // Délai entre les requêtes pour respecter la limite de rate
-        await delay(REQUEST_DELAY);
+        // Délai minimal entre les requêtes
+        await delay(MIN_DELAY);
         
       } catch (error) {
         console.error(`Erreur lors de la récupération de la page ${page}:`, error);
-        throw new Error(`Échec de la récupération de la page ${page}`);
+        throw new Error(`Échec de la récupération de la page ${page}: ${error.message}`);
       }
     }
     
