@@ -35,36 +35,14 @@ export const getAll = async (tableId: string, query: object = {}) => {
       where: query?.where
     };
     
-    // Fonction pour pause avec délai exponentiel
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-    const retryWithBackoff = async (fn, maxRetries = 5) => {
-      let retries = 0;
-      while (retries < maxRetries) {
-        try {
-          return await fn();
-        } catch (error) {
-          if (error.response && error.response.status === 429) {
-            // Délai exponentiel: 500ms, 1000ms, 2000ms, 4000ms, 8000ms
-            const delay = Math.min(500 * Math.pow(2, retries), 8000);
-            console.warn(`Limite de requêtes atteinte, nouvelle tentative dans ${delay}ms...`);
-            await sleep(delay);
-            retries++;
-          } else {
-            throw error;
-          }
-        }
-      }
-      throw new Error(`Échec après ${maxRetries} tentatives`);
-    };
-    
     // Première requête pour obtenir le nombre total d'enregistrements
-    const firstResponse = await retryWithBackoff(() => api.get(`/api/v2/tables/${tableId}/records`, {
+    const firstResponse = await api.get(`/api/v2/tables/${tableId}/records`, {
       params: {
         ...baseParams,
         limit: 100,
         page: 1
       }
-    }));
+    });
     
     const firstData = firstResponse.data as ApiResponse;
     if (!firstData.pageInfo) {
@@ -82,16 +60,13 @@ export const getAll = async (tableId: string, query: object = {}) => {
       page++;
       
       try {
-        // Ajouter un délai pour respecter les limites de l'API (5 requêtes/sec)
-        await sleep(250); // Une requête toutes les 250ms = max 4 requêtes/sec
-        
-        const response = await retryWithBackoff(() => api.get(`/api/v2/tables/${tableId}/records`, {
+        const response = await api.get(`/api/v2/tables/${tableId}/records`, {
           params: {
             ...baseParams,
             limit: 100,
             page: page
           }
-        }));
+        });
         
         const data = response.data as ApiResponse;
         if (!data.list) {
@@ -99,6 +74,9 @@ export const getAll = async (tableId: string, query: object = {}) => {
         }
         
         allRecords = [...allRecords, ...data.list];
+        
+        // Pause courte entre les requêtes pour éviter la surcharge
+        await new Promise(resolve => setTimeout(resolve, 100));
         
       } catch (error) {
         console.error(`Erreur lors de la récupération de la page ${page}:`, error);
