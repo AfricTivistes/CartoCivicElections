@@ -1,3 +1,4 @@
+
 ---
 import { api } from './api/nocodb';
 
@@ -12,6 +13,9 @@ interface ApiResponse {
   list: any[];
   pageInfo: PageInfo;
 }
+
+// Fonction utilitaire pour ajouter un délai
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const getData = async (tableId: string, query: object = {}) => {
   try {
@@ -29,6 +33,9 @@ export const getAll = async (tableId: string, query: object = {}) => {
     let page = 1;
     let hasMore = true;
     let totalRows = 0;
+    
+    // Délai minimal entre les requêtes (en ms) pour respecter la limite de 5 req/sec
+    const REQUEST_DELAY = 300; // 300ms ~ 3 requêtes par seconde pour plus de sécurité
     const baseParams = {
       viewId: query?.viewId,
       fields: query?.fields,
@@ -75,8 +82,8 @@ export const getAll = async (tableId: string, query: object = {}) => {
         
         allRecords = [...allRecords, ...data.list];
         
-        // Pause courte entre les requêtes pour éviter la surcharge
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Délai entre les requêtes pour respecter la limite de rate
+        await delay(REQUEST_DELAY);
         
       } catch (error) {
         console.error(`Erreur lors de la récupération de la page ${page}:`, error);
