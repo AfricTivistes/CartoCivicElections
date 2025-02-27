@@ -1,4 +1,3 @@
-
 ---
 import { api } from './api/nocodb';
 
@@ -13,9 +12,6 @@ interface ApiResponse {
   list: any[];
   pageInfo: PageInfo;
 }
-
-// Fonction utilitaire pour ajouter un délai
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const getData = async (tableId: string, query: object = {}) => {
   try {
@@ -33,89 +29,58 @@ export const getAll = async (tableId: string, query: object = {}) => {
     let page = 1;
     let hasMore = true;
     let totalRows = 0;
-    
-    // Configuration pour respecter la limite de 5 req/sec avec backoff exponentiel
-    const MIN_DELAY = 300; // Délai minimal entre requêtes (ms)
-    const MAX_RETRIES = 5;  // Nombre maximal de tentatives en cas d'erreur 429
-    const BACKOFF_FACTOR = 1.5; // Facteur multiplicatif pour l'attente entre les tentatives
-    
     const baseParams = {
       viewId: query?.viewId,
       fields: query?.fields,
       where: query?.where
     };
     
-    // Première requête pour obtenir le nombre total d'enregistrements (avec retry)
-    try {
-      const firstData = await fetchWithRetry(1);
-      
-      if (!firstData.pageInfo) {
-        throw new Error('Format de réponse API invalide : pageInfo manquant');
+    // Première requête pour obtenir le nombre total d'enregistrements
+    const firstResponse = await api.get(`/api/v2/tables/${tableId}/records`, {
+      params: {
+        ...baseParams,
+        limit: 100,
+        page: 1
       }
-      
-      totalRows = firstData.pageInfo.totalRows;
-      allRecords = [...firstData.list];
-      
-      // Délai après la première requête
-      await delay(MIN_DELAY);
-    } catch (error) {
-      console.error("Erreur lors de la récupération de la première page:", error);
-      throw new Error(`Échec de la récupération des données initiales: ${error.message}`);
+    });
+    
+    const firstData = firstResponse.data as ApiResponse;
+    if (!firstData.pageInfo) {
+      throw new Error('Format de réponse API invalide : pageInfo manquant');
     }
+    
+    totalRows = firstData.pageInfo.totalRows;
+    allRecords = [...firstData.list];
     
     // Calcul du nombre total de pages
     const totalPages = Math.ceil(totalRows / 100);
-    
-    // Fonction pour faire une requête avec retry en cas d'erreur 429
-    const fetchWithRetry = async (pageNumber) => {
-      let currentDelay = MIN_DELAY;
-      let retries = 0;
-      
-      while (retries <= MAX_RETRIES) {
-        try {
-          const response = await api.get(`/api/v2/tables/${tableId}/records`, {
-            params: {
-              ...baseParams,
-              limit: 100,
-              page: pageNumber
-            }
-          });
-          
-          return response.data;
-        } catch (error) {
-          if (error.response && error.response.status === 429 && retries < MAX_RETRIES) {
-            retries++;
-            const waitTime = currentDelay * Math.pow(BACKOFF_FACTOR, retries - 1);
-            console.log(`Rate limit atteint (429). Tentative ${retries}/${MAX_RETRIES}. Attente de ${waitTime}ms avant nouvel essai...`);
-            await delay(waitTime);
-          } else {
-            throw error;
-          }
-        }
-      }
-      
-      throw new Error(`Échec après ${MAX_RETRIES} tentatives pour la page ${pageNumber}`);
-    };
     
     // Récupération des pages restantes
     while (page < totalPages) {
       page++;
       
       try {
-        const data = await fetchWithRetry(page);
+        const response = await api.get(`/api/v2/tables/${tableId}/records`, {
+          params: {
+            ...baseParams,
+            limit: 100,
+            page: page
+          }
+        });
         
+        const data = response.data as ApiResponse;
         if (!data.list) {
           throw new Error(`Format de réponse API invalide pour la page ${page}`);
         }
         
         allRecords = [...allRecords, ...data.list];
         
-        // Délai minimal entre les requêtes
-        await delay(MIN_DELAY);
+        // Pause courte entre les requêtes pour éviter la surcharge
+        await new Promise(resolve => setTimeout(resolve, 100));
         
       } catch (error) {
         console.error(`Erreur lors de la récupération de la page ${page}:`, error);
-        throw new Error(`Échec de la récupération de la page ${page}: ${error.message}`);
+        throw new Error(`Échec de la récupération de la page ${page}`);
       }
     }
     
