@@ -6,6 +6,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "build": "astro build && node process-html.mjs",
+    "build:optimized": "NODE_OPTIONS=--max-old-space-size=4096 astro build && node process-html.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },

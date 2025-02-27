@@ -17,7 +17,7 @@ import { getAll } from "@/lib/contentNocodb.astro";
 import { getInitiatives } from "@/lib/initiatives";
 import { getInitiativeDetails } from "@/lib/initiatives"; // Assuming this function exists
 
-const initiatives = await getInitiatives("fr");
+const initiatives = await getInitiatives("en");
 
 // Global declaration for gsap animation library
 declare global {
@@ -255,11 +255,7 @@ const retourName =
               Partners of the initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {
-                product[
-                  "L’initiative a-t-elle été soutenue par des partenaires ?"
-                ]
-              }
+              Information not available
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -291,7 +287,7 @@ const retourName =
               Target of the initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Cibles de l’initiative"]}
+              Information not available
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
