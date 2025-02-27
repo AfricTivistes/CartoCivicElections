@@ -20,17 +20,23 @@ export class RequestQueue {
     resolve: (value: any) => void;
     reject: (reason?: any) => void;
     fn: () => Promise<any>;
+    retryCount: number;
   }> = [];
   private processing = false;
   private lastRequestTime = 0;
-  private minRequestInterval = 200; // 200ms entre les requêtes = 5 requêtes/seconde max
+  private minRequestInterval = 220; // 220ms entre les requêtes pour garantir < 5 req/s
+  private requestsInLastSecond = 0;
+  private lastSecondTimestamp = 0;
+  private maxRetries = 3;
+  private retryDelay = 2000; // 2 secondes de délai avant retry en cas d'erreur 429
 
   async enqueue<T>(fn: () => Promise<T>): Promise<T> {
     return new Promise((resolve, reject) => {
       this.queue.push({
         resolve,
         reject,
-        fn
+        fn,
+        retryCount: 0
       });
       
       if (!this.processing) {
@@ -47,8 +53,23 @@ export class RequestQueue {
 
     this.processing = true;
     const now = Date.now();
+    
+    // Réinitialiser le compteur de requêtes si une seconde s'est écoulée
+    if (now - this.lastSecondTimestamp >= 1000) {
+      this.requestsInLastSecond = 0;
+      this.lastSecondTimestamp = now;
+    }
+    
+    // Si nous avons déjà fait 5 requêtes dans la dernière seconde, attendons le début de la prochaine seconde
+    if (this.requestsInLastSecond >= 5) {
+      const timeUntilNextSecond = 1000 - (now - this.lastSecondTimestamp);
+      console.log(`Limite de 5 requêtes/s atteinte, attente de ${timeUntilNextSecond}ms avant la prochaine requête`);
+      await new Promise(resolve => setTimeout(resolve, timeUntilNextSecond + 50)); // +50ms pour être sûr
+      return this.processQueue(); // Réessayer après l'attente
+    }
+    
+    // Respecter l'intervalle minimal entre les requêtes
     const timeToWait = Math.max(0, this.lastRequestTime + this.minRequestInterval - now);
-
     if (timeToWait > 0) {
       await new Promise(resolve => setTimeout(resolve, timeToWait));
     }
@@ -57,13 +78,31 @@ export class RequestQueue {
 
     try {
       this.lastRequestTime = Date.now();
+      this.requestsInLastSecond++;
+      console.log(`Exécution de la requête (${this.requestsInLastSecond}/5 cette seconde)`);
       const result = await request.fn();
       request.resolve(result);
-    } catch (error) {
-      request.reject(error);
+    } catch (error: any) {
+      // Si on a une erreur 429 Too Many Requests et qu'on n'a pas dépassé le nombre de retries
+      if (error?.response?.status === 429 && request.retryCount < this.maxRetries) {
+        request.retryCount++;
+        console.log(`Erreur 429 reçue, retry ${request.retryCount}/${this.maxRetries} dans ${this.retryDelay}ms`);
+        
+        // Ajouter à nouveau la requête à la queue après un délai
+        setTimeout(() => {
+          this.queue.unshift(request);
+          // Réinitialiser les compteurs de requêtes pour être sûr
+          this.requestsInLastSecond = 0;
+          this.lastSecondTimestamp = Date.now();
+        }, this.retryDelay);
+      } else {
+        // Si trop de retries ou autre erreur, rejeter la promesse
+        console.error(`Erreur finale après ${request.retryCount} retries:`, error);
+        request.reject(error);
+      }
     } finally {
-      // Continuer avec la prochaine requête
-      setTimeout(() => this.processQueue(), 0);
+      // Continuer avec la prochaine requête après un court délai
+      setTimeout(() => this.processQueue(), 50);
     }
   }
 }
@@ -78,7 +117,10 @@ export const getData = async (tableId: string, query: object = {}) => {
         .then(response => response.data)
     );
   } catch (error) {
-    console.error('Error fetching data:', error);
+    console.error(`Erreur lors de la récupération des données pour la table ${tableId}:`, error);
+    if (error?.response?.status === 429) {
+      console.error('Trop de requêtes (429). Essayez d\'augmenter les délais entre requêtes.');
+    }
     throw error;
   }
 };
@@ -117,11 +159,14 @@ export const getAll = async (tableId: string, query: object = {}) => {
     const totalPages = Math.ceil(totalRows / 100);
     
     // Récupération des pages restantes
-    const pagePromises = [];
+    // Pour éviter de surcharger l'API, nous allons traiter les requêtes en séquence
+    // plutôt qu'en parallèle avec Promise.all
+    const results = [];
     
     for (let p = 2; p <= totalPages; p++) {
-      pagePromises.push(
-        requestQueue.enqueue(() => 
+      console.log(`Récupération page ${p}/${totalPages} pour la table ${tableId}`);
+      try {
+        const result = await requestQueue.enqueue(() => 
           api.get(`/api/v2/tables/${tableId}/records`, {
             params: {
               ...baseParams,
@@ -136,12 +181,19 @@ export const getAll = async (tableId: string, query: object = {}) => {
             }
             return data.list;
           })
-        )
-      );
+        );
+        results.push(result);
+        
+        // Si nous avons beaucoup de pages, ajoutons un délai supplémentaire tous les 3 pages
+        if (totalPages > 5 && p % 3 === 0) {
+          console.log("Pause supplémentaire après 3 pages pour éviter de surcharger l'API...");
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      } catch (error) {
+        console.error(`Erreur lors de la récupération de la page ${p}:`, error);
+        throw error;
+      }
     }
-    
-    // Attendre que toutes les requêtes soient terminées
-    const results = await Promise.all(pagePromises);
     
     // Combiner tous les résultats
     for (const result of results) {
