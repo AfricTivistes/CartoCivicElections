@@ -2,6 +2,8 @@ import { getAll } from "./contentNocodb.astro";
 import { slug } from "@/utils/slug";
 
 // Fonction pour récupérer la liste des initiatives avec les informations de base
+
+await pauseBeforeStart();
 export async function getInitiatives(language: string = "fr") {
   const tableId = "m9erh9bplb8jihp";
   const query = {
