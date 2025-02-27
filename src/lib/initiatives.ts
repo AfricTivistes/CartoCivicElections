@@ -51,11 +51,11 @@ export function getInitiativeQuery(language: string = "fr") {
       "Type d'élection",
       "Date de début",
       "Date de fin",
-      "L’initiative a-t-elle été soutenue par des partenaires ?",
+      "L'initiative a-t-elle été soutenue par des partenaires ?",
       "Si OUI, quels étaient les principaux partenaires",
       "Zone d'intervention des partenaires",
       "Quel a été leur apport",
-      "Cibles de l’initiative",
+      "Cibles de l'initiative",
       "Type d'organisation",
       "zone géographique couverte par l'initiative",
       "Pays de mise en oeuvre",
@@ -85,7 +85,9 @@ export function getInitiativeQuery(language: string = "fr") {
 // Fonction pour récupérer les détails des initiatives et les convertir en chemins statiques
 export async function getInitiativeDetails(language: string = "fr") {
   const { tableId, query } = getInitiativeQuery(language);
-  const productEntries = await getAll(tableId, query);
+
+  // Utilisation du wrapper avec limitation de débit
+  const productEntries = await getRateLimitedAll(tableId, query);
 
   if (!productEntries?.list) return [];
 
@@ -99,4 +101,11 @@ export async function getInitiativeDetails(language: string = "fr") {
       props: { product },
     };
   });
+}
+
+// Placeholder for rate limiting implementation.  Needs to be implemented separately.
+async function getRateLimitedAll(tableId, query) {
+  //Implement rate limiting logic here to ensure no more than 5 requests per second.
+  //This could involve using a queue, timers, or a dedicated rate limiting library.
+  return await getAll(tableId, query);
 }
