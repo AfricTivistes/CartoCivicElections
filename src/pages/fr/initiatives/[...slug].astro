@@ -12,6 +12,7 @@ import FooterSocialLink from "@/components/ui/links/FooterSocialLink.astro";
 import Icon from "@/components/ui/icons/Icon.astro";
 import InitiativesGrid from "@/components/InitiativesGrid.jsx";
 import SimilarInitiatives from "@/components/SimilarInitiatives.jsx";
+import { getAll } from "@/lib/contentNocodb.astro";
 
 import { getInitiatives, getInitiativeDetails } from "@/lib/initiatives";
 
@@ -251,7 +252,11 @@ const retourName =
               Partenaires de l'initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              Information non disponible
+              {
+                product[
+                  "L’initiative a-t-elle été soutenue par des partenaires ?"
+                ]
+              }
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -283,7 +288,7 @@ const retourName =
               Cibles de l'initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              Information non disponible
+              {product["Cibles de l’initiative"]}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
