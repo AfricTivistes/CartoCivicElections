@@ -100,23 +100,4 @@ export const getAll = async (tableId: string, query: object = {}) => {
   }
 };
 
-export const insertData = async (tableId: string, data: object[]) => {
-  try {
-    const response = await api.post(`/api/v2/tables/${tableId}/records`, data);
-    return response.data;
-  } catch (error) {
-    console.error('Error inserting data:', error);
-    throw error;
-  }
-};
-
-export const deleteData = async (tableId: string, recordIds: string[]) => {
-  try {
-    const response = await api.delete(`/api/v2/tables/${tableId}/records`, { data: recordIds });
-    return response.data;
-  } catch (error) {
-    console.error('Error deleting data:', error);
-    throw error;
-  }
-};
 ---
