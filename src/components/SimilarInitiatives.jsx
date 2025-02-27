@@ -3,17 +3,10 @@ import { useMemo } from 'react';
 import Card from './Card';
 
 const SimilarInitiatives = ({ currentInitiative, allInitiatives, language }) => {
-  // Vérifier que les props sont valides pour éviter les erreurs
-  if (!currentInitiative || !allInitiatives || !Array.isArray(allInitiatives)) {
-    console.warn('SimilarInitiatives: Props invalides', { currentInitiative, allInitiatives });
-    return <div className="mt-12">Aucune initiative similaire disponible</div>;
-  }
-
   const similarInitiatives = useMemo(() => {
     // Filtrer l'initiative courante
     const otherInitiatives = allInitiatives.filter(
-      (initiative) => initiative && currentInitiative && 
-      initiative.title !== currentInitiative.title
+      (initiative) => initiative.title !== currentInitiative.title
     );
 
     // Trouver les initiatives de la même catégorie
