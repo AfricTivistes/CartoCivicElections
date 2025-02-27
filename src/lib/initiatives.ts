@@ -103,9 +103,32 @@ export async function getInitiativeDetails(language: string = "fr") {
   });
 }
 
-// Placeholder for rate limiting implementation.  Needs to be implemented separately.
+// Implémentation du rate limiting pour respecter la limite de 5 requêtes par seconde
+// On utilise un système de file d'attente avec délai contrôlé
+let lastRequestTime = 0;
+const minTimeBetweenRequests = 200; // 200ms = 5 requêtes par seconde maximum
+
 async function getRateLimitedAll(tableId, query) {
-  //Implement rate limiting logic here to ensure no more than 5 requests per second.
-  //This could involve using a queue, timers, or a dedicated rate limiting library.
-  return await getAll(tableId, query);
+  // Calculer le délai nécessaire depuis la dernière requête
+  const now = Date.now();
+  const timeElapsedSinceLastRequest = now - lastRequestTime;
+  const timeToWait = Math.max(0, minTimeBetweenRequests - timeElapsedSinceLastRequest);
+  
+  // Si nécessaire, attendre avant d'envoyer la requête
+  if (timeToWait > 0) {
+    await new Promise(resolve => setTimeout(resolve, timeToWait));
+  }
+  
+  // Mettre à jour le temps de la dernière requête
+  lastRequestTime = Date.now();
+  
+  // Exécuter la requête
+  try {
+    const response = await getAll(tableId, query);
+    return response;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des données:", error.message);
+    // En cas d'erreur, retourner un objet avec une liste vide
+    return { list: [] };
+  }
 }
