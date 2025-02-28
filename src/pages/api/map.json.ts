@@ -1,16 +1,26 @@
 import type { APIRoute } from "astro";
 import { getAll } from "@/lib/contentNocodb.astro";
-import countryCoordinates from "@/utils/pays.json";
+import paysData from "@/utils/pays.json";
 
 export const GET: APIRoute = async ({ params, request }) => {
   try {
     // Extraction de la langue à partir de l'URL complète
     const url = new URL(request.url);
-
+    
     // Détection de la langue basée sur l'URL
-    const lang = "fr";
+    const lang = url.pathname.startsWith("/fr") ? "fr" : "en";
 
     console.log("Current language:", lang, "URL:", url.toString());
+    
+    // Conversion de l'objet pays pour le rendre compatible avec le code existant
+    const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) => {
+      acc[key] = value.coords;
+      // Ajouter aussi les noms en anglais pour permettre la correspondance
+      if (lang === "en" && value.en) {
+        acc[value.en] = value.coords;
+      }
+      return acc;
+    }, {});
 
     // Utilisation d'un cache en mémoire pour éviter les requêtes répétées
     const cacheKey = `map_data_${lang}`;
