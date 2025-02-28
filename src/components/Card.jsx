@@ -1,5 +1,6 @@
 import { slug } from "@/utils/slug";
 import SecondaryCTA from "@components/ui/buttons/SecondaryCTA";
+import paysData from "@/utils/pays.json";
 
 const Card = ({ title, country, category, description, langue, logo = "" }) => {
   const details = langue === "fr" ? "Voir les détails" : "View details";
@@ -8,6 +9,11 @@ const Card = ({ title, country, category, description, langue, logo = "" }) => {
       ? `/fr/initiatives/${slug(title)}`
       : `/initiatives/${slug(title)}`;
   const basePath = langue === "fr" ? "/fr/initiatives" : "/initiatives";
+  
+  // Traduire le nom du pays en anglais si on est en mode anglais
+  const displayCountry = langue === "fr" 
+    ? country 
+    : (paysData[country]?.en || country); // Utilise le nom en anglais s'il existe, sinon garde le nom original
 
   return (
     <div className="to-orange-50 transform overflow-hidden rounded-lg border border-gray-100 bg-gradient-to-br from-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
@@ -33,7 +39,7 @@ const Card = ({ title, country, category, description, langue, logo = "" }) => {
             href={`${basePath}?tags=${encodeURIComponent(country)}`}
             className="text-primary-700 text-lg hover:underline"
           >
-            {country}
+            {displayCountry}
           </a>
         </div>
 

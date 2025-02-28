@@ -1,12 +1,17 @@
 ---
 import { slug } from "@/utils/slug.ts";
-import { getAll } from "@/lib/contentNocodb.astro";
-import countryCoordinates from "@/utils/pays.json";
+  import { getAll } from "@/lib/contentNocodb.astro";
+  import paysData from "@/utils/pays.json";
 interface Props {
   title?: string;
 }
 
 const { title } = Astro.props;
+// Conversion de l'objet pays pour le rendre compatible avec le code existant
+const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) => {
+  acc[key] = value.coords;
+  return acc;
+}, {});
 ---
 <section class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full">
   <h1
@@ -338,7 +343,7 @@ const { title } = Astro.props;
     list-style: none;
     border: none;
   }
-  
+
   .initiatives-list {
     margin-top: 8px;
   }
@@ -350,7 +355,7 @@ const { title } = Astro.props;
     border: none;
     padding: 0;
   }
-  
+
   .custom-popup ul li a {
     display: inline-block;
     text-align: left;
@@ -360,7 +365,7 @@ const { title } = Astro.props;
     box-shadow: none;
     outline: none;
   }
-  
+
   /* Supprimer l'encadrement bleu de focus sur les liens */
   .custom-popup ul li a:focus,
   .custom-popup ul li a:active,

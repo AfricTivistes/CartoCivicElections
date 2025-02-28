@@ -1,10 +1,24 @@
 import { useState, useMemo, useEffect } from "react";
 import Card from "./Card";
+import paysData from "../utils/pays.json";
 
 const InitiativesGrid = ({ initiatives, language }) => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedThematic, setSelectedThematic] = useState("");
+  
+  // Fonction pour traduire le nom d'un pays si nécessaire
+  const translateCountryName = (countryName) => {
+    if (language === "en") {
+      // Rechercher le pays français correspondant et obtenir son nom anglais
+      for (const [frName, data] of Object.entries(paysData)) {
+        if (frName === countryName && data.en) {
+          return data.en;
+        }
+      }
+    }
+    return countryName; // Par défaut, renvoyer le nom non traduit
+  };
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -119,7 +133,7 @@ const InitiativesGrid = ({ initiatives, language }) => {
             </option>
             {countries.map((country) => (
               <option key={country} value={country}>
-                {country}
+                {language === "en" ? translateCountryName(country) : country}
               </option>
             ))}
           </select>
