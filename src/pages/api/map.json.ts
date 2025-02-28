@@ -1,5 +1,4 @@
-
-import type { APIRoute } from 'astro';
+import type { APIRoute } from "astro";
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 
@@ -7,11 +6,11 @@ export const GET: APIRoute = async ({ params, request }) => {
   try {
     // Extraction de la langue à partir de l'URL complète
     const url = new URL(request.url);
-    
+
     // Détection de la langue basée sur l'URL
-    const lang = url.pathname.startsWith('/fr') || url.pathname.includes('/fr/') ? 'fr' : 'en';
-    
-    console.log('Current language:', lang, 'URL:', url.toString());
+    const lang = "fr";
+
+    console.log("Current language:", lang, "URL:", url.toString());
 
     // Utilisation d'un cache en mémoire pour éviter les requêtes répétées
     const cacheKey = `map_data_${lang}`;
@@ -28,10 +27,7 @@ export const GET: APIRoute = async ({ params, request }) => {
     const tableId = "m9erh9bplb8jihp";
     const query = {
       viewId: "vwdobxvm00ayso6s",
-      fields: [
-        "Nom de l'initiative",
-        "Pays",
-      ],
+      fields: ["Nom de l'initiative", "Pays"],
       where: `(Status,eq,Traiter)~and(Langue,eq,${lang})`,
     };
 
@@ -39,15 +35,19 @@ export const GET: APIRoute = async ({ params, request }) => {
 
     // Traitement des données par pays de manière plus efficace
     const countryData = {};
-    
+
     if (Initiatives?.list && Array.isArray(Initiatives.list)) {
       Initiatives.list.forEach((initiative) => {
         const country = initiative["Pays"];
         if (country) {
           if (!countryData[country]) {
-            countryData[country] = { count: 0 };
+            countryData[country] = { count: 0, initiatives: [] };
           }
           countryData[country].count += 1;
+          // S'assurer que le nom de l'initiative est une chaîne valide avant de l'ajouter
+          const initiativeName =
+            initiative["Nom de l'initiative"] || "Initiative sans nom";
+          countryData[country].initiatives.push(initiativeName);
         }
       });
     } else {
@@ -60,7 +60,11 @@ export const GET: APIRoute = async ({ params, request }) => {
       features: Object.entries(countryData)
         .map(([country, data]) => {
           const coordinates = countryCoordinates[country];
-          if (coordinates && Array.isArray(coordinates) && coordinates.length === 2) {
+          if (
+            coordinates &&
+            Array.isArray(coordinates) &&
+            coordinates.length === 2
+          ) {
             // Les coordonnées dans pays.json sont déjà [longitude, latitude]
             // donc on respecte ce format et on n'inverse pas
             return {
@@ -71,8 +75,10 @@ export const GET: APIRoute = async ({ params, request }) => {
               },
               properties: {
                 title: country,
-                description: `${data.count} initiative${data.count > 1 ? "s" : ""} ${lang === "fr" ? "dans ce pays" : "in this country"}`,
                 count: data.count,
+                country: country,
+                initiatives: data.initiatives || [],
+                // Les slugs seront générés côté client pour simplifier
               },
             };
           }
@@ -95,12 +101,15 @@ export const GET: APIRoute = async ({ params, request }) => {
     });
   } catch (error) {
     console.error("Erreur lors de la génération des données de carte:", error);
-    return new Response(JSON.stringify({ error: "Erreur lors du chargement des données" }), {
-      status: 500,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
+    return new Response(
+      JSON.stringify({ error: "Erreur lors du chargement des données" }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
       },
-    });
+    );
   }
 };

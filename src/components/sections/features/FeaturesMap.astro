@@ -1,4 +1,5 @@
 ---
+import { slug } from "@/utils/slug.ts";
 import { getAll } from "@/lib/contentNocodb.astro";
 import countryCoordinates from "@/utils/pays.json";
 interface Props {
@@ -19,7 +20,7 @@ const { title } = Astro.props;
 
 <script>
   import maplibregl from 'maplibre-gl';
-  import { slug } from '@/utils/slug';
+  import { slug } from "@/utils/slug.ts";
 
   // Initialize the map when the component mounts
   const initMap = () => {
@@ -52,25 +53,41 @@ const { title } = Astro.props;
 
     // African countries data points
 
-    let points;
-
-    const fetchPoints = async () => {
-      const response = await fetch('/api/map.json');
-      points = await response.json();
+    let points = {
+      type: "FeatureCollection",
+      features: []
     };
 
+    // Charger les points
+    const fetchPoints = async () => {
+      try {
+        const response = await fetch('/api/map.json');
+        if (response.ok) {
+          const data = await response.json();
 
-    const pointsPromise = fetchPoints();
+          // Mettre à jour la source de données une fois les points chargés
+          if (map.getSource('initiatives')) {
+            map.getSource('initiatives').setData(data);
+          }
+          return data;
+        }
+      } catch (error) {
+        console.error("Erreur lors du chargement des points:", error);
+      }
+    };
 
-    map.on('load', () => {
+    map.on('load', async () => {
       // Add the source for clusters
       map.addSource('initiatives', {
         type: 'geojson',
-        data: points,
+        data: points, // Commence avec un objet vide
         cluster: true,
         clusterMaxZoom: 14,
         clusterRadius: 50
       });
+
+      // Charger les données après l'initialisation de la source
+      const loadedPoints = await fetchPoints();
 
       // Add cluster layer
       map.addLayer({
@@ -131,23 +148,100 @@ const { title } = Astro.props;
 
       // Create a popup for individual points
       const popup = new maplibregl.Popup({
-        closeButton: false,
-        closeOnClick: false
+        closeButton: true,
+        closeOnClick: false,
+        maxWidth: '300px',
+        className: 'custom-popup'
       });
 
       map.on('mouseenter', 'unclustered-point', (e) => {
         map.getCanvas().style.cursor = 'pointer';
 
         const coordinates = e.features[0].geometry.coordinates.slice();
-        const { title, description, count, country } = e.features[0].properties;
-        const link = `/initiatives/${slug(title)}`;
+        const { title, description, count, country, initiatives } = e.features[0].properties;
+
+        // Créer la liste des initiatives (limiter à 5 par exemple)
+        let initiativesList = '';
+
+        // Parse les initiatives si elles sont dans un format de chaîne JSON
+        let initiativesArray = initiatives;
+        if (typeof initiatives === 'string') {
+          try {
+            initiativesArray = JSON.parse(initiatives);
+          } catch (e) {
+            console.error("Erreur lors du parsing des initiatives:", e);
+            initiativesArray = [];
+          }
+        }
+
+        // Vérifier si c'est un tableau
+        if (!Array.isArray(initiativesArray)) {
+          initiativesArray = [];
+        }
+
+        const displayLimit = Math.min(initiativesArray.length, 5);
+
+        // Récupérer les noms et slugs des initiatives
+        const initiativesData = Array.isArray(e.features[0].properties.initiativesData) 
+          ? e.features[0].properties.initiativesData 
+          : [];
+
+        if (initiativesArray && initiativesArray.length > 0) {
+          initiativesList = '<ul class="mt-2 text-sm">';
+          for (let i = 0; i < displayLimit; i++) {
+            const initiativeName = initiativesArray[i];
+            // Utiliser la fonction slug importée pour assurer la cohérence
+            const initiativeSlug = slug(initiativeName);
+
+            const currentPath = window.location.pathname;
+            const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
+            const initiativeLink = `${basePath}/initiatives/${initiativeSlug}`;
+
+            initiativesList += `<li class="my-1 flex items-start">
+              <span class="mr-1">•</span>
+              <a href="${initiativeLink}" class="text-orange-600 hover:underline">${initiativeName}</a>
+            </li>`;
+          }
+
+          if (initiativesArray.length > displayLimit) {
+            // Déterminer la langue en fonction de l'URL
+            const currentLang = window.location.pathname.startsWith('/fr') ? 'fr' : 'en';
+            const moreText = currentLang === 'fr' 
+              ? `... et ${initiativesArray.length - displayLimit} autres` 
+              : `... and ${initiativesArray.length - displayLimit} more`;
+
+            initiativesList += `<li>• ${moreText}</li>`;
+          }
+
+          initiativesList += '</ul>';
+        }
+
+        const currentPath = window.location.pathname;
+        const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
+        const filterLink = `${basePath}/initiatives/?tags=${encodeURIComponent(title)}`;
+
+        // Déterminer la langue actuelle basée sur l'URL
+        const currentLang = window.location.pathname.startsWith('/fr') ? 'fr' : 'en';
+
+        // Textes traduits
+        const viewAllText = currentLang === 'fr' 
+          ? `Voir toutes les initiatives de ${title}` 
+          : `View all initiatives from ${title}`;
+        const descriptionn = currentLang === 'fr' 
+          ? `${count} initiative${count > 1 ? "s" : ""} dans ce pays` 
+          : `${count} initiative${count > 1 ? "s" : ""} in this country`;
 
         const popupContent = `
-          <a href="/initiatives/${title.toLowerCase()}" class="block">
+          <div class="block popup-content">
             <h3 class="font-bold text-lg">${title}</h3>
-            <p class="text-sm">${description}</p>
-            <p class="text-sm mt-2">${count} initiative${count > 1 ? 's' : ''}</p>
-          </a>
+            <p class="text-sm">${descriptionn}</p>
+            <div class="initiatives-list">
+              ${initiativesList}
+            </div>
+            <a href="${filterLink}" class="block mt-3 text-sm text-orange-600 hover:underline">
+              ${viewAllText}
+            </a>
+          </div>
         `;
 
         popup.setLngLat(coordinates)
@@ -155,17 +249,42 @@ const { title } = Astro.props;
           .addTo(map);
       });
 
-      map.on('mouseleave', 'unclustered-point', () => {
+      // Modifier le comportement de mouseleave pour qu'il ne ferme pas immédiatement
+      map.on('mouseleave', 'unclustered-point', (e) => {
         map.getCanvas().style.cursor = '';
-        popup.remove();
+
+        // Attendre avant de fermer le popup pour permettre à l'utilisateur d'interagir avec
+        setTimeout(() => {
+          // Si le curseur est sur le popup, ne pas le fermer
+          const popupElement = document.querySelector('.maplibregl-popup');
+          if (popupElement) {
+            const rect = popupElement.getBoundingClientRect();
+            // Utiliser e.originalEvent pour accéder aux coordonnées de la souris
+            const x = e.originalEvent?.clientX || 0;
+            const y = e.originalEvent?.clientY || 0;
+
+            // Si la souris est en dehors du popup, le fermer
+            if (!(x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)) {
+              popup.remove();
+            }
+          }
+        }, 100);
+      });
+
+      // Ajouter un gestionnaire pour le popup lui-même
+      document.addEventListener('mouseover', (e) => {
+        // Si la souris est sur le popup, empêcher sa fermeture
+        if (e.target.closest('.maplibregl-popup')) {
+          document.querySelector('.maplibregl-popup').classList.add('active');
+        }
       });
 
       // Add click handler for unclustered points
       map.on('click', 'unclustered-point', (e) => {
-        const { country } = e.features[0].properties;
+        const { title } = e.features[0].properties;
         const currentPath = window.location.pathname;
         const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-        window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(country)}`;
+        window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(title)}`;
       });
     });
 
@@ -195,6 +314,9 @@ const { title } = Astro.props;
     map.on('mouseleave', 'clusters', () => {
       map.getCanvas().style.cursor = '';
     });
+
+    // Rafraîchir les données toutes les 30 secondes si nécessaire
+    // setInterval(fetchPoints, 30000);
   };
 
   // Initialize map when component mounts
@@ -203,4 +325,66 @@ const { title } = Astro.props;
 
 <style is:global>
   @import 'maplibre-gl/dist/maplibre-gl.css';
+
+  .custom-popup .maplibregl-popup-content {
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .custom-popup ul {
+    margin-top: 8px;
+    padding-left: 5px;
+    list-style: none;
+    border: none;
+  }
+  
+  .initiatives-list {
+    margin-top: 8px;
+  }
+
+  .custom-popup ul li {
+    margin-bottom: 4px;
+    display: flex;
+    align-items: flex-start;
+    border: none;
+    padding: 0;
+  }
+  
+  .custom-popup ul li a {
+    display: inline-block;
+    text-align: left;
+    word-break: normal;
+    overflow-wrap: anywhere;
+    border: none;
+    box-shadow: none;
+    outline: none;
+  }
+  
+  /* Supprimer l'encadrement bleu de focus sur les liens */
+  .custom-popup ul li a:focus,
+  .custom-popup ul li a:active,
+  .custom-popup ul li a:hover {
+    outline: none;
+    border: none;
+    box-shadow: none;
+  }
+
+  .custom-popup .maplibregl-popup-content:hover {
+    cursor: default;
+  }
+
+  .custom-popup.active {
+    z-index: 10;
+  }
+
+  .popup-content a {
+    display: inline-block;
+    transition: all 0.2s ease;
+  }
+
+  .popup-content a:hover {
+    color: #EA580C;
+    text-decoration: underline;
+  }
 </style>
