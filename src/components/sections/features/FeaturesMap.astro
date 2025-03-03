@@ -223,14 +223,16 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
 
         const currentPath = window.location.pathname;
         const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-        const filterLink = `${basePath}/initiatives/?tags=${encodeURIComponent(title)}`;
+        // Récupérer le pays original pour le lien de filtre
+        const originalCountry = e.features[0].properties.originalCountry || title;
+        const filterLink = `${basePath}/initiatives/?tags=${encodeURIComponent(originalCountry)}`;
 
         // Déterminer la langue actuelle basée sur l'URL
         const currentLang = window.location.pathname.startsWith('/fr') ? 'fr' : 'en';
 
         // Textes traduits
         const viewAllText = currentLang === 'fr' 
-          ? `Voir toutes les initiatives de ${title}` 
+          ? `Voir toutes les initiatives de ${originalCountry}` 
           : `View all initiatives from ${title}`;
         const descriptionn = currentLang === 'fr' 
           ? `${count} initiative${count > 1 ? "s" : ""} dans ce pays` 
@@ -286,10 +288,11 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
 
       // Add click handler for unclustered points
       map.on('click', 'unclustered-point', (e) => {
-        const { title } = e.features[0].properties;
+        const { originalCountry, title } = e.features[0].properties;
+        const countryParam = originalCountry || title; // Utiliser le pays original pour le filtre
         const currentPath = window.location.pathname;
         const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
-        window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(title)}`;
+        window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(countryParam)}`;
       });
     });
 
