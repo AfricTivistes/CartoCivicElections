@@ -77,11 +77,6 @@ export const GET: APIRoute = async ({ params, request }) => {
           ) {
             // Les coordonnées dans pays.json sont déjà [longitude, latitude]
             // donc on respecte ce format et on n'inverse pas
-            // Traduction du nom du pays selon la langue
-            const displayCountry = lang === "en" && paysData[country]?.en 
-              ? paysData[country].en 
-              : country;
-            
             return {
               type: "Feature",
               geometry: {
@@ -89,10 +84,9 @@ export const GET: APIRoute = async ({ params, request }) => {
                 coordinates: coordinates,
               },
               properties: {
-                title: displayCountry, // Utiliser le nom traduit
+                title: country,
                 count: data.count,
-                country: country, // Conserver le nom original pour référence
-                originalCountry: country, // Ajouter le nom original
+                country: country,
                 initiatives: data.initiatives || [],
                 // Les slugs seront générés côté client pour simplifier
               },
