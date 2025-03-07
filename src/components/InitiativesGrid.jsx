@@ -6,7 +6,6 @@ const InitiativesGrid = ({ initiatives, language }) => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedThematic, setSelectedThematic] = useState("");
-
   // Fonction pour traduire le nom d'un pays si nécessaire
   const translateCountryName = (countryName) => {
     if (language === "en") {
