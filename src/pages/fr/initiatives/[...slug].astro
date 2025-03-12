@@ -13,6 +13,7 @@ import Icon from "@/components/ui/icons/Icon.astro";
 import InitiativesGrid from "@/components/InitiativesGrid.jsx";
 import SimilarInitiatives from "@/components/SimilarInitiatives.jsx";
 import { getAll } from "@/lib/contentNocodb.astro";
+import InitiativeImage from "@/components/InitiativeImage.astro"; // Added import
 
 import { getInitiatives, getInitiativeDetails } from "@/lib/initiatives";
 
@@ -91,17 +92,7 @@ const retourName =
         </h2>
       </div>
       <div>
-        <Image
-          id="fadeInMoveRight"
-          src={product["image-logo"]
-            ? product["image-logo"][0].signedUrl
-            : "https://placehold.co/600x600?text=Soobu+No+Image+Available"}
-          class="w-[600px]"
-          alt={"image alt"}
-          width="600"
-          height="600"
-          loading={"eager"}
-        />
+        <InitiativeImage initiative={product["Nom de l'initiative"]} alt={`Logo de ${product["Nom de l'initiative"]}`} className="w-[600px]" width="600" height="600" loading="lazy"/>
       </div>
     </div>
   </section>
