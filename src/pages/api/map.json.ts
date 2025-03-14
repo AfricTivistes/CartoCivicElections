@@ -6,12 +6,11 @@ export const GET: APIRoute = async ({ params, request }) => {
   try {
     // Extraction de la langue à partir de l'URL complète
     const url = new URL(request.url);
-    
+
     // Détection de la langue basée sur l'URL
     const lang = url.pathname.startsWith("/fr") ? "fr" : "en";
 
-    console.log("Current language:", lang, "URL:", url.toString());
-    
+
     // Conversion de l'objet pays pour le rendre compatible avec le code existant
     const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) => {
       acc[key] = value.coords;
@@ -21,18 +20,6 @@ export const GET: APIRoute = async ({ params, request }) => {
       }
       return acc;
     }, {});
-
-    // Utilisation d'un cache en mémoire pour éviter les requêtes répétées
-    const cacheKey = `map_data_${lang}`;
-    if (global[cacheKey]) {
-      console.log("Serving from cache");
-      return new Response(global[cacheKey], {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      });
-    }
 
     const tableId = "m9erh9bplb8jihp";
     const query = {
@@ -97,16 +84,11 @@ export const GET: APIRoute = async ({ params, request }) => {
         .filter(Boolean), // Supprime les entrées null
     };
 
-    // Mise en cache du résultat
-    const jsonResponse = JSON.stringify(points);
-    global[cacheKey] = jsonResponse;
-
     // Retourne la réponse JSON
-    return new Response(jsonResponse, {
+    return new Response(JSON.stringify(points), {
       headers: {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "public, max-age=300", // Cache pendant 5 minutes
       },
     });
   } catch (error) {

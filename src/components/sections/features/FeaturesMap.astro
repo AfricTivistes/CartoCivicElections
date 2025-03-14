@@ -1,19 +1,14 @@
 ---
-import { slug } from "@/utils/slug.ts";
-  import { getAll } from "@/lib/contentNocodb.astro";
-  import paysData from "@/utils/pays.json";
 interface Props {
   title?: string;
 }
 
 const { title } = Astro.props;
-// Conversion de l'objet pays pour le rendre compatible avec le code existant
-const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) => {
-  acc[key] = value.coords;
-  return acc;
-}, {});
 ---
-<section class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full">
+
+<section
+  class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full"
+>
   <h1
     class="block text-balance text-center text-3xl font-bold tracking-tight text-neutral-800 dark:text-neutral-200 sm:text-4xl lg:text-6xl lg:leading-tight"
   >
@@ -24,33 +19,47 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
 </section>
 
 <script>
-  import maplibregl from 'maplibre-gl';
+  import maplibregl from "maplibre-gl";
   import { slug } from "@/utils/slug.ts";
+  import paysData from "@/utils/pays.json";
+
+  const translateCountryName = (countryName: string, langue: string) => {
+    if (langue === "en") {
+      for (const [frName, data] of Object.entries(paysData)) {
+        if (frName === countryName && data.en) {
+          return data.en;
+        }
+      }
+    }
+    return countryName;
+  };
 
   // Initialize the map when the component mounts
   const initMap = () => {
     const map = new maplibregl.Map({
-      container: 'map',
+      container: "map",
       style: {
         version: 8,
         sources: {
-          'osm': {
-            type: 'raster',
-            tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+          osm: {
+            type: "raster",
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
             tileSize: 256,
-            attribution: '© OpenStreetMap Contributors'
-          }
+            attribution: "© OpenStreetMap Contributors",
+          },
         },
-        layers: [{
-          id: 'osm',
-          type: 'raster',
-          source: 'osm',
-          minzoom: 0,
-          maxzoom: 19
-        }]
+        layers: [
+          {
+            id: "osm",
+            type: "raster",
+            source: "osm",
+            minzoom: 0,
+            maxzoom: 19,
+          },
+        ],
       },
       center: [20, 0], // Center of Africa
-      zoom: 3
+      zoom: 3,
     });
 
     // Add navigation controls
@@ -60,19 +69,19 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
 
     let points = {
       type: "FeatureCollection",
-      features: []
+      features: [],
     };
 
     // Charger les points
     const fetchPoints = async () => {
       try {
-        const response = await fetch('/api/map.json');
+        const response = await fetch("/api/map.json");
         if (response.ok) {
           const data = await response.json();
 
           // Mettre à jour la source de données une fois les points chargés
-          if (map.getSource('initiatives')) {
-            map.getSource('initiatives').setData(data);
+          if (map.getSource("initiatives")) {
+            map.getSource("initiatives").setData(data);
           }
           return data;
         }
@@ -81,14 +90,14 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
       }
     };
 
-    map.on('load', async () => {
+    map.on("load", async () => {
       // Add the source for clusters
-      map.addSource('initiatives', {
-        type: 'geojson',
+      map.addSource("initiatives", {
+        type: "geojson",
         data: points, // Commence avec un objet vide
         cluster: true,
         clusterMaxZoom: 14,
-        clusterRadius: 50
+        clusterRadius: 50,
       });
 
       // Charger les données après l'initialisation de la source
@@ -96,81 +105,74 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
 
       // Add cluster layer
       map.addLayer({
-        id: 'clusters',
-        type: 'circle',
-        source: 'initiatives',
-        filter: ['has', 'point_count'],
+        id: "clusters",
+        type: "circle",
+        source: "initiatives",
+        filter: ["has", "point_count"],
         paint: {
-          'circle-color': [
-            'step',
-            ['get', 'point_count'],
-            '#FB923C', // Primary orange color for small clusters
+          "circle-color": [
+            "step",
+            ["get", "point_count"],
+            "#FB923C", // Primary orange color for small clusters
             10,
-            '#EA580C', // Darker orange for medium clusters
+            "#EA580C", // Darker orange for medium clusters
             30,
-            '#9A3412' // Darkest orange for large clusters
+            "#9A3412", // Darkest orange for large clusters
           ],
-          'circle-radius': [
-            'step',
-            ['get', 'point_count'],
-            20,
-            10,
-            30,
-            30,
-            40
-          ]
-        }
+          "circle-radius": ["step", ["get", "point_count"], 20, 10, 30, 30, 40],
+        },
       });
 
       // Add cluster count
       map.addLayer({
-        id: 'cluster-count',
-        type: 'symbol',
-        source: 'initiatives',
-        filter: ['has', 'point_count'],
+        id: "cluster-count",
+        type: "symbol",
+        source: "initiatives",
+        filter: ["has", "point_count"],
         layout: {
-          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-          'text-size': 12
+          "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+          "text-size": 12,
         },
         paint: {
-          'text-color': '#ffffff'
-        }
+          "text-color": "#ffffff",
+        },
       });
 
       // Add unclustered point layer
       map.addLayer({
-        id: 'unclustered-point',
-        type: 'circle',
-        source: 'initiatives',
-        filter: ['!', ['has', 'point_count']],
+        id: "unclustered-point",
+        type: "circle",
+        source: "initiatives",
+        filter: ["!", ["has", "point_count"]],
         paint: {
-          'circle-color': '#FB923C',
-          'circle-radius': 8,
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#fff'
-        }
+          "circle-color": "#FB923C",
+          "circle-radius": 8,
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#fff",
+        },
       });
 
       // Create a popup for individual points
       const popup = new maplibregl.Popup({
         closeButton: true,
         closeOnClick: false,
-        maxWidth: '300px',
-        className: 'custom-popup'
+        maxWidth: "300px",
+        className: "custom-popup",
       });
 
-      map.on('mouseenter', 'unclustered-point', (e) => {
-        map.getCanvas().style.cursor = 'pointer';
+      map.on("mouseenter", "unclustered-point", (e) => {
+        map.getCanvas().style.cursor = "pointer";
 
         const coordinates = e.features[0].geometry.coordinates.slice();
-        const { title, description, count, country, initiatives } = e.features[0].properties;
+        const { title, description, count, country, initiatives } =
+          e.features[0].properties;
 
         // Créer la liste des initiatives (limiter à 5 par exemple)
-        let initiativesList = '';
+        let initiativesList = "";
 
         // Parse les initiatives si elles sont dans un format de chaîne JSON
         let initiativesArray = initiatives;
-        if (typeof initiatives === 'string') {
+        if (typeof initiatives === "string") {
           try {
             initiativesArray = JSON.parse(initiatives);
           } catch (e) {
@@ -187,8 +189,10 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
         const displayLimit = Math.min(initiativesArray.length, 5);
 
         // Récupérer les noms et slugs des initiatives
-        const initiativesData = Array.isArray(e.features[0].properties.initiativesData) 
-          ? e.features[0].properties.initiativesData 
+        const initiativesData = Array.isArray(
+          e.features[0].properties.initiativesData
+        )
+          ? e.features[0].properties.initiativesData
           : [];
 
         if (initiativesArray && initiativesArray.length > 0) {
@@ -199,7 +203,7 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
             const initiativeSlug = slug(initiativeName);
 
             const currentPath = window.location.pathname;
-            const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
+            const basePath = currentPath.startsWith("/fr") ? "/fr" : "";
             const initiativeLink = `${basePath}/initiatives/${initiativeSlug}`;
 
             initiativesList += `<li class="my-1 flex items-start">
@@ -210,35 +214,43 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
 
           if (initiativesArray.length > displayLimit) {
             // Déterminer la langue en fonction de l'URL
-            const currentLang = window.location.pathname.startsWith('/fr') ? 'fr' : 'en';
-            const moreText = currentLang === 'fr' 
-              ? `... et ${initiativesArray.length - displayLimit} autres` 
-              : `... and ${initiativesArray.length - displayLimit} more`;
+            const currentLang = window.location.pathname.startsWith("/fr")
+              ? "fr"
+              : "en";
+            const moreText =
+              currentLang === "fr"
+                ? `... et ${initiativesArray.length - displayLimit} autres`
+                : `... and ${initiativesArray.length - displayLimit} more`;
 
             initiativesList += `<li>• ${moreText}</li>`;
           }
 
-          initiativesList += '</ul>';
+          initiativesList += "</ul>";
         }
 
         const currentPath = window.location.pathname;
-        const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
+        const basePath = currentPath.startsWith("/fr") ? "/fr" : "";
         const filterLink = `${basePath}/initiatives/?tags=${encodeURIComponent(title)}`;
 
         // Déterminer la langue actuelle basée sur l'URL
-        const currentLang = window.location.pathname.startsWith('/fr') ? 'fr' : 'en';
+        const currentLang = window.location.pathname.startsWith("/fr")
+          ? "fr"
+          : "en";
 
-        // Textes traduits
-        const viewAllText = currentLang === 'fr' 
-          ? `Voir toutes les initiatives de ${title}` 
-          : `View all initiatives from ${title}`;
-        const descriptionn = currentLang === 'fr' 
-          ? `${count} initiative${count > 1 ? "s" : ""} dans ce pays` 
-          : `${count} initiative${count > 1 ? "s" : ""} in this country`;
+        const countryName = translateCountryName(title, currentLang);
+        console.log("Country name:", countryName);
+        const viewAllText =
+          currentLang === "fr"
+            ? `Voir toutes les initiatives de ${countryName}`
+            : `View all initiatives from ${countryName}`;
+        const descriptionn =
+          currentLang === "fr"
+            ? `${count} initiative${count > 1 ? "s" : ""} dans ce pays`
+            : `${count} initiative${count > 1 ? "s" : ""} in this country`;
 
         const popupContent = `
           <div class="block popup-content">
-            <h3 class="font-bold text-lg">${title}</h3>
+            <h3 class="font-bold text-lg">${countryName}</h3>
             <p class="text-sm">${descriptionn}</p>
             <div class="initiatives-list">
               ${initiativesList}
@@ -249,19 +261,17 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
           </div>
         `;
 
-        popup.setLngLat(coordinates)
-          .setHTML(popupContent)
-          .addTo(map);
+        popup.setLngLat(coordinates).setHTML(popupContent).addTo(map);
       });
 
       // Modifier le comportement de mouseleave pour qu'il ne ferme pas immédiatement
-      map.on('mouseleave', 'unclustered-point', (e) => {
-        map.getCanvas().style.cursor = '';
+      map.on("mouseleave", "unclustered-point", (e) => {
+        map.getCanvas().style.cursor = "";
 
         // Attendre avant de fermer le popup pour permettre à l'utilisateur d'interagir avec
         setTimeout(() => {
           // Si le curseur est sur le popup, ne pas le fermer
-          const popupElement = document.querySelector('.maplibregl-popup');
+          const popupElement = document.querySelector(".maplibregl-popup");
           if (popupElement) {
             const rect = popupElement.getBoundingClientRect();
             // Utiliser e.originalEvent pour accéder aux coordonnées de la souris
@@ -269,7 +279,14 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
             const y = e.originalEvent?.clientY || 0;
 
             // Si la souris est en dehors du popup, le fermer
-            if (!(x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom)) {
+            if (
+              !(
+                x >= rect.left &&
+                x <= rect.right &&
+                y >= rect.top &&
+                y <= rect.bottom
+              )
+            ) {
               popup.remove();
             }
           }
@@ -277,47 +294,46 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
       });
 
       // Ajouter un gestionnaire pour le popup lui-même
-      document.addEventListener('mouseover', (e) => {
+      document.addEventListener("mouseover", (e) => {
         // Si la souris est sur le popup, empêcher sa fermeture
-        if (e.target.closest('.maplibregl-popup')) {
-          document.querySelector('.maplibregl-popup').classList.add('active');
+        if (e.target.closest(".maplibregl-popup")) {
+          document.querySelector(".maplibregl-popup").classList.add("active");
         }
       });
 
       // Add click handler for unclustered points
-      map.on('click', 'unclustered-point', (e) => {
+      map.on("click", "unclustered-point", (e) => {
         const { title } = e.features[0].properties;
         const currentPath = window.location.pathname;
-        const basePath = currentPath.startsWith('/fr') ? '/fr' : '';
+        const basePath = currentPath.startsWith("/fr") ? "/fr" : "";
         window.location.href = `${basePath}/initiatives/?tags=${encodeURIComponent(title)}`;
       });
     });
 
     // Inspect a cluster on click
-    map.on('click', 'clusters', (e) => {
+    map.on("click", "clusters", (e) => {
       const features = map.queryRenderedFeatures(e.point, {
-        layers: ['clusters']
+        layers: ["clusters"],
       });
       const clusterId = features[0].properties.cluster_id;
-      map.getSource('initiatives').getClusterExpansionZoom(
-        clusterId,
-        (err, zoom) => {
+      map
+        .getSource("initiatives")
+        .getClusterExpansionZoom(clusterId, (err, zoom) => {
           if (err) return;
 
           map.easeTo({
             center: features[0].geometry.coordinates,
-            zoom: zoom
+            zoom: zoom,
           });
-        }
-      );
+        });
     });
 
     // Show pointer cursor on hover
-    map.on('mouseenter', 'clusters', () => {
-      map.getCanvas().style.cursor = 'pointer';
+    map.on("mouseenter", "clusters", () => {
+      map.getCanvas().style.cursor = "pointer";
     });
-    map.on('mouseleave', 'clusters', () => {
-      map.getCanvas().style.cursor = '';
+    map.on("mouseleave", "clusters", () => {
+      map.getCanvas().style.cursor = "";
     });
 
     // Rafraîchir les données toutes les 30 secondes si nécessaire
@@ -325,11 +341,11 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
   };
 
   // Initialize map when component mounts
-  document.addEventListener('DOMContentLoaded', initMap);
+  document.addEventListener("DOMContentLoaded", initMap);
 </script>
 
 <style is:global>
-  @import 'maplibre-gl/dist/maplibre-gl.css';
+  @import "maplibre-gl/dist/maplibre-gl.css";
 
   .custom-popup .maplibregl-popup-content {
     padding: 15px;
@@ -389,7 +405,7 @@ const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) =
   }
 
   .popup-content a:hover {
-    color: #EA580C;
+    color: #ea580c;
     text-decoration: underline;
   }
 </style>
