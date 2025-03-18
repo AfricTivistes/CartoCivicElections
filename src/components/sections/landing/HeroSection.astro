@@ -13,6 +13,7 @@ const {
   primaryBtnURL,
   secondaryBtn,
   secondaryBtnURL,
+  target,
   withReview,
   avatars,
   starCount,
@@ -30,6 +31,7 @@ interface Props {
   primaryBtnURL?: string;
   secondaryBtn?: string;
   secondaryBtnURL?: string;
+  target?: string;
   withReview?: boolean;
   avatars?: Array<string>;
   starCount?: number;
@@ -66,7 +68,7 @@ interface Props {
       <PrimaryCTA title={primaryBtn} url={primaryBtnURL} />
       }
       {secondaryBtn && 
-      <SecondaryCTA title={secondaryBtn} url={secondaryBtnURL} />
+      <SecondaryCTA title={secondaryBtn} url={secondaryBtnURL} target={target}/>
       }
     </div>
     {
