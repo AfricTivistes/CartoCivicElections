@@ -1,18 +1,18 @@
 import type { APIRoute } from "astro";
 import { getAll } from "@/lib/contentNocodb.astro";
 import paysData from "@/utils/pays.json";
+import { getInitiatives } from "@/lib/initiatives";
 
 export const GET: APIRoute = async ({ params, request }) => {
   try {
     // Extraction de la langue à partir de l'URL complète
     const url = new URL(request.url);
-
+    
     // Détection de la langue basée sur l'URL
     const lang = url.pathname.startsWith("/fr") ? "fr" : "en";
 
-
     // Conversion de l'objet pays pour le rendre compatible avec le code existant
-    const countryCoordinates = Object.entries(paysData).reduce((acc, [key, value]) => {
+    const countryCoordinates = Object.entries(paysData).reduce((acc: any, [key, value]) => {
       acc[key] = value.coords;
       // Ajouter aussi les noms en anglais pour permettre la correspondance
       if (lang === "en" && value.en) {
@@ -28,28 +28,25 @@ export const GET: APIRoute = async ({ params, request }) => {
       where: `(Status,eq,Traiter)~and(Langue,eq,${lang})`,
     };
 
-    const Initiatives = await getAll(tableId, query);
-
+    //const Initiatives = await getAll(tableId, query);
+    const Initiatives = await getInitiatives(lang);
     // Traitement des données par pays de manière plus efficace
-    const countryData = {};
+    const countryData = Initiatives.reduce((acc, initiative) => {
+      const country = initiative.props.product.country;
 
-    if (Initiatives?.list && Array.isArray(Initiatives.list)) {
-      Initiatives.list.forEach((initiative) => {
-        const country = initiative["Pays"];
-        if (country) {
-          if (!countryData[country]) {
-            countryData[country] = { count: 0, initiatives: [] };
-          }
-          countryData[country].count += 1;
-          // S'assurer que le nom de l'initiative est une chaîne valide avant de l'ajouter
-          const initiativeName =
-            initiative["Nom de l'initiative"] || "Initiative sans nom";
-          countryData[country].initiatives.push(initiativeName);
+
+      if (country) {
+        if (!acc[country]) {
+          acc[country] = { count: 0, initiatives: [] };
         }
-      });
-    } else {
-      console.error("Pas de données d'initiatives disponibles");
-    }
+        acc[country].count += 1;
+        // S'assurer que le nom de l'initiative est une chaîne valide avant de l'ajouter
+        const initiativeName =
+          initiative.props.product.title;
+        acc[country].initiatives.push(initiativeName);
+      }
+      return acc;
+    }, {});
 
     // Création du GeoJSON pour la carte
     const points = {
