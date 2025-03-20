@@ -26,6 +26,7 @@ export function getInitiatives(language: string = "fr") {
   }
 
   const filteredInitiatives = initiatives.filter((init: any) => init.props.product.langue === language);
+  console.log(`✅ ${filteredInitiatives.length} initiatives trouvées pour la langue : ${language}`);
 
 
   return filteredInitiatives;
