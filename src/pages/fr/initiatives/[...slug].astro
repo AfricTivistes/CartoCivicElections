@@ -33,6 +33,10 @@ const dirPath = path.join(process.cwd(), "public/details");
 const jsonFilePath = path.join(dirPath, `fr-${product.slug}.json`);
 const productData = [product];
 
+if (fs.existsSync(jsonFilePath)) {
+    fs.unlinkSync(jsonFilePath);
+  }
+
 if (!fs.existsSync(jsonFilePath)) {
   fs.writeFileSync(jsonFilePath, JSON.stringify(productData, null, 2), "utf8");
 }
