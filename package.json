@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "prebuild": "tsx src/lib/api/generateInitiatives.ts",
     "build": "astro build && node process-html.mjs",
     "preview": "astro preview",
     "astro": "astro"
@@ -48,6 +49,7 @@
     "prettier": "^3.3.3",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.6.5",
+    "tsx": "^4.19.3",
     "typescript": "^5.5.4"
   }
 }
