@@ -26,3 +26,7 @@ package-lock.json
 
 # output
 .vercel/output
+
+#Data
+/public/details/*
+/src/content/initiatives/*

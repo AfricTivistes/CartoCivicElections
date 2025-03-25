@@ -55,7 +55,7 @@ const InitiativesGrid = ({ initiatives, language }) => {
   // Extract unique categories and countries
   const categories = useMemo(() => {
     const uniqueCategories = [
-      ...new Set(initiatives.map((initiative) => initiative.category)),
+      ...new Set(initiatives.map((initiative) => initiative.props.product.category)),
     ];
 
     // Définir les catégories spéciales qui doivent apparaître à la fin
@@ -92,7 +92,7 @@ const InitiativesGrid = ({ initiatives, language }) => {
 
   const countries = useMemo(() => {
     const uniqueCountries = [
-      ...new Set(initiatives.map((initiative) => initiative.country)),
+      ...new Set(initiatives.map((initiative) => initiative.props.product.country)),
     ];
     return uniqueCountries.sort();
   }, [initiatives]);
@@ -100,7 +100,7 @@ const InitiativesGrid = ({ initiatives, language }) => {
   // Filter initiatives based on selected category and country
   const thematics = useMemo(() => {
     const uniqueThematics = [
-      ...new Set(initiatives.map((initiative) => initiative.thematic)),
+      ...new Set(initiatives.map((initiative) => initiative.props.product.thematic)),
     ];
 
     // Définir les thématiques spéciales qui doivent apparaître à la fin
@@ -136,11 +136,11 @@ const InitiativesGrid = ({ initiatives, language }) => {
   const filteredInitiatives = useMemo(() => {
     return initiatives.filter((initiative) => {
       const matchCategory =
-        !selectedCategory || initiative.category === selectedCategory;
+        !selectedCategory || initiative.props.product.category === selectedCategory;
       const matchCountry =
-        !selectedCountry || initiative.country === selectedCountry;
+        !selectedCountry || initiative.props.product.country === selectedCountry;
       const matchThematic =
-        !selectedThematic || initiative.thematic === selectedThematic;
+        !selectedThematic || initiative.props.product.thematic === selectedThematic;
       return matchCategory && matchCountry && matchThematic;
     });
   }, [initiatives, selectedCategory, selectedCountry, selectedThematic]);
@@ -174,6 +174,30 @@ const InitiativesGrid = ({ initiatives, language }) => {
 
         <div className="min-w-[200px] flex-1">
           <label
+            htmlFor="thematic"
+            className="mb-1 block text-sm font-medium text-gray-700"
+          >
+            {language === "en" ? "Thematic" : "Thématique"}
+          </label>
+          <select
+            id="thematic"
+            value={selectedThematic}
+            onChange={(e) => setSelectedThematic(e.target.value)}
+            className="focus:border-primary-500 focus:ring-primary-500 w-full rounded-md border-gray-300 shadow-sm"
+          >
+            <option value="">
+              {language === "en" ? "All thematics" : "Toutes les thématiques"}
+            </option>
+            {thematics.map((thematic) => (
+              <option key={thematic} value={thematic}>
+                {thematic}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="min-w-[200px] flex-1">
+          <label
             htmlFor="country"
             className="mb-1 block text-sm font-medium text-gray-700"
           >
@@ -196,42 +220,23 @@ const InitiativesGrid = ({ initiatives, language }) => {
           </select>
         </div>
 
-        <div className="min-w-[200px] flex-1">
-          <label
-            htmlFor="thematic"
-            className="mb-1 block text-sm font-medium text-gray-700"
-          >
-            {language === "en" ? "Thematic" : "Thématique"}
-          </label>
-          <select
-            id="thematic"
-            value={selectedThematic}
-            onChange={(e) => setSelectedThematic(e.target.value)}
-            className="focus:border-primary-500 focus:ring-primary-500 w-full rounded-md border-gray-300 shadow-sm"
-          >
-            <option value="">
-              {language === "en" ? "All thematics" : "Toutes les thématiques"}
-            </option>
-            {thematics.map((thematic) => (
-              <option key={thematic} value={thematic}>
-                {thematic}
-              </option>
-            ))}
-          </select>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredInitiatives.map((initiative) => (
-          <Card
-            key={initiative.title}
-            title={initiative.title}
-            country={initiative.country}
-            category={initiative.category}
-            description={initiative.thematic}
-            langue={initiative.langue}
-          />
-        ))}
+        {filteredInitiatives
+          .map((a) => ({ sort: Math.random(), value: a }))
+          .sort((a, b) => a.sort - b.sort)
+          .map((a) => a.value)
+          .map((initiative) => (
+            <Card
+              key={initiative.props.product.title}
+              title={initiative.props.product.title}
+              country={initiative.props.product.country}
+              category={initiative.props.product.category}
+              description={initiative.props.product.thematic}
+              langue={initiative.props.product.langue}
+            />
+          ))}
       </div>
     </div>
   );

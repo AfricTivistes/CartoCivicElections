@@ -238,7 +238,6 @@ const { title } = Astro.props;
           : "en";
 
         const countryName = translateCountryName(title, currentLang);
-        console.log("Country name:", countryName);
         const viewAllText =
           currentLang === "fr"
             ? `Voir toutes les initiatives de ${countryName}`

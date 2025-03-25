@@ -2,18 +2,13 @@
 // Import section components
 import MainLayout from "@/layouts/MainLayout.astro";
 import ProductTabBtn from "@components/ui/buttons/ProductTabBtn.astro";
-import PrimaryCTA from "@components/ui/buttons/PrimaryCTA.astro";
-import { Image } from "astro:assets";
-import { getCollection } from "astro:content";
 import { SITE } from "@data/constants";
-import { getAll } from "@/lib/contentNocodb.astro";
-import { slug } from "@/utils/slug";
+import PrimaryCTA from "@/components/ui/buttons/PrimaryCTA.astro";
 import FooterSocialLink from "@/components/ui/links/FooterSocialLink.astro";
 import Icon from "@/components/ui/icons/Icon.astro";
-import InitiativesGrid from "@/components/InitiativesGrid.jsx";
 import SimilarInitiatives from "@/components/SimilarInitiatives.jsx";
-import { getAll } from "@/lib/contentNocodb.astro";
-import InitiativeImage from "@/components/InitiativeImage.astro"; // Added import
+import InitiativeImage from "@/components/InitiativeImage.astro";
+import path from "path";
 
 import { getInitiatives, getInitiativeDetails } from "@/lib/initiatives";
 
@@ -25,14 +20,17 @@ declare global {
     gsap: any;
   }
 }
+
 // Récupération des chemins statiques à partir de la fonction centralisée
 export async function getStaticPaths() {
-  return await getInitiativeDetails("fr");
+  const details = await getInitiativeDetails("fr");
+  return details;
 }
 
 const { product } = Astro.props;
 
-const pageTitle: string = `${product["Nom de l'initiative"]} | ${SITE.title}`;
+const pageTitle: string = `${product.title} | ${SITE.title}`;
+
 
 const initiativeLink =
   Astro.currentLocale === "fr" ? "/fr/initiatives" : "/initiatives";
@@ -50,30 +48,43 @@ const retourName =
     class="mx-auto flex max-w-[85rem] flex-col px-4 py-10 sm:px-6 lg:px-8 lg:py-14 2xl:max-w-full"
   >
     <div>
-      <a
-        href={initiativeLink}
-        class="mb-4 flex items-center text-primary-green dark:text-primary-green"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+      <div>
+        <a
+          href={initiativeLink}
+          class="mb-4 flex items-center text-primary-green dark:text-primary-green"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 19l-7-7 7-7"></path>
-        </svg>
-        <span class="ml-2">{retourName}</span>
-      </a>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 19l-7-7 7-7"></path>
+          </svg>
+          <span class="ml-2">{retourName}</span>
+        </a>
+        <a
+          href={`/details/fr-${product.slug}.json`}
+          download
+          class="flex items-center"
+        >
+          <span
+            class="ml-auto inline justify-end rounded-lg bg-primary-green px-2 py-1 text-xs font-bold text-neutral-50 dark:bg-primary-green dark:text-primary-black"
+          >
+            Télécharger les données
+          </span>
+        </a>
+      </div>
       <p
         id="fadeText"
         class="mb-8 max-w-prose text-pretty font-light text-neutral-700 dark:text-neutral-300 sm:text-xl"
       >
-        {product["Thématique de l'initiative"]}
+        {product.thematic}
       </p>
     </div>
     <div
@@ -83,16 +94,20 @@ const retourName =
         <h1
           class="block text-4xl font-bold tracking-tighter text-neutral-800 dark:text-neutral-200 sm:text-5xl md:text-6xl lg:text-7xl"
         >
-          {product["Nom de l'initiative"]}
+          {product.title}
         </h1>
         <h2
           class="text-balance text-3xl tracking-tight text-neutral-800 dark:text-neutral-200 md:leading-tight lg:text-4xl"
         >
-          {product["Pays"]}
+          {product.country}
         </h2>
       </div>
       <div>
-        <InitiativeImage initiative={product["Nom de l'initiative"]} alt={`Logo de ${product["Nom de l'initiative"]}`} className="w-[600px]" width="600" height="600" loading="lazy"/>
+        <InitiativeImage
+          initiative={product.title}
+          alt={`Logo de ${product.title}`}
+          className="w-[600px] rounded-xl"
+        />
       </div>
     </div>
   </section>
@@ -130,9 +145,8 @@ const retourName =
               </h3>
               <p
                 class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
-                set:html={product["Quels étaient les principaux objectifs de cette initiative citoyenne"]?.replace(/(\r\n|\n|\r)/gm, "<br>")}
-              >
-              </p>
+                set:html={product.objectives?.replace(/(\r\n|\n|\r)/gm, "<br>")}
+              />
             </div>
 
             <div class="space-y-6 lg:space-y-5">
@@ -144,7 +158,7 @@ const retourName =
                     Type d'élection
                   </h3>
                   <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                    {product["Type d'élection"]}
+                    {product.electionType}
                   </p>
                 </div>
               </div>
@@ -155,7 +169,7 @@ const retourName =
                   Type d'organisation
                 </h3>
                 <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                  {product["Type d'organisation"]}
+                  {product.typeOrganisation}
                 </p>
               </div>
               <div>
@@ -165,21 +179,18 @@ const retourName =
                   Catégorie
                 </h3>
                 <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                  {product["Catégorie de l'initiative"]}
+                  {product.category}
                 </p>
               </div>
               <div>
                 {
-                  product["Site web de l'initiative"] === "Vide" ? (
+                  product.website === "Vide" ? (
                     <p class="mt-5">
-                      <PrimaryCTA title={"Site web"} url="#" />
+                      <PrimaryCTA title="Site web" url="#" />
                     </p>
                   ) : (
                     <p class="mt-5">
-                      <PrimaryCTA
-                        title={"Site web"}
-                        url={product["Site web de l'initiative"]}
-                      />
+                      <PrimaryCTA title="Site web" url={product.website} />
                     </p>
                   )
                 }
@@ -193,15 +204,14 @@ const retourName =
     <div id="tabs-with-card-2" class="hidden" role="tabpanel">
       <div class="mx-auto max-w-[85rem] px-4 pb-10 sm:px-6 lg:px-8 lg:pb-14">
         <h3
-          class="text-base font-bold mt-3 text-neutral-800 dark:text-neutral-200 sm:text-lg"
+          class="mt-3 text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
         >
           Resume de l'initiative
         </h3>
-        <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
-        set:html={product["Résumé descriptif de l'initiative"]?.replace(/(\r\n|\n|\r)/gm, "<br>")}
-        >
-        </p>
-
+        <p
+          class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
+          set:html={product.description?.replace(/(\r\n|\n|\r)/gm, "<br>")}
+        />
       </div>
       <hr class="border-t-2 border-neutral-300 dark:border-neutral-600" />
 
@@ -216,7 +226,7 @@ const retourName =
               Date de Début 🗓️
             </h3>
             <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Date de début"]}
+              {product.startDate}
             </p>
           </div>
           <div class="text-center">
@@ -226,7 +236,7 @@ const retourName =
               Date de Fin 🗓️
             </h3>
             <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Date de fin"]}
+              {product.endDate}
             </p>
           </div>
         </div>
@@ -243,11 +253,7 @@ const retourName =
               Partenaires de l'initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {
-                product[
-                  "L’initiative a-t-elle été soutenue par des partenaires ?"
-                ]
-              }
+              {product.partners}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -255,7 +261,7 @@ const retourName =
               Principaux partenaires
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Si OUI, quels étaient les principaux partenaires"]}
+              {product.mainPartners}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -263,7 +269,7 @@ const retourName =
               Zone d'intervention des partenaires
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Zone d'intervention des partenaires"]}
+              {product.partnerzone}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -271,7 +277,7 @@ const retourName =
               Appuis partenaires
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Quel a été leur apport"]}
+              {product.partnersContribution}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -279,7 +285,7 @@ const retourName =
               Cibles de l'initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Cibles de l’initiative"]}
+              {product.targetAudience}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -287,7 +293,7 @@ const retourName =
               Type d'organisation
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Type d'organisation"]}
+              {product.typeOrganisation}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -295,7 +301,7 @@ const retourName =
               Zone géographique couverte
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["zone géographique couverte par l'initiative"]}
+              {product.interventionZone}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -303,7 +309,7 @@ const retourName =
               Pays de mise en oeuvre
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Pays de mise en oeuvre"]}
+              {product.paysMiseOeuvre}
             </p>
           </div>
           <div>
@@ -313,11 +319,7 @@ const retourName =
               Dysfonctionnement sur le processus
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {
-                product[
-                  "Avez-vous constaté des dysfonctionnements majeurs dans le processus électoral ?"
-                ]
-              }
+              {product.electionProcessIssues}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -325,7 +327,7 @@ const retourName =
               Nature dysfonctionnements
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Si oui, quelle était la nature des dysfonctionnements"]}
+              {product.electionIssuesNature}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -333,11 +335,7 @@ const retourName =
               Dysfonctionnement signalé aux autorités
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {
-                product[
-                  "Si oui, les avez-vous portés à la connaissance des autorités compétentes pour rectification"
-                ]
-              }
+              {product.reportedIssues}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -345,7 +343,7 @@ const retourName =
               Suite apres signalement
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Quelle suite a été réservée à votre signalement"]}
+              {product.reportOutcome}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -353,11 +351,7 @@ const retourName =
               impact sur l'initiatives
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {
-                product[
-                  "Les dysfonctionnements ont-ils affecté l'atteinte des objectifs de l'initiative"
-                ]
-              }
+              {product.impactDysfunctions}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -365,11 +359,7 @@ const retourName =
               Environnement legal favorable ?
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {
-                product[
-                  "Les initiatives citoyennes électorales bénéficient-elles d'un environnement légal favorable dans votre contexte"
-                ]
-              }
+              {product.legalEnvironment}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -377,11 +367,7 @@ const retourName =
               Difficultés avec les pouvoirs publics dans la mise en oeuvre
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {
-                product[
-                  "difficultés avec les pouvoirs publics dans la réalisation de vos activités"
-                ]
-              }
+              {product.publicAuthoritiesDifficulties}
             </p>
           </div>
           <div>
@@ -391,7 +377,7 @@ const retourName =
               L'initiative a-t-elle plusieurs composantes ?
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Est-ce-une initiative à plusieurs composantes1"]}
+              {product.isMultiComponent}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -399,11 +385,7 @@ const retourName =
               Autres Composantes
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {
-                product[
-                  "Voulez-vous soumettre une autre composante de votre initiative"
-                ]
-              }
+              {product.submitAnotherComponent}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -411,7 +393,7 @@ const retourName =
               Phase d'intervention dans le processus
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product["Phases"]}
+              {product.phases}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -419,11 +401,7 @@ const retourName =
               Obligations de reconnaissance institutionnelle de l'initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {
-                product[
-                  "Obligation de reconnaissance institutionnelle de l'initiative"
-                ]
-              }
+              {product.obligationRecognition}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -431,11 +409,7 @@ const retourName =
               Appréciation de la transparence du processus electoral
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {
-                product[
-                  "Appréciation de la transparence du processus électoral"
-                ]
-              }
+              {product.transparencyAssessment}
             </p>
           </div>
         </div>
@@ -455,7 +429,7 @@ const retourName =
           class="list-inside list-disc space-y-2 text-pretty text-neutral-600 dark:text-neutral-400"
         >
           {
-            product["Ressources"]?.map((resource, index) => (
+            product.resources?.map((resource, index) => (
               <li key={index}>
                 <a
                   href={resource.signedUrl}
@@ -481,37 +455,34 @@ const retourName =
         </h2>
         <div class="">
           {
-            product["Facebook"] === "Non concernée" ||
-            product["Facebook"] === "En cours de création" ? (
+            product.socialLinks.facebook === "Vide" ? (
               <FooterSocialLink url="#">
                 <Icon name="facebookFooter" />
               </FooterSocialLink>
             ) : (
-              <FooterSocialLink url={product["Facebook"]}>
+              <FooterSocialLink url={product.socialLinks.facebook}>
                 <Icon name="facebookFooter" />
               </FooterSocialLink>
             )
           }
           {
-            product["X"] === "Non concernée" ||
-            product["X"] === "En cours de création" ? (
+            product.socialLinks.twitter === "Vide" ? (
               <FooterSocialLink url="#">
                 <Icon name="xFooter" />
               </FooterSocialLink>
             ) : (
-              <FooterSocialLink url={product["X"]}>
+              <FooterSocialLink url={product.socialLinks.twitter}>
                 <Icon name="xFooter" />
               </FooterSocialLink>
             )
           }
           {
-            product["Linkedin"] === "Non concernée" ||
-            product["Linkedin"] === "Vide" ? (
+            product.socialLinks.linkedin === "Vide" ? (
               <FooterSocialLink url="#">
                 <Icon name="linkedIn" />
               </FooterSocialLink>
             ) : (
-              <FooterSocialLink url={product["Linkedin"]}>
+              <FooterSocialLink url={product.socialLinks.linkedin}>
                 <Icon name="linkedIn" />
               </FooterSocialLink>
             )
@@ -519,15 +490,15 @@ const retourName =
         </div>
         <div>
           {
-            product["Site web de l'initiative"] === "Vide" ? (
+            product.website === "Vide" ? (
               <p class="mt-5">
-                <PrimaryCTA title={"Site web de l'initiative"} url="#" />
+                <PrimaryCTA title="Site web de l'initiative" url="#" />
               </p>
             ) : (
               <p class="mt-5">
                 <PrimaryCTA
-                  title={"Site web de l'initiative"}
-                  url={product["Site web de l'initiative"]}
+                  title="Site web de l'initiative"
+                  url={product.website}
                 />
               </p>
             )
@@ -539,7 +510,12 @@ const retourName =
     <InitiativesGrid client:load initiatives={initiatives} /-->
   </div>
 
-  <SimilarInitiatives client:load currentInitiative={product} allInitiatives={initiatives} language="fr" />
+  <SimilarInitiatives
+    client:load
+    currentInitiative={product}
+    allInitiatives={initiatives}
+    language="fr"
+  />
 
   <script>
     import { gsap } from "gsap";
