@@ -7,7 +7,7 @@
     },
     {
       "question": "How to contribute?",
-      "answer": "To contribute, access the 'I contribute' section and fill out the form, or click on this [link](https://docs.google.com/forms/d/1Vdr3PbcZzwoGFT5-RIudQZVJ921ByHuphNSLvvMy07w/edit). You can also contact our teams via info@africtivistes.org for an interview."
+      "answer": "To contribute, access the 'I contribute' section and fill out the form, or click on this <a class='text-primary-green' href='https://docs.google.com/forms/d/1Vdr3PbcZzwoGFT5-RIudQZVJ921ByHuphNSLvvMy07w/edit' target='_blank'>link</a>. You can also contact our teams via  <a class='text-primary-green' href='mailto:info@africtivistes.org'>info@africtivistes.com<a/> for an interview."
     },
     {
       "question": "What types of data are aggregated?",

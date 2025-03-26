@@ -7,7 +7,7 @@
     },
     {
       "question": "Comment contribuer ?",
-      "answer": "Pour contribuer, accédez à l'espace 'Je contribue' et remplissez le formulaire, ou cliquez sur ce lien [ici](https://docs.google.com/forms/d/1Vdr3PbcZzwoGFT5-RIudQZVJ921ByHuphNSLvvMy07w/edit). Vous pouvez également contacter nos équipes via info@africtivistes.org pour un entretien."
+      "answer": "Pour contribuer, accédez à l'espace 'Je contribue' et remplissez le formulaire, ou cliquez sur ce lien <a class='text-primary-green' href='https://docs.google.com/forms/d/1Vdr3PbcZzwoGFT5-RIudQZVJ921ByHuphNSLvvMy07w/edit' target='_blank'>ici</a>. Vous pouvez également contacter nos équipes via <a class='text-primary-green' href='mailto:info@africtivistes.org'>info@africtivistes.com<a/> pour un entretien."
     },
     {
       "question": "Quels sont les types de données qui sont agrégés ?",
