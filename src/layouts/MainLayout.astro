@@ -4,6 +4,7 @@ import Meta from "@components/Meta.astro";
 import Navbar from "@components/sections/navbar&footer/Navbar.astro";
 import FooterSection from "@components/sections/navbar&footer/FooterSection.astro";
 import { SITE } from "@data/constants";
+import { ViewTransitions } from 'astro:transitions';
 
 // Setting expected props
 const { title = SITE.title, meta, structuredData, lang = "fr" } = Astro.props;
@@ -25,6 +26,7 @@ We set the language of the page to English and add classes for scrollbar and scr
   <head>
     <!-- Adding metadata to the HTML document -->
     <Meta meta={meta} structuredData={structuredData} />
+    <ViewTransitions />
     <!-- Define the title of the page -->
     <title>{title}</title>
     <script is:inline>

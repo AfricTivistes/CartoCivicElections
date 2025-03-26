@@ -60,6 +60,7 @@ const InitiativeImage = ({ initiative, alt = "Image de l'initiative", className 
           }
         }}
         loading="lazy"
+        transition:name="hero"
       />
     </div>
   );
