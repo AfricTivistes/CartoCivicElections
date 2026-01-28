@@ -7,6 +7,10 @@ dotenv.config();
 const API_URL = process.env.API_URL;
 const API_TOKEN = process.env.API_TOKEN;
 
+if (!API_URL || !API_TOKEN) {
+  console.warn('⚠️ API_URL or API_TOKEN not configured. API calls will be skipped.');
+}
+
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -29,3 +33,7 @@ export const api = axios.create({
     }
   }
 });
+
+export const isApiConfigured = () => {
+  return !!(API_URL && API_TOKEN);
+};

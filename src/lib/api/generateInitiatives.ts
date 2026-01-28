@@ -4,7 +4,7 @@ import path from "path";
 import { slug } from "@/utils/slug";
 import fetch from "node-fetch";
 import sharp from "sharp";
-import { api } from './nocodb';
+import { api, isApiConfigured } from './nocodb';
 
 /**
  * Helper to get field value with flexible apostrophe matching
@@ -296,6 +296,27 @@ async function fetchInitiatives() {
 export async function generateInitiativesJson() {
   console.log("🚀 Démarrage de la génération des initiatives...");
 
+  // Vérifier si l'API est configurée
+  if (!isApiConfigured()) {
+    console.warn("⚠️ API not configured. Skipping data generation.");
+    console.warn("⚠️ Using existing initiatives.json file if available.");
+    
+    const filePath = path.join(process.cwd(), "src/content/initiatives/initiatives.json");
+    if (fs.existsSync(filePath)) {
+      console.log("✅ Using existing initiatives.json file.");
+      return;
+    } else {
+      console.log("⚠️ No existing initiatives.json file found. Creating empty file.");
+      // Create empty but valid file to avoid build errors
+      const dirPath = path.dirname(filePath);
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+      fs.writeFileSync(filePath, JSON.stringify([], null, 2), "utf8");
+      return;
+    }
+  }
+
   // Définir le chemin du fichier d'initiatives JSON
   const filePath = path.join(process.cwd(), "src/content/initiatives/initiatives.json");
 
@@ -409,5 +430,7 @@ export async function generateInitiativesJson() {
 // Si le script est exécuté directement (pas importé)
 generateInitiativesJson().catch(err => {
   console.error("❌ Erreur fatale lors de la génération des initiatives:", err);
-  process.exit(1);
+  console.warn("⚠️ Build will continue with existing data if available.");
+  // Don't exit with error code to prevent build failure
+  // The build should continue even if data fetching fails
 });
