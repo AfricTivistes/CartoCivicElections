@@ -6,6 +6,7 @@
     "dev": "astro dev",
     "start": "astro dev",
     "prebuild": "tsx src/lib/api/generateInitiatives.ts",
+    "check": "astro check",
     "build": "astro build && node process-html.mjs",
     "preview": "astro preview",
     "astro": "astro"

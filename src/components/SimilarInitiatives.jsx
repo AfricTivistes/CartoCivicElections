@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import Card from "./Card";
-import PrimaryCTA from "../components/ui/buttons/PrimaryCTA.astro";
-import { slug } from "@/utils/slug";
+
 
 const SimilarInitiatives = ({
   currentInitiative,

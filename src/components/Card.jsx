@@ -2,7 +2,7 @@ import { slug } from "@/utils/slug";
 import paysData from "@/utils/pays.json";
 import InitiativeImage from "./InitiativeImage";
 
-const Card = ({ title, country, category, description, langue, logo = "" }) => {
+const Card = ({ title, country, category, description, langue= "" }) => {
   const details = langue === "fr" ? "Voir les détails" : "View details";
   const link =
     langue === "fr"
