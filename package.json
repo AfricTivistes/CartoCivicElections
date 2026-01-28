@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "clean": "rm -rf dist .astro .vercel/output node_modules/.vite",
     "prebuild": "tsx src/lib/api/generateInitiatives.ts",
     "check": "astro check",
     "build": "astro build && node process-html.mjs",

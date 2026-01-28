@@ -4,7 +4,14 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  # Force Netlify to ignore any old cache
+  NETLIFY_USE_YARN = "false"
+
+# Clear cache on each build to avoid stale files
+[build.processing]
+  skip_processing = false
 
 [[plugins]]
   package = "@netlify/plugin-lighthouse"
+
 
