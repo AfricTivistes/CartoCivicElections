@@ -13,4 +13,19 @@ export const api = axios.create({
     'xc-token': API_TOKEN,
     'Content-Type': 'application/json',
   },
+  paramsSerializer: {
+    serialize: (params) => {
+      const searchParams = new URLSearchParams();
+      for (const [key, value] of Object.entries(params)) {
+        if (value === undefined || value === null) continue;
+        if (Array.isArray(value)) {
+          // NocoDB expects arrays as repeated params: fields=X&fields=Y
+          value.forEach(v => searchParams.append(key, v));
+        } else {
+          searchParams.append(key, String(value));
+        }
+      }
+      return searchParams.toString();
+    }
+  }
 });

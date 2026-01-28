@@ -6,6 +6,55 @@ import fetch from "node-fetch";
 import sharp from "sharp";
 import { api } from './nocodb';
 
+/**
+ * Helper to get field value with flexible apostrophe matching
+ * NocoDB has mixed apostrophe types: ASCII ' (U+0027) and Unicode ' (U+2019)
+ */
+function getField(product: any, fieldName: string): any {
+  // Try with the original field name first
+  if (product[fieldName] !== undefined) {
+    return product[fieldName];
+  }
+  // Try replacing ASCII apostrophe with Unicode
+  const unicodeVersion = fieldName.replace(/'/g, '\u2019');
+  if (product[unicodeVersion] !== undefined) {
+    return product[unicodeVersion];
+  }
+  // Try replacing Unicode apostrophe with ASCII
+  const asciiVersion = fieldName.replace(/\u2019/g, "'");
+  if (product[asciiVersion] !== undefined) {
+    return product[asciiVersion];
+  }
+  return undefined;
+}
+
+/**
+ * Cleans and normalizes a URL
+ * - Trims whitespace
+ * - Takes only the first URL if multiple are concatenated
+ * - Adds https:// if missing
+ */
+function cleanUrl(url: string | undefined): string {
+  if (!url || url === "Vide" || url === "Non spécifié") {
+    return "Vide";
+  }
+
+  // Trim whitespace
+  let cleaned = url.trim();
+
+  // If multiple URLs are concatenated (e.g., "url1 // url2"), take only the first one
+  if (cleaned.includes(' // ')) {
+    cleaned = cleaned.split(' // ')[0].trim();
+  }
+
+  // If URL doesn't start with http, add https://
+  if (cleaned && !cleaned.startsWith('http://') && !cleaned.startsWith('https://')) {
+    cleaned = 'https://' + cleaned;
+  }
+
+  return cleaned || "Vide";
+}
+
 const getAll = async (tableId: string, query: object = {}) => {
   try {
     let allRecords = [];
@@ -180,21 +229,6 @@ async function fetchInitiatives() {
   const tableId = "m9erh9bplb8jihp";
   const query = {
     viewId: "vwdobxvm00ayso6s",
-    fields: [
-      "Langue", "Type d'organisation", "Nom de l'initiative", "Résumé descriptif de l'initiative",
-      "Pays", "Thématique de l'initiative", "Quels étaient les principaux objectifs de cette initiative citoyenne",
-      "Catégorie de l'initiative", "Site web de l'initiative", "Type d'élection", "Date de début",
-      "Date de fin", "L’initiative a-t-elle été soutenue par des partenaires ?", "Si OUI, quels étaient les principaux partenaires",
-      "Zone d'intervention des partenaires", "Quel a été leur apport", "Cibles de l’initiative", "zone géographique couverte par l'initiative",
-      "Pays de mise en oeuvre", "Avez-vous constaté des dysfonctionnements majeurs dans le processus électoral ?",
-      "Si oui, quelle était la nature des dysfonctionnements", "Si oui, les avez-vous portés à la connaissance des autorités compétentes pour rectification",
-      "Quelle suite a été réservée à votre signalement", "Les dysfonctionnements ont-ils affecté l'atteinte des objectifs de l'initiative",
-      "Les initiatives citoyennes électorales bénéficient-elles d'un environnement légal favorable dans votre contexte",
-      "difficultés avec les pouvoirs publics dans la réalisation de vos activités", "Est-ce-une initiative à plusieurs composantes1",
-      "Voulez-vous soumettre une autre composante de votre initiative", "Phases", "Facebook", "X", "Linkedin",
-      "Ressources", "Obligation de reconnaissance institutionnelle de l'initiative",
-      "Appréciation de la transparence du processus électoral", "image-logo"
-    ],
     where: `(Status,eq,Traiter)`,
   };
 
@@ -236,12 +270,12 @@ export async function generateInitiativesJson() {
   const initiatives = [];
   
   for (const product of productEntries.list) {
-    const initiativeName = product["Nom de l'initiative"] || "Initiative sans nom";
+    const initiativeName = getField(product, "Nom de l'initiative") || "Initiative sans nom";
     const productSlug = slug(initiativeName);
     const localImagePath = `/initiatives/${productSlug}.webp`;
     const publicPath = path.join(process.cwd(), "public", "initiatives", `${productSlug}.webp`);
     let logoPath = fs.existsSync(publicPath) ? localImagePath : null;
-    
+
     if (!logoPath && product["image-logo"] && product["image-logo"][0]?.signedUrl) {
       try {
         logoPath = await downloadAndOptimizeImage(product["image-logo"][0].signedUrl, productSlug);
@@ -250,68 +284,71 @@ export async function generateInitiativesJson() {
         logoPath = null;
       }
     }
-    
+
     const formattedInitiative = {
       params: { slug: productSlug },
       props: {
         product: {
           slug: productSlug,
-          title: product["Nom de l'initiative"] || "Nom non spécifié",
-          country: product["Pays"] || "Pays non spécifié",
-          langue: product["Langue"] || "Langue non spécifiée",
-          typeOrganisation: product["Type d'organisation"] || "Organisation non spécifiée",
-          category: product["Catégorie de l'initiative"] || "Non catégorisé",
-          thematic: product["Thématique de l'initiative"] || "Non spécifié",
-          description: product["Résumé descriptif de l'initiative"] || "Description non disponible",
-          objectives: product["Quels étaient les principaux objectifs de cette initiative citoyenne"] || "Non spécifié",
-          website: product["Site web de l'initiative"] || "Non spécifié",
-          electionType: product["Type d'élection"] || "Non spécifié",
-          startDate: product["Date de début"] || "Non spécifié",
-          endDate: product["Date de fin"] || "Non spécifié",
-          
-          partners: product["L'initiative a-t-elle été soutenue par des partenaires ?"] || "Non spécifié",
-          mainPartners: product["Si OUI, quels étaient les principaux partenaires"] || "Non spécifié",
-          partnersContribution: product["Quel a été leur apport"] || "Non spécifié",
-          partnerZone: product["Zone d'intervention des partenaires"] || "Non spécifié",
-          
-          targetAudience: product["Cibles de l'initiative"] || "Non spécifié",
-          interventionZone: product["zone géographique couverte par l'initiative"] || "Non spécifié",
-          paysMiseOeuvre: product["Pays de mise en oeuvre"] || "Non spécifié",
-          
-          electionProcessIssues: product["Avez-vous constaté des dysfonctionnements majeurs dans le processus électoral ?"] || "Non",
-          electionIssuesNature: product["Si oui, quelle était la nature des dysfonctionnements"] || "Non spécifié",
-          reportedIssues: product["Si oui, les avez-vous portés à la connaissance des autorités compétentes pour rectification"] || "Non spécifié",
-          reportOutcome: product["Quelle suite a été réservée à votre signalement"] || "Non spécifié",
-          impactDysfunctions: product["Les dysfonctionnements ont-ils affecté l'atteinte des objectifs de l'initiative"] || "Non spécifié",
-          
-          legalEnvironment: product["Les initiatives citoyennes électorales bénéficient-elles d'un environnement légal favorable dans votre contexte"] || "Non spécifié",
-          publicAuthoritiesDifficulties: product["difficultés avec les pouvoirs publics dans la réalisation de vos activités"] || "Non spécifié",
-          transparencyAssessment: product["Appréciation de la transparence du processus électoral"] || "Non spécifié",
-          obligationRecognition: product["Obligation de reconnaissance institutionnelle de l'initiative"] || "Non spécifié",
-          isMultiComponent: product["Est-ce-une initiative à plusieurs composantes1"] || "Non spécifié",
-          submitAnotherComponent: product["Voulez-vous soumettre une autre composante de votre initiative"] || "Non spécifié",
-          
-          phases: product["Phases"] || "Non spécifié",
-          initiativeType: product["Type d'initiative"] || "Non spécifié",
-          initiativeStatus: product["Statut de l'initiative"] || "Non spécifié",
-          
-          resources: Array.isArray(product.Ressources) ? product.Ressources.map((resource: any) => resource.signedUrl) : [],
-          
+          title: getField(product, "Nom de l'initiative") || "Nom non spécifié",
+          country: getField(product, "Pays") || "Pays non spécifié",
+          langue: getField(product, "Langue") || "Langue non spécifiée",
+          typeOrganisation: getField(product, "Type d'organisation") || "Organisation non spécifiée",
+          category: getField(product, "Catégorie de l'initiative") || "Non catégorisé",
+          thematic: getField(product, "Thématique de l'initiative") || "Non spécifié",
+          description: getField(product, "Résumé descriptif de l'initiative") || "Description non disponible",
+          objectives: getField(product, "Quels étaient les principaux objectifs de cette initiative citoyenne") || "Non spécifié",
+          website: cleanUrl(getField(product, "Site web de l'initiative")),
+          electionType: getField(product, "Type d'élection") || "Non spécifié",
+          startDate: getField(product, "Date de début") || "Non spécifié",
+          endDate: getField(product, "Date de fin") || "Non spécifié",
+
+          partners: getField(product, "L'initiative a-t-elle été soutenue par des partenaires ?") || "Non spécifié",
+          mainPartners: getField(product, "Si OUI, quels étaient les principaux partenaires") || "Non spécifié",
+          partnersContribution: getField(product, "Quel a été leur apport") || "Non spécifié",
+          partnerZone: getField(product, "Zone d'intervention des partenaires") || "Non spécifié",
+
+          targetAudience: getField(product, "Cibles de l'initiative") || "Non spécifié",
+          interventionZone: getField(product, "zone géographique couverte par l'initiative") || "Non spécifié",
+          paysMiseOeuvre: getField(product, "Pays de mise en oeuvre") || "Non spécifié",
+
+          electionProcessIssues: getField(product, "Avez-vous constaté des dysfonctionnements majeurs dans le processus électoral ?") || "Non",
+          electionIssuesNature: getField(product, "Si oui, quelle était la nature des dysfonctionnements") || "Non spécifié",
+          reportedIssues: getField(product, "Si oui, les avez-vous portés à la connaissance des autorités compétentes pour rectification") || "Non spécifié",
+          reportOutcome: getField(product, "Quelle suite a été réservée à votre signalement") || "Non spécifié",
+          impactDysfunctions: getField(product, "Les dysfonctionnements ont-ils affecté l'atteinte des objectifs de l'initiative") || "Non spécifié",
+
+          legalEnvironment: getField(product, "Les initiatives citoyennes électorales bénéficient-elles d'un environnement légal favorable dans votre contexte") || "Non spécifié",
+          publicAuthoritiesDifficulties: getField(product, "difficultés avec les pouvoirs publics dans la réalisation de vos activités") || "Non spécifié",
+          transparencyAssessment: getField(product, "Appréciation de la transparence du processus électoral") || "Non spécifié",
+          obligationRecognition: getField(product, "Obligation de reconnaissance institutionnelle de l'initiative") || "Non spécifié",
+          isMultiComponent: getField(product, "Est-ce-une initiative à plusieurs composantes1") || "Non spécifié",
+          submitAnotherComponent: getField(product, "Voulez-vous soumettre une autre composante de votre initiative") || "Non spécifié",
+
+          phases: getField(product, "Phases") || "Non spécifié",
+          initiativeType: getField(product, "Type d'initiative") || "Non spécifié",
+          initiativeStatus: getField(product, "Statut de l'initiative") || "Non spécifié",
+
+          resources: Array.isArray(product.Ressources) ? product.Ressources.map((resource: any) => ({
+            title: resource.title || "Resource",
+            signedUrl: resource.signedUrl
+          })) : [],
+
           socialLinks: {
-            facebook: product["Facebook"] || "Non spécifié",
-            twitter: product["X"] || "Non spécifié",
-            linkedin: product["Linkedin"] || "Non spécifié",
+            facebook: cleanUrl(getField(product, "Facebook")),
+            twitter: cleanUrl(getField(product, "X")),
+            linkedin: cleanUrl(getField(product, "Linkedin")),
           },
-          
+
           logo: logoPath || "Non spécifié",
         },
       },
     };
 
     await saveInitiativeDetails(
-      formattedInitiative, 
-      product["Langue"], 
-      slug(product["Nom de l'initiative"])
+      formattedInitiative,
+      getField(product, "Langue"),
+      slug(getField(product, "Nom de l'initiative"))
     );
     
     initiatives.push(formattedInitiative);
