@@ -221,6 +221,49 @@ async function saveInitiativeDetails(initiative: any, language: string, initiati
 }
 
 /**
+ * Compare les anciennes et nouvelles initiatives et affiche les changements
+ */
+function compareInitiatives(oldFilePath: string, newInitiatives: any[]) {
+  if (!fs.existsSync(oldFilePath)) {
+    console.log("📊 Première génération - pas de comparaison possible");
+    return;
+  }
+
+  try {
+    const oldData = JSON.parse(fs.readFileSync(oldFilePath, "utf8"));
+    const oldSlugs = new Set(oldData.map((i: any) => i.params.slug));
+    const newSlugs = new Set(newInitiatives.map((i: any) => i.params.slug));
+
+    // Nouvelles initiatives
+    const added = newInitiatives.filter((i: any) => !oldSlugs.has(i.params.slug));
+    // Initiatives supprimées
+    const removed = oldData.filter((i: any) => !newSlugs.has(i.params.slug));
+
+    console.log("\n📊 === RAPPORT DE MISE À JOUR ===");
+    console.log(`   Anciennes initiatives: ${oldData.length}`);
+    console.log(`   Nouvelles initiatives: ${newInitiatives.length}`);
+
+    if (added.length > 0) {
+      console.log(`\n   ✨ ${added.length} NOUVELLE(S) INITIATIVE(S):`);
+      added.forEach((i: any) => console.log(`      + ${i.props.product.title} (${i.props.product.country})`));
+    }
+
+    if (removed.length > 0) {
+      console.log(`\n   🗑️ ${removed.length} INITIATIVE(S) RETIRÉE(S):`);
+      removed.forEach((i: any) => console.log(`      - ${i.props.product.title} (${i.props.product.country})`));
+    }
+
+    if (added.length === 0 && removed.length === 0) {
+      console.log("   ℹ️ Aucun changement détecté");
+    }
+
+    console.log("================================\n");
+  } catch (error) {
+    console.log("⚠️ Impossible de comparer avec l'ancien fichier");
+  }
+}
+
+/**
  * Récupère les initiatives depuis l'API NocoDB
  * @returns Un objet contenant la liste des initiatives, ou null en cas d'erreur
  */
@@ -252,19 +295,20 @@ async function fetchInitiatives() {
  */
 export async function generateInitiativesJson() {
   console.log("🚀 Démarrage de la génération des initiatives...");
-  
+
   // Définir le chemin du fichier d'initiatives JSON
   const filePath = path.join(process.cwd(), "src/content/initiatives/initiatives.json");
-  
-  // Supprimer l'ancien fichier d'initiatives
-  await removeOldInitiativesFile(filePath);
-  
-  // Récupérer les initiatives depuis l'API
+
+  // Récupérer les initiatives depuis l'API AVANT de supprimer l'ancien fichier
   const productEntries = await fetchInitiatives();
   if (!productEntries) {
     console.error("❌ Impossible de continuer sans données d'initiatives.");
+    console.log("⚠️ Conservation de l'ancien fichier initiatives.json si existant.");
     return;
   }
+
+  // Supprimer l'ancien fichier seulement après avoir récupéré les nouvelles données
+  await removeOldInitiativesFile(filePath);
   
   // Traiter les données et optimiser les images
   const initiatives = [];
