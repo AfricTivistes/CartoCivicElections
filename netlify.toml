@@ -3,7 +3,7 @@
   publish = ".vercel/output/static"
 
 [build.environment]
-  NODE_VERSION = "18"
+  NODE_VERSION = "20"
   # Force clean build
   NPM_FLAGS = "--legacy-peer-deps"
 

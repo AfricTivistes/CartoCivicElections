@@ -1,6 +1,6 @@
 import { defineConfig } from "astro/config";
 import tailwind from "@astrojs/tailwind";
-import vercelStatic from "@astrojs/vercel/static";
+import vercel from "@astrojs/vercel";
 import sitemap from "@astrojs/sitemap";
 import compressor from "astro-compressor";
 import starlight from "@astrojs/starlight";
@@ -65,9 +65,13 @@ export default defineConfig({
           autogenerate: { directory: "advanced" },
         },
       ],
-      social: {
-        github: "https://github.com/mearashadowfax/ScrewFast",
-      },
+      social: [
+        {
+          icon: "github",
+          label: "GitHub",
+          href: "https://github.com/mearashadowfax/ScrewFast",
+        },
+      ],
       disable404Route: true,
       customCss: ["./src/assets/styles/starlight.css"],
       favicon: "/favicon.ico",
@@ -100,9 +104,5 @@ export default defineConfig({
     }),
   ],
   output: "static",
-  experimental: {
-    clientPrerender: true,
-    directRenderScript: true,
-  },
-  adapter: vercelStatic(),
+  adapter: vercel(),
 });
