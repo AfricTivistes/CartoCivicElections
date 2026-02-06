@@ -1,18 +1,20 @@
 import type { APIRoute } from "astro";
-import { getAll } from "@/lib/contentNocodb.astro";
 import paysData from "@/utils/pays.json";
 import { getInitiatives } from "@/lib/initiatives";
+import type { Initiative } from "@/collections/initiatives/config";
 
 export const GET: APIRoute = async ({ params, request }) => {
   try {
     // Extraction de la langue à partir de l'URL complète
     const url = new URL(request.url);
-    
+
     // Détection de la langue basée sur l'URL
     const lang = url.pathname.startsWith("/fr") ? "fr" : "en";
 
     // Conversion de l'objet pays pour le rendre compatible avec le code existant
-    const countryCoordinates = Object.entries(paysData).reduce((acc: any, [key, value]) => {
+    const countryCoordinates: Record<string, number[]> = Object.entries(
+      paysData,
+    ).reduce((acc: Record<string, number[]>, [key, value]) => {
       acc[key] = value.coords;
       // Ajouter aussi les noms en anglais pour permettre la correspondance
       if (lang === "en" && value.en) {
@@ -21,32 +23,30 @@ export const GET: APIRoute = async ({ params, request }) => {
       return acc;
     }, {});
 
-    const tableId = "m9erh9bplb8jihp";
-    const query = {
-      viewId: "vwdobxvm00ayso6s",
-      fields: ["Nom de l'initiative", "Pays"],
-      where: `(Status,eq,Traiter)~and(Langue,eq,${lang})`,
-    };
+    const initiatives = await getInitiatives(lang);
 
-    //const Initiatives = await getAll(tableId, query);
-    const Initiatives = await getInitiatives(lang);
-    // Traitement des données par pays de manière plus efficace
-    const countryData = Initiatives.reduce((acc, initiative) => {
-      const country = initiative.props.product.country;
+    // Traitement des données par pays
+    const countryData: Record<
+      string,
+      { count: number; initiatives: string[] }
+    > = initiatives.reduce(
+      (
+        acc: Record<string, { count: number; initiatives: string[] }>,
+        initiative: Initiative,
+      ) => {
+        const country = initiative.country;
 
-
-      if (country) {
-        if (!acc[country]) {
-          acc[country] = { count: 0, initiatives: [] };
+        if (country) {
+          if (!acc[country]) {
+            acc[country] = { count: 0, initiatives: [] };
+          }
+          acc[country].count += 1;
+          acc[country].initiatives.push(initiative.title);
         }
-        acc[country].count += 1;
-        // S'assurer que le nom de l'initiative est une chaîne valide avant de l'ajouter
-        const initiativeName =
-          initiative.props.product.title;
-        acc[country].initiatives.push(initiativeName);
-      }
-      return acc;
-    }, {});
+        return acc;
+      },
+      {},
+    );
 
     // Création du GeoJSON pour la carte
     const points = {
@@ -59,8 +59,6 @@ export const GET: APIRoute = async ({ params, request }) => {
             Array.isArray(coordinates) &&
             coordinates.length === 2
           ) {
-            // Les coordonnées dans pays.json sont déjà [longitude, latitude]
-            // donc on respecte ce format et on n'inverse pas
             return {
               type: "Feature",
               geometry: {
@@ -72,13 +70,12 @@ export const GET: APIRoute = async ({ params, request }) => {
                 count: data.count,
                 country: country,
                 initiatives: data.initiatives || [],
-                // Les slugs seront générés côté client pour simplifier
               },
             };
           }
           return null;
         })
-        .filter(Boolean), // Supprime les entrées null
+        .filter(Boolean),
     };
 
     // Retourne la réponse JSON

@@ -8,7 +8,6 @@ import FooterSocialLink from "@/components/ui/links/FooterSocialLink.astro";
 import Icon from "@/components/ui/icons/Icon.astro";
 import SimilarInitiatives from "@/components/SimilarInitiatives.jsx";
 import InitiativeImage from "@/components/InitiativeImage.astro";
-import path from "path";
 
 import { getInitiatives, getInitiativeDetails } from "@/lib/initiatives";
 
@@ -24,6 +23,8 @@ declare global {
 // Récupération des chemins statiques à partir de la fonction centralisée
 export async function getStaticPaths() {
   const details = await getInitiativeDetails("fr");
+  // Log the slugs to debug
+  console.log('Generating paths for French initiatives:', details.map(d => d.params.slug));
   return details;
 }
 
@@ -104,7 +105,7 @@ const retourName =
       </div>
       <div>
         <InitiativeImage
-          initiative={product.title}
+          initiative={product}
           alt={`Logo de ${product.title}`}
           className="w-[600px] rounded-xl"
         />
@@ -190,7 +191,7 @@ const retourName =
                     </p>
                   ) : (
                     <p class="mt-5">
-                      <PrimaryCTA title="Site web" url={product.website} />
+                      <PrimaryCTA title="Site web" url={product.website} target="_blank" />
                     </p>
                   )
                 }
@@ -429,8 +430,8 @@ const retourName =
           class="list-inside list-disc space-y-2 text-pretty text-neutral-600 dark:text-neutral-400"
         >
           {
-            product.resources?.map((resource, index) => (
-              <li key={index}>
+            product.resources?.map((resource: any, index: number) => (
+              <li>
                 <a
                   href={resource.signedUrl}
                   target="_blank"
@@ -455,34 +456,34 @@ const retourName =
         </h2>
         <div class="">
           {
-            product.socialLinks.facebook === "Vide" ? (
+            product.socialLinks?.facebook === "Vide" ? (
               <FooterSocialLink url="#">
                 <Icon name="facebookFooter" />
               </FooterSocialLink>
             ) : (
-              <FooterSocialLink url={product.socialLinks.facebook}>
+              <FooterSocialLink url={product.socialLinks?.facebook}>
                 <Icon name="facebookFooter" />
               </FooterSocialLink>
             )
           }
           {
-            product.socialLinks.twitter === "Vide" ? (
+            product.socialLinks?.twitter === "Vide" ? (
               <FooterSocialLink url="#">
                 <Icon name="xFooter" />
               </FooterSocialLink>
             ) : (
-              <FooterSocialLink url={product.socialLinks.twitter}>
+              <FooterSocialLink url={product.socialLinks?.twitter}>
                 <Icon name="xFooter" />
               </FooterSocialLink>
             )
           }
           {
-            product.socialLinks.linkedin === "Vide" ? (
+            product.socialLinks?.linkedin === "Vide" ? (
               <FooterSocialLink url="#">
                 <Icon name="linkedIn" />
               </FooterSocialLink>
             ) : (
-              <FooterSocialLink url={product.socialLinks.linkedin}>
+              <FooterSocialLink url={product.socialLinks?.linkedin}>
                 <Icon name="linkedIn" />
               </FooterSocialLink>
             )
@@ -499,6 +500,7 @@ const retourName =
                 <PrimaryCTA
                   title="Site web de l'initiative"
                   url={product.website}
+                  target="_blank"
                 />
               </p>
             )
@@ -506,8 +508,6 @@ const retourName =
         </div>
       </div>
     </div>
-    <!-- Initiatives Grid Component 
-    <InitiativesGrid client:load initiatives={initiatives} /-->
   </div>
 
   <SimilarInitiatives

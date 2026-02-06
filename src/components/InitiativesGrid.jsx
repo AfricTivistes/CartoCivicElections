@@ -55,7 +55,7 @@ const InitiativesGrid = ({ initiatives, language }) => {
   // Extract unique categories and countries
   const categories = useMemo(() => {
     const uniqueCategories = [
-      ...new Set(initiatives.map((initiative) => initiative.props.product.category)),
+      ...new Set(initiatives.map((initiative) => initiative.category)),
     ];
 
     // Définir les catégories spéciales qui doivent apparaître à la fin
@@ -92,7 +92,7 @@ const InitiativesGrid = ({ initiatives, language }) => {
 
   const countries = useMemo(() => {
     const uniqueCountries = [
-      ...new Set(initiatives.map((initiative) => initiative.props.product.country)),
+      ...new Set(initiatives.map((initiative) => initiative.country)),
     ];
     return uniqueCountries.sort();
   }, [initiatives]);
@@ -100,7 +100,7 @@ const InitiativesGrid = ({ initiatives, language }) => {
   // Filter initiatives based on selected category and country
   const thematics = useMemo(() => {
     const uniqueThematics = [
-      ...new Set(initiatives.map((initiative) => initiative.props.product.thematic)),
+      ...new Set(initiatives.map((initiative) => initiative.thematic)),
     ];
 
     // Définir les thématiques spéciales qui doivent apparaître à la fin
@@ -136,11 +136,11 @@ const InitiativesGrid = ({ initiatives, language }) => {
   const filteredInitiatives = useMemo(() => {
     return initiatives.filter((initiative) => {
       const matchCategory =
-        !selectedCategory || initiative.props.product.category === selectedCategory;
+        !selectedCategory || initiative.category === selectedCategory;
       const matchCountry =
-        !selectedCountry || initiative.props.product.country === selectedCountry;
+        !selectedCountry || initiative.country === selectedCountry;
       const matchThematic =
-        !selectedThematic || initiative.props.product.thematic === selectedThematic;
+        !selectedThematic || initiative.thematic === selectedThematic;
       return matchCategory && matchCountry && matchThematic;
     });
   }, [initiatives, selectedCategory, selectedCountry, selectedThematic]);
@@ -219,7 +219,6 @@ const InitiativesGrid = ({ initiatives, language }) => {
             ))}
           </select>
         </div>
-
       </div>
 
       <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
@@ -229,12 +228,13 @@ const InitiativesGrid = ({ initiatives, language }) => {
           .map((a) => a.value)
           .map((initiative) => (
             <Card
-              key={initiative.props.product.title}
-              title={initiative.props.product.title}
-              country={initiative.props.product.country}
-              category={initiative.props.product.category}
-              description={initiative.props.product.thematic}
-              langue={initiative.props.product.langue}
+              key={initiative.title}
+              initiative={initiative}
+              title={initiative.title}
+              country={initiative.country}
+              category={initiative.category}
+              description={initiative.thematic}
+              langue={initiative.langue}
             />
           ))}
       </div>

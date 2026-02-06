@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import Card from "./Card";
 
-
 const SimilarInitiatives = ({
   currentInitiative,
   allInitiatives,
@@ -10,13 +9,13 @@ const SimilarInitiatives = ({
   const similarInitiatives = useMemo(() => {
     // Filtrer l'initiative courante
     const otherInitiatives = allInitiatives.filter(
-      (initiative) => initiative.props.product.title !== currentInitiative.title,
+      (initiative) => initiative.title !== currentInitiative.title,
     );
 
     // Trouver les initiatives de la même catégorie
     const sameCategory = otherInitiatives
       .filter(
-        (initiative) => initiative.props.product.category === currentInitiative.category,
+        (initiative) => initiative.category === currentInitiative.category,
       )
       .slice(0, 3);
 
@@ -24,7 +23,7 @@ const SimilarInitiatives = ({
     const sameCountry = otherInitiatives
       .filter(
         (initiative) =>
-          initiative.props.product.country === currentInitiative.country &&
+          initiative.country === currentInitiative.country &&
           !sameCategory.includes(initiative),
       )
       .slice(0, 3);
@@ -47,25 +46,23 @@ const SimilarInitiatives = ({
     Array.prototype.push.apply(initiatives, sameCountry);
     Array.prototype.push.apply(initiatives, random);
     return initiatives;
-  }, [allInitiatives, currentInitiative]); // Ajout des dépendances manquantes
-
+  }, [allInitiatives, currentInitiative]);
 
   return (
     <div className="mt-12">
-
       <h2 className="mb-6 text-2xl font-bold">
         {language === "fr" ? "Initiatives similaires" : "Similar initiatives"}
       </h2>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {similarInitiatives.map((initiative) => (
           <Card
-            key={initiative.props.product.title}
-            title={initiative.props.product.title}
-            country={initiative.props.product.country}
-            category={initiative.props.product.category}
-            description={initiative.props.product.thematic}
-            langue={initiative.props.product.langue}
-            logo={initiative.props.product.logo} // Ajout du logo
+            key={initiative.title}
+            initiative={initiative}
+            title={initiative.title}
+            country={initiative.country}
+            category={initiative.category}
+            description={initiative.thematic}
+            langue={initiative.langue}
           />
         ))}
       </div>

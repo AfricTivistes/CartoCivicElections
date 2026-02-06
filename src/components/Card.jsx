@@ -2,7 +2,14 @@ import { slug } from "@/utils/slug";
 import paysData from "@/utils/pays.json";
 import InitiativeImage from "./InitiativeImage";
 
-const Card = ({ title, country, category, description, langue= "" }) => {
+const Card = ({
+  initiative,
+  title,
+  country,
+  category,
+  description,
+  langue = "",
+}) => {
   const details = langue === "fr" ? "Voir les détails" : "View details";
   const link =
     langue === "fr"
@@ -18,14 +25,16 @@ const Card = ({ title, country, category, description, langue= "" }) => {
     <div className="to-orange-50 transform overflow-hidden rounded-lg border border-gray-100 bg-gradient-to-br from-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
       <a href={link}>
         <InitiativeImage
-          initiative={title}
+          initiative={initiative || title}
           alt={`Logo de l'initiative ${title}`}
-          className="rounded-t-lg h-48 w-full object-cover"
+          className="h-48 w-full rounded-t-lg object-cover"
         />
       </a>
       <div className="p-5">
         <a href={link}>
-          <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{title}</h5>
+          <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+            {title}
+          </h5>
         </a>
 
         <div className="mb-3 flex items-center">
@@ -75,13 +84,25 @@ const Card = ({ title, country, category, description, langue= "" }) => {
           {description}
         </p>
 
-        <a 
-          href={link} 
-          className="w-full flex justify-center items-center px-3 py-2 text-sm font-medium text-center text-white bg-primary-green rounded-lg hover:bg-primary-green/90 focus:ring-4 focus:outline-none focus:ring-primary-green/30"
+        <a
+          href={link}
+          className="flex w-full items-center justify-center rounded-lg bg-primary-green px-3 py-2 text-center text-sm font-medium text-white hover:bg-primary-green/90 focus:outline-none focus:ring-4 focus:ring-primary-green/30"
         >
           {details}
-          <svg className="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+          <svg
+            className="ms-2 h-3.5 w-3.5 rtl:rotate-180"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 10"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M1 5h12m0 0L9 1m4 4L9 9"
+            />
           </svg>
         </a>
       </div>

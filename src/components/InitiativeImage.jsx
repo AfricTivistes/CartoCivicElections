@@ -1,12 +1,16 @@
-
 import { useState, useEffect } from "react";
 import { slug } from "@/utils/slug";
 
-const InitiativeImage = ({ initiative, alt = "Image de l'initiative", className = "" }) => {
+const InitiativeImage = ({
+  initiative,
+  alt = "Image de l'initiative",
+  className = "",
+}) => {
   const [imageSrc, setImageSrc] = useState("");
   const [isLoaded, setIsLoaded] = useState(false);
-  const defaultImage = "https://placehold.co/600x600?text=Soobu+No+Image+Available";
-  
+  const defaultImage =
+    "https://placehold.co/600x600?text=Soobu+No+Image+Available";
+
   useEffect(() => {
     const loadImage = () => {
       // Déterminer le slug de l'initiative
@@ -16,25 +20,42 @@ const InitiativeImage = ({ initiative, alt = "Image de l'initiative", className 
       } else if (typeof initiative?.title === "string" && initiative.title) {
         initiativeSlug = slug(initiative.title);
       }
-      
+
       // Si aucun slug valide n'est disponible, utiliser l'image par défaut
       if (!initiativeSlug) {
         setImageSrc(defaultImage);
         return;
       }
-      
+
       // Construire le chemin de l'image locale
       const localImagePath = `/initiatives/${initiativeSlug}.webp`;
-      
-      // Créer une nouvelle image pour tester si le fichier existe
+
+      // Si l'initiative est passée sous forme d'objet
+      if (typeof initiative === "object") {
+        if (initiative.logo && initiative.logo !== "Vide") {
+          setImageSrc(initiative.logo);
+          setIsLoaded(true);
+          return;
+        } else if (initiative.logoUrl) {
+          // Si on n'a pas de logo local mais une URL distante, on l'utilise directement
+          // pour éviter de déclencher un 404 sur localImagePath
+          setImageSrc(initiative.logoUrl);
+          setIsLoaded(true);
+          return;
+        }
+      }
+
       const img = new Image();
+
       img.onload = () => {
         setImageSrc(localImagePath);
         setIsLoaded(true);
       };
       img.onerror = () => {
         // Si l'image locale n'existe pas, essayer d'utiliser l'URL signée si disponible
-        if (initiative?.["image-logo"]?.[0]?.signedUrl) {
+        if (initiative?.logoUrl) {
+          setImageSrc(initiative.logoUrl);
+        } else if (initiative?.["image-logo"]?.[0]?.signedUrl) {
           setImageSrc(initiative["image-logo"][0].signedUrl);
         } else {
           setImageSrc(defaultImage);
@@ -43,7 +64,7 @@ const InitiativeImage = ({ initiative, alt = "Image de l'initiative", className 
       };
       img.src = localImagePath;
     };
-    
+
     loadImage();
   }, [initiative]);
 
@@ -52,7 +73,7 @@ const InitiativeImage = ({ initiative, alt = "Image de l'initiative", className 
       <img
         src={imageSrc || defaultImage}
         alt={alt}
-        className={`w-full h-48 object-cover transition-opacity duration-300 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+        className={`h-48 w-full object-cover transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"}`}
         onLoad={() => setIsLoaded(true)}
         onError={() => {
           if (imageSrc !== defaultImage) {

@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 
 interface Props {
-  initiative: string;
+  initiative: string | any;
   alt?: string;
   className?: string;
 }
@@ -16,8 +16,17 @@ const {
 } = Astro.props;
 
 // Déterminer le slug de l'initiative
-let initiativeSlug = slug(initiative);
+let initiativeSlug = "";
+let logoUrl = "";
+let logo = "";
 
+if (typeof initiative === "string") {
+  initiativeSlug = slug(initiative);
+} else {
+  initiativeSlug = initiative.slug;
+  logoUrl = initiative.logoUrl;
+  logo = initiative.logo;
+}
 
 // Image par défaut en cas d'erreur
 const defaultImage =
@@ -26,8 +35,10 @@ const defaultImage =
 // Vérifier si l'image existe dans le système de fichiers
 let imageExists = false;
 
-// Vérifier si le fichier existe
-if (initiativeSlug) {
+// Si le mapper a déjà fait le check
+if (logo && logo !== "Vide") {
+  imageExists = true;
+} else if (initiativeSlug) {
   const publicDir = path.join(process.cwd(), "public", "initiatives");
   const filePath = path.join(publicDir, `${initiativeSlug}.webp`);
 
@@ -40,17 +51,26 @@ if (initiativeSlug) {
 const localImagePath =
   imageExists && initiativeSlug
     ? `/initiatives/${initiativeSlug}.webp`
-    : defaultImage;
+    : (logoUrl || defaultImage);
 ---
 
 <div class={`initiative-image-container ${className}`}>
-  <img
-    src={localImagePath}
-    alt={alt}
-    class="max-h-96 w-full object-contain"
-    loading="lazy"
-    onerror={`this.src='${defaultImage}'; this.onerror=null;`}
-  />
+  {imageExists || logoUrl ? (
+    <img
+      src={localImagePath}
+      alt={alt}
+      class="max-h-96 w-full object-contain"
+      loading="lazy"
+      onerror={`this.src='${defaultImage}'; this.onerror=null;`}
+    />
+  ) : (
+    <img
+      src={defaultImage}
+      alt={alt}
+      class="max-h-96 w-full object-contain"
+      loading="lazy"
+    />
+  )}
 </div>
 
 <style>
