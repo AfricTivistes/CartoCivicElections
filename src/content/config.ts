@@ -117,8 +117,9 @@ const nocodbData =
             tableId: "m9erh9bplb8jihp",
             schema: initiativeSchema,
             queryParams: {
+              limit: 100, // Small limit to avoid skipping records in buggy loader
               where: "(Status,eq,Traiter)",
-              viewId: "vwdobxvm00ayso6s",
+              // viewId: "vwdobxvm00ayso6s",
             },
             mapper: initiativeMapper,
             retries: 10, // Max retries on 429 rate limit errors

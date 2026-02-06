@@ -4,6 +4,7 @@ interface Props {
 }
 
 const { title } = Astro.props;
+const currentLang = Astro.currentLocale || "en";
 ---
 
 <section
@@ -15,7 +16,7 @@ const { title } = Astro.props;
     <!-- About Fragment: https://docs.astro.build/en/basics/astro-syntax/#fragments -->
     <Fragment set:html={title} />
   </h1>
-  <div id="map" class="h-[600px] w-full rounded-lg md:mb-4"></div>
+  <div id="map" class="h-[600px] w-full rounded-lg md:mb-4" data-lang={currentLang}></div>
 </section>
 
 <script>
@@ -75,7 +76,9 @@ const { title } = Astro.props;
     // Charger les points
     const fetchPoints = async () => {
       try {
-        const response = await fetch("/api/map.json");
+        const mapElement = document.getElementById("map");
+        const lang = mapElement?.getAttribute("data-lang") || "en";
+        const response = await fetch(`/api/map.json?lang=${lang}`);
         if (response.ok) {
           const data = await response.json();
 

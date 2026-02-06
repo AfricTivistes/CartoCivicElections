@@ -7,9 +7,10 @@ export const GET: APIRoute = async ({ params, request }) => {
   try {
     // Extraction de la langue à partir de l'URL complète
     const url = new URL(request.url);
+    const langParam = url.searchParams.get("lang");
 
-    // Détection de la langue basée sur l'URL
-    const lang = url.pathname.startsWith("/fr") ? "fr" : "en";
+    // Détection de la langue basée sur le paramètre ou l'URL
+    const lang = langParam || (url.pathname.startsWith("/fr") ? "fr" : "en");
 
     // Conversion de l'objet pays pour le rendre compatible avec le code existant
     const countryCoordinates: Record<string, number[]> = Object.entries(

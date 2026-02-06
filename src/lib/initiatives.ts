@@ -15,27 +15,23 @@ export async function getInitiatives(
     const allEntries = await getCollection("initiatives");
 
     // Download and optimize images if they don't exist yet
-    // This happens during build time when getStaticPaths calls this function
+
     await Promise.all(
       allEntries.map(async (entry: any) => {
         if (entry.data.logoUrl) {
-          console.log(`Checking/Downloading image for: ${entry.data.slug}`);
           const result = await downloadAndOptimizeImage(
             entry.data.logoUrl,
             entry.data.slug,
           );
-          if (result) {
-            console.log(`Successfully processed image for: ${entry.data.slug}`);
-          } else {
-            console.warn(`Failed to process image for: ${entry.data.slug}`);
-          }
         }
       }),
     );
 
-    return (allEntries as any[])
-      .filter((entry) => entry.data.langue === language)
-      .map((entry) => entry.data);
+    const filtered = (allEntries as any[]).filter(
+      (entry) => entry.data.langue === language,
+    );
+
+    return filtered.map((entry) => entry.data);
   } catch (error) {
     console.error("Error loading initiatives from collection:", error);
     return [];
@@ -46,7 +42,7 @@ export async function getInitiatives(
  * Retrieves initiative details for generating static paths.
  * Returns data in the format expected by Astro's getStaticPaths().
  * @param language Target language, defaults to "fr"
- * @returns Array of { params: { slug }, props: { product } } objects
+ * @returns Array of { params: { slug }, props: { initiative } } objects
  */
 export async function getInitiativeDetails(language: string = "fr") {
   const initiatives = await getInitiatives(language);
@@ -56,8 +52,9 @@ export async function getInitiativeDetails(language: string = "fr") {
     return [];
   }
 
+  // Update to use 'initiative' instead of 'product' for consistency
   return initiatives.map((initiative) => ({
     params: { slug: initiative.slug },
-    props: { product: initiative },
+    props: { initiative },
   }));
 }

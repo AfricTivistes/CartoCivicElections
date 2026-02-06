@@ -9,6 +9,7 @@ import Icon from "@/components/ui/icons/Icon.astro";
 import SimilarInitiatives from "@/components/SimilarInitiatives.jsx";
 import InitiativeImage from "@/components/InitiativeImage.astro";
 import { getInitiatives, getInitiativeDetails } from "@/lib/initiatives";
+import type { Initiative } from "@/collections/initiatives/config";
 import paysData from "@/utils/pays.json";
 
 const initiatives = await getInitiatives("en");
@@ -19,6 +20,7 @@ declare global {
     gsap: any;
   }
 }
+
 // Récupération des chemins statiques à partir de la fonction centralisée
 export async function getStaticPaths() {
   const details = await getInitiativeDetails("en");
@@ -27,11 +29,17 @@ export async function getStaticPaths() {
   return details;
 }
 
-const { product } = Astro.props;
+interface Props {
+  initiative: Initiative;
+}
 
-  // Traduire le nom du pays en anglais si on est en mode anglais
-const displayCountry = paysData[product.country]?.en || product.country;
-const pageTitle: string =  `${product.title} | ${SITE.title}`;
+const { initiative } = Astro.props;
+
+// Traduire le nom du pays en anglais si on est en mode anglais
+const pays = paysData as Record<string, { en: string }>;
+const displayCountry = pays[initiative.country]?.en || initiative.country;
+const pageTitle: string =  `${initiative.title} | ${SITE.title}`;
+
 
 const initiativeLink =
   Astro.currentLocale === "fr" ? "/fr/initiatives" : "/initiatives";
@@ -71,7 +79,7 @@ const retourName =
           <span class="ml-2">{retourName}</span>
         </a>
         <a
-          href={`/details/en-${product.slug}.json`}
+          href={`/details/en-${initiative.slug}.json`}
           download
           class="flex items-center"
         >
@@ -86,7 +94,7 @@ const retourName =
         id="fadeText"
         class="mb-8 max-w-prose text-pretty font-light text-neutral-700 dark:text-neutral-300 sm:text-xl"
       >
-        {product.thematic}
+        {initiative.thematic}
       </p>
     </div>
 
@@ -97,7 +105,7 @@ const retourName =
         <h1
           class="block text-4xl font-bold tracking-tighter text-neutral-800 dark:text-neutral-200 sm:text-5xl md:text-6xl lg:text-7xl"
         >
-          {product.title}
+          {initiative.title}
         </h1>
         <h2
           class="text-balance text-3xl tracking-tight text-neutral-800 dark:text-neutral-200 md:leading-tight lg:text-4xl"
@@ -107,8 +115,8 @@ const retourName =
       </div>
       <div>
         <InitiativeImage
-          initiative={product}
-          alt={`Logo de ${product.title}`}
+          initiative={initiative}
+          alt={`Logo de ${initiative.title}`}
           className="w-[600px] rounded-xl"
         />
       </div>
@@ -148,7 +156,7 @@ const retourName =
               </h3>
               <p
                 class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
-                set:html={product.objectives?.replace(/(\r\n|\n|\r)/gm, "<br>")}
+                set:html={initiative.objectives?.replace(/(\r\n|\n|\r)/gm, "<br>")}
               />
             </div>
 
@@ -161,7 +169,7 @@ const retourName =
                     Type of election
                   </h3>
                   <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                    {product.electionType}
+                    {initiative.electionType}
                   </p>
                 </div>
               </div>
@@ -172,7 +180,7 @@ const retourName =
                   Type of organisation
                 </h3>
                 <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                  {product.typeOrganisation}
+                  {initiative.typeOrganisation}
                 </p>
               </div>
               <div>
@@ -182,18 +190,18 @@ const retourName =
                   Category
                 </h3>
                 <p class="mt-1 text-neutral-600 dark:text-neutral-400">
-                  {product.category}
+                  {initiative.category}
                 </p>
               </div>
               <div>
                 {
-                  product.website === "Vide" ? (
+                  initiative.website === "Vide" ? (
                     <p class="mt-5">
                       <PrimaryCTA title="Website" url="#" />
                     </p>
                   ) : (
                     <p class="mt-5">
-                      <PrimaryCTA title="Website" url={product.website} target="_blank" />
+                      <PrimaryCTA title="Website" url={initiative.website} target="_blank" />
                     </p>
                   )
                 }
@@ -213,7 +221,7 @@ const retourName =
         </h3>
         <p
           class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400"
-          set:html={product.description?.replace(/(\r\n|\n|\r)/gm, "<br>")}
+          set:html={initiative.description?.replace(/(\r\n|\n|\r)/gm, "<br>")}
         />
       </div>
       <hr class="border-t-2 border-neutral-300 dark:border-neutral-600" />
@@ -229,7 +237,7 @@ const retourName =
               Start Date 🗓️
             </h3>
             <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.startDate}
+              {initiative.startDate}
             </p>
           </div>
           <div class="text-center">
@@ -239,7 +247,7 @@ const retourName =
               End Date 🗓️
             </h3>
             <p class="mt-3 text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.endDate}
+              {initiative.endDate}
             </p>
           </div>
         </div>
@@ -256,21 +264,21 @@ const retourName =
               Partners of the initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.partners}
+              {initiative.partners}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
               Main partners
             </h2>
-            {product.mainPartners}
+            {initiative.mainPartners}
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
             >
               Partners' intervention area
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.partnerZone}
+              {initiative.partnerZone}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -278,7 +286,7 @@ const retourName =
               Partners' contribution
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-             {product.partnersContribution}
+             {initiative.partnersContribution}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -286,7 +294,7 @@ const retourName =
               Target of the initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.targetAudience}
+              {initiative.targetAudience}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -294,7 +302,7 @@ const retourName =
               Type of organisation
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.typeOrganisation}
+              {initiative.typeOrganisation}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -302,7 +310,7 @@ const retourName =
               Geographical area initiative covers
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.interventionZone}
+              {initiative.interventionZone}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -310,7 +318,7 @@ const retourName =
               Country of implementation
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-               {product.paysMiseOeuvre}
+               {initiative.paysMiseOeuvre}
             </p>
           </div>
           <div>
@@ -320,7 +328,7 @@ const retourName =
               Electoral process irregularity
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.electionProcessIssues}
+              {initiative.electionProcessIssues}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -328,7 +336,7 @@ const retourName =
               Types of irregularity
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-               {product.electionIssuesNature}
+               {initiative.electionIssuesNature}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -336,7 +344,7 @@ const retourName =
               Irregularity reported to authorities
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.reportedIssues}
+              {initiative.reportedIssues}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -344,7 +352,7 @@ const retourName =
               Response after reporting
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.reportOutcome}
+              {initiative.reportOutcome}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -352,7 +360,7 @@ const retourName =
               Impact on the Initiative
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.impactDysfunctions}
+              {initiative.impactDysfunctions}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -360,7 +368,7 @@ const retourName =
               Conducive legal environment ?
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.legalEnvironment}
+              {initiative.legalEnvironment}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -368,7 +376,7 @@ const retourName =
               Challenges with public authorities in implementation
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.publicAuthoritiesDifficulties}
+              {initiative.publicAuthoritiesDifficulties}
             </p>
           </div>
           <div>
@@ -378,7 +386,7 @@ const retourName =
               Does the initiative have multi-components?
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-               {product.isMultiComponent}
+               {initiative.isMultiComponent}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -386,7 +394,7 @@ const retourName =
               Other Components
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.submitAnotherComponent}
+              {initiative.submitAnotherComponent}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -394,7 +402,7 @@ const retourName =
               Electoral process intervention phase
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-               {product.phases}
+               {initiative.phases}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -402,7 +410,7 @@ const retourName =
               Mandatory registration
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.obligationRecognition}
+              {initiative.obligationRecognition}
             </p>
             <h2
               class="text-base font-bold text-neutral-800 dark:text-neutral-200 sm:text-lg"
@@ -410,7 +418,7 @@ const retourName =
               Assess transparency of the electoral process
             </h2>
             <p class="text-pretty text-neutral-600 dark:text-neutral-400">
-              {product.transparencyAssessment}
+              {initiative.transparencyAssessment}
             </p>
           </div>
         </div>
@@ -430,7 +438,7 @@ const retourName =
           class="list-inside list-disc space-y-2 text-pretty text-neutral-600 dark:text-neutral-400"
         >
           {
-            product.resources?.map((resource: any, index: number) => (
+            initiative.resources?.map((resource: any, index: number) => (
               <li>
                 <a
                   href={resource.signedUrl}
@@ -456,34 +464,34 @@ const retourName =
         </h2>
         <div class="">
           {
-            product.socialLinks?.facebook === "Vide" ? (
+            initiative.socialLinks?.facebook === "Vide" ? (
               <FooterSocialLink url="#">
                 <Icon name="facebookFooter" />
               </FooterSocialLink>
             ) : (
-              <FooterSocialLink url={product.socialLinks?.facebook}>
+              <FooterSocialLink url={initiative.socialLinks?.facebook}>
                 <Icon name="facebookFooter" />
               </FooterSocialLink>
             )
           }
           {
-            product.socialLinks?.twitter === "Vide" ? (
+            initiative.socialLinks?.twitter === "Vide" ? (
               <FooterSocialLink url="#">
                 <Icon name="xFooter" />
               </FooterSocialLink>
             ) : (
-              <FooterSocialLink url={product.socialLinks?.twitter}>
+              <FooterSocialLink url={initiative.socialLinks?.twitter}>
                 <Icon name="xFooter" />
               </FooterSocialLink>
             )
           }
           {
-            product.socialLinks?.linkedin === "Vide" ? (
+            initiative.socialLinks?.linkedin === "Vide" ? (
               <FooterSocialLink url="#">
                 <Icon name="linkedIn" />
               </FooterSocialLink>
             ) : (
-              <FooterSocialLink url={product.socialLinks?.linkedin}>
+              <FooterSocialLink url={initiative.socialLinks?.linkedin}>
                 <Icon name="linkedIn" />
               </FooterSocialLink>
             )
@@ -491,7 +499,7 @@ const retourName =
         </div>
         <div>
           {
-            product.website === "Vide" ? (
+            initiative.website === "Vide" ? (
               <p class="mt-5">
                 <PrimaryCTA title={"Website of the initiative"} url="#" />
               </p>
@@ -499,7 +507,7 @@ const retourName =
               <p class="mt-5">
                 <PrimaryCTA
                   title={"Website of the initiative"}
-                  url={product.website}
+                  url={initiative.website}
                   target="_blank"
                 />
               </p>
@@ -512,7 +520,7 @@ const retourName =
 
   <SimilarInitiatives
     client:load
-    currentInitiative={product}
+    currentInitiative={initiative}
     allInitiatives={initiatives}
     language="en"
   />

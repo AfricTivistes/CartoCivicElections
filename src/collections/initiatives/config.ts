@@ -8,18 +8,29 @@ import path from "path";
  * NocoDB has mixed apostrophe types: ASCII ' (U+0027) and Unicode ' (U+2019)
  */
 function getField(product: any, fieldName: string): any {
+  let value;
   if (product[fieldName] !== undefined) {
-    return product[fieldName];
+    value = product[fieldName];
+  } else {
+    const unicodeVersion = fieldName.replace(/'/g, "\u2019");
+    if (product[unicodeVersion] !== undefined) {
+      value = product[unicodeVersion];
+    } else {
+      const asciiVersion = fieldName.replace(/\u2019/g, "'");
+      if (product[asciiVersion] !== undefined) {
+        value = product[asciiVersion];
+      }
+    }
   }
-  const unicodeVersion = fieldName.replace(/'/g, "\u2019");
-  if (product[unicodeVersion] !== undefined) {
-    return product[unicodeVersion];
+
+  if (
+    value === "Vide" ||
+    value === "Non spécifié" ||
+    value === "Non spécifiée"
+  ) {
+    return undefined;
   }
-  const asciiVersion = fieldName.replace(/\u2019/g, "'");
-  if (product[asciiVersion] !== undefined) {
-    return product[asciiVersion];
-  }
-  return undefined;
+  return value;
 }
 
 /**
@@ -136,7 +147,7 @@ export const initiativeMapper = (raw: any) => {
   );
 
   return {
-    Id: initiativeSlug, // Used by astro-nocodb as the entry ID
+    Id: raw.Id || raw.id || initiativeSlug, // Use NocoDB ID for uniqueness in Astro store
     slug: initiativeSlug,
     title: getField(raw, "Nom de l'initiative") || "Nom non spécifié",
     country: getField(raw, "Pays") || "Pays non spécifié",
