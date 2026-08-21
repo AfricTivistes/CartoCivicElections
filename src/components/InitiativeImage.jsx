@@ -36,13 +36,12 @@ const InitiativeImage = ({
           setImageSrc(initiative.logo);
           setIsLoaded(true);
           return;
-        } else if (initiative.logoUrl) {
-          // Si on n'a pas de logo local mais une URL distante, on l'utilise directement
-          // pour éviter de déclencher un 404 sur localImagePath
-          setImageSrc(initiative.logoUrl);
-          setIsLoaded(true);
-          return;
         }
+        // Sinon on tente quand même localImagePath : pour une initiative
+        // récemment ajoutée, le mapper a calculé logo="Vide" avant le
+        // téléchargement de l'image, mais le fichier existe bien dans le build.
+        // logoUrl (URL signée NocoDB, expirée quelques heures après le build)
+        // ne sert plus que de dernier recours, géré dans img.onerror.
       }
 
       const img = new Image();
