@@ -1,0 +1,111 @@
+---
+import type { Row } from "@/lib/normalize";
+import { base, type Lang } from "@/i18n/ui";
+
+interface Props {
+  row: Row;
+  lang: Lang;
+}
+const { row, lang } = Astro.props;
+const initials = row.title
+  .split(/\s+/)
+  .filter((w) => /^[A-Za-zÀ-ÿ]/.test(w))
+  .slice(0, 2)
+  .map((w) => w[0].toUpperCase())
+  .join("");
+---
+
+<a class="icard" href={`${base(lang)}/initiatives/${row.slug}/`}>
+  <div class="icard-logo">
+    {
+      row.logo ? (
+        <img src={row.logo} alt="" loading="lazy" decoding="async" width="56" height="56" />
+      ) : (
+        <span aria-hidden="true">{initials}</span>
+      )
+    }
+  </div>
+  <div class="icard-body">
+    <p class="m">{row.countryLabel}{row.year ? ` · ${row.year}` : ""}</p>
+    <h3>{row.title}</h3>
+    {row.summary && <p class="sum">{row.summary}</p>}
+    <div class="tags">
+      {row.thematic && <span class="tag acc">{row.thematic}</span>}
+      {row.category && <span class="tag">{row.category}</span>}
+    </div>
+  </div>
+</a>
+
+<style is:global>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+    gap: 16px;
+  }
+  .icard {
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 14px;
+    padding: 16px;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+    transition: border-color 0.15s;
+  }
+  .icard:hover {
+    border-color: var(--line);
+  }
+  .icard-logo {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    background: #fff;
+    border: 1px solid var(--rule);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .icard-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .icard-logo span {
+    font-weight: 700;
+    color: #161512;
+    font-size: 17px;
+  }
+  .icard .m {
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  .icard h3 {
+    margin-top: 2px;
+    font-family: var(--font-body);
+    font-size: 15.5px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .icard .sum {
+    margin-top: 6px;
+    font-size: 13.5px;
+    color: var(--ink-2);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .icard .tags {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .icard {
+      transition: none;
+    }
+  }
+</style>

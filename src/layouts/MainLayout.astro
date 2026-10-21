@@ -1,71 +1,347 @@
 ---
-// Importing necessary components
-import Meta from "@components/Meta.astro";
-import Navbar from "@components/sections/navbar&footer/Navbar.astro";
-import FooterSection from "@components/sections/navbar&footer/FooterSection.astro";
+import "@/styles/global.css";
+import { Image } from "astro:assets";
+import Logo from "@/components/Logo.astro";
 import { SITE } from "@data/constants";
+import ogImage from "@images/social.png";
+import aheadLogo from "@images/logo_AHEAD.png";
+import africtivistesLogo from "../../public/partenaires/Africtivistes.svg";
+import { partners } from "@/data_files/about";
+import { base, formLinks, useT, type Lang } from "@/i18n/ui";
 
-// Setting expected props
-const { title = SITE.title, meta, structuredData, lang = "fr" } = Astro.props;
-
-// Interface to type-check the properties
 interface Props {
   title?: string;
-  meta?: string;
-  structuredData?: object;
-  lang?: string;
+  description?: string;
+  lang?: Lang;
 }
+
+const { title, description = SITE.description_short, lang = "en" } = Astro.props;
+const t = useT(lang);
+const b = base(lang);
+const pageTitle = title ? `${title} · Sóobu` : `Sóobu · ${t("footer.tagline")}`;
+
+// Lien vers la même page dans l'autre langue
+const path = Astro.url.pathname;
+const altPath = lang === "fr" ? path.replace(/^\/fr(\/|$)/, "/") : `/fr${path === "/" ? "/" : path}`;
+const canonical = new URL(path, Astro.site);
+const og = new URL(ogImage.src, Astro.site);
+
+const nav = [
+  { href: `${b}/`, label: t("nav.home") },
+  { href: `${b}/observatoire/`, label: t("nav.observatory") },
+  { href: `${b}/initiatives/`, label: t("nav.initiatives") },
+  { href: `${b}/about/`, label: t("nav.about") },
+];
+const isActive = (href: string) =>
+  href === `${b}/` ? path === href || path === b : path.startsWith(href);
 ---
 
-<!--
-This is the main structure for the page.
-We set the language of the page to English and add classes for scrollbar and scroll behavior.
--->
-<html lang={lang} class="scrollbar-hide lenis lenis-smooth scroll-pt-16">
+<html lang={lang}>
   <head>
-    <!-- Adding metadata to the HTML document -->
-    <Meta meta={meta} structuredData={structuredData} />
-    <!-- Define the title of the page -->
-    <title>{title}</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang={lang === "fr" ? "en" : "fr"} href={new URL(altPath, Astro.site)} />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="theme-color" content="#161512" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={og} />
+    <meta property="og:locale" content={lang === "fr" ? "fr_FR" : "en_US"} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="generator" content={Astro.generator} />
     <script is:inline>
-      // Script to handle dark mode. It will check if the theme is stored in localStorage or if dark theme is preferred by system settings
-      if (
-        localStorage.getItem("hs_theme") === "light" ||
-        (!("hs_theme" in localStorage) &&
-          window.matchMedia("(prefers-color-scheme: light)").matches)
-      ) {
-        document.documentElement.classList.add("light");
-      } else {
-        document.documentElement.classList.remove("light");
-      }
-    </script>
-    <script>
-      import "@scripts/lenisSmoothScroll.js";
+      // Applique le thème choisi avant le rendu pour éviter un flash
+      try {
+        const saved = localStorage.getItem("soobu-theme");
+        if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+      } catch {}
     </script>
   </head>
-  <body
-    class="bg-neutral-200 selection:bg-yellow-400 selection:text-neutral-700 dark:bg-neutral-800"
-  >
-    <!--
-    Setting up the main structure of the page.
-    The Navbar is placed at the top, with a slot for the main content and FooterSection at the bottom.
-    -->
-    <div class="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
-      <Navbar />
-      <main>
-        <slot />
-      </main>
-    </div>
-    <FooterSection />
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-head">
+      <div class="wrap">
+        <a href={`${b}/`} class="brand" aria-label="Sóobu">
+          <Logo class="h-9 w-auto" />
+        </a>
+        <nav class="site-nav" aria-label="Main">
+          {
+            nav.map((n) => (
+              <a href={n.href} aria-current={isActive(n.href) ? "page" : undefined}>
+                {n.label}
+              </a>
+            ))
+          }
+        </nav>
+        <div class="head-tools">
+          <a class="lang" href={altPath} hreflang={lang === "fr" ? "en" : "fr"}>{lang === "fr" ? "EN" : "FR"}</a>
+          <button type="button" class="theme" id="theme-toggle" aria-label={t("nav.theme")}>
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"
+              ><path
+                fill="currentColor"
+                d="M12 3a9 9 0 1 0 0 18V3Z"></path><circle
+                cx="12"
+                cy="12"
+                r="8.25"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"></circle></svg
+            >
+          </button>
+          <a class="btn btn-primary submit" href={formLinks[lang]} target="_blank" rel="noopener">
+            {t("nav.submit")}
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="site-foot">
+      <div class="wrap">
+        <div class="foot-top">
+          <div class="foot-brand">
+            <Logo class="h-10 w-auto" />
+            <p>{t("footer.tagline")}</p>
+            <p class="by">{t("footer.by")}</p>
+            <div class="foot-orgs">
+              <a href="https://africtivistes.com/" target="_blank" rel="noopener" class="org-light">
+                <Image src={africtivistesLogo} alt="AfricTivistes" height={40} />
+              </a>
+              <a href="https://ahead.africa" target="_blank" rel="noopener" class="org-light">
+                <Image src={aheadLogo} alt="AHEAD Africa" height={44} width={35} />
+              </a>
+            </div>
+          </div>
+          <nav class="foot-nav" aria-label="Footer">
+            {nav.map((n) => <a href={n.href}>{n.label}</a>)}
+            <a href={`${b}/contact/`}>{t("nav.contact")}</a>
+            <a href={formLinks[lang]} target="_blank" rel="noopener">{t("nav.submit")}</a>
+          </nav>
+        </div>
+        <ul class="foot-partners" aria-label="Partners">
+          {
+            partners.map((p) => (
+              <li>
+                <a href={p.href} target="_blank" rel="noopener" title={p.name}>
+                  <Image src={p.logo} alt={p.name} height={36} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <p class="copy">© {new Date().getFullYear()} AfricTivistes · Sóobu. {t("footer.rights")}</p>
+      </div>
+    </footer>
+
+    <script>
+      const btn = document.getElementById("theme-toggle");
+      btn?.addEventListener("click", () => {
+        const root = document.documentElement;
+        const current =
+          root.dataset.theme ??
+          (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        const next = current === "dark" ? "light" : "dark";
+        root.dataset.theme = next;
+        try {
+          localStorage.setItem("soobu-theme", next);
+        } catch {}
+        document.dispatchEvent(new CustomEvent("soobu:theme", { detail: next }));
+      });
+    </script>
+
     <style>
-      /* CSS rules for the page scrollbar */
-      .scrollbar-hide::-webkit-scrollbar {
-        display: none;
+      .skip {
+        position: absolute;
+        left: -9999px;
+      }
+      .skip:focus {
+        left: 16px;
+        top: 8px;
+        z-index: 100;
+        background: var(--surface);
+        padding: 6px 10px;
+      }
+      .site-head {
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        background: color-mix(in srgb, var(--ground) 88%, transparent);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--rule);
+      }
+      .site-head .wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px 24px;
+        min-height: 60px;
+        flex-wrap: wrap;
+      }
+      .brand {
+        color: var(--ink);
+        display: flex;
+      }
+      .site-nav {
+        display: flex;
+        gap: 2px;
+        flex: 1;
+        flex-wrap: wrap;
+      }
+      .site-nav a {
+        font-size: 14px;
+        color: var(--ink-2);
+        text-decoration: none;
+        padding: 6px 10px;
+        border-radius: 7px;
+      }
+      .site-nav a:hover {
+        background: var(--sunk);
+        color: var(--ink);
+      }
+      .site-nav a[aria-current="page"] {
+        color: var(--ink);
+        font-weight: 600;
+        box-shadow: inset 0 -2px 0 var(--brand-yellow);
+        border-radius: 0;
+      }
+      .head-tools {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .lang,
+      .theme {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: var(--ink-2);
+        text-decoration: none;
+        border: 1px solid var(--rule);
+        background: var(--surface);
+        border-radius: 7px;
+        height: 32px;
+        min-width: 36px;
+        display: inline-grid;
+        place-items: center;
+        padding: 0 8px;
+      }
+      .lang:hover,
+      .theme:hover {
+        border-color: var(--line);
+        color: var(--ink);
+      }
+      .submit {
+        padding: 7px 14px;
+        font-size: 13.5px;
+      }
+      @media (max-width: 860px) {
+        .site-nav {
+          order: 3;
+          flex-basis: 100%;
+          overflow-x: auto;
+          flex-wrap: nowrap;
+          margin-inline: -10px;
+          padding-bottom: 4px;
+        }
+        .head-tools {
+          margin-left: auto;
+        }
+      }
+      @media (max-width: 480px) {
+        .submit {
+          display: none;
+        }
       }
 
-      .scrollbar-hide {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+      .site-foot {
+        background: var(--band);
+        color: var(--band-ink-2);
+        font-size: 13px;
+        padding-block: 48px 36px;
+        margin-top: 0;
+      }
+      .site-foot :global(svg) {
+        color: var(--band-ink);
+      }
+      .foot-top {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        gap: 32px 48px;
+      }
+      .foot-brand p {
+        margin-top: 12px;
+        max-width: 52ch;
+      }
+      .foot-brand .by {
+        font-size: 12.5px;
+      }
+      .foot-orgs {
+        margin-top: 18px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .org-light {
+        background: #f7f6f2;
+        border-radius: 8px;
+        padding: 6px 10px;
+        display: flex;
+      }
+      .org-light :global(img) {
+        height: 32px;
+        width: auto;
+      }
+      .foot-nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px 24px;
+        align-content: start;
+      }
+      .foot-nav a {
+        color: var(--band-ink);
+        text-decoration: none;
+      }
+      .foot-nav a:hover {
+        text-decoration: underline;
+      }
+      .foot-partners {
+        list-style: none;
+        margin: 36px 0 0;
+        padding: 20px 0 0;
+        border-top: 1px solid var(--band-rule);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .foot-partners a {
+        display: flex;
+        background: #f7f6f2;
+        border-radius: 8px;
+        padding: 6px 10px;
+        height: 48px;
+        align-items: center;
+      }
+      .foot-partners :global(img) {
+        height: 32px;
+        width: auto;
+        max-width: 140px;
+        object-fit: contain;
+      }
+      .copy {
+        margin-top: 24px;
+        font-size: 12px;
+      }
+      @media (max-width: 720px) {
+        .foot-top {
+          grid-template-columns: minmax(0, 1fr);
+        }
       }
     </style>
   </body>

@@ -1,0 +1,352 @@
+---
+import type { Initiative } from "@/collections/initiatives/config";
+import InitiativeCard from "@/components/InitiativeCard.astro";
+import { clean, countryLabel, type Row } from "@/lib/normalize";
+import { base, useT, type Lang } from "@/i18n/ui";
+
+interface Props {
+  initiative: Initiative;
+  rows: Row[];
+  lang: Lang;
+}
+const { initiative: i, rows, lang } = Astro.props;
+const t = useT(lang);
+const b = base(lang);
+const self = rows.find((r) => r.slug === i.slug)!;
+const country = self?.country ? countryLabel(self.country, lang) : clean(i.country);
+
+const dates = [clean(i.startDate), clean(i.endDate)].filter(Boolean).join(" → ");
+
+type Field = [string, string | null];
+const sections: { title: string; fields: Field[] }[] = [
+  {
+    title: t("detail.identity"),
+    fields: [
+      [t("detail.org"), clean(i.typeOrganisation)],
+      [t("detail.category"), clean(i.category)],
+      [t("detail.thematic"), clean(i.thematic)],
+      [t("detail.dates"), dates || null],
+    ],
+  },
+  {
+    title: t("detail.scope"),
+    fields: [
+      [t("detail.election"), clean(i.electionType)],
+      [t("detail.phases"), clean(i.phases)],
+      [t("detail.targets"), clean(i.targetAudience)],
+      [t("detail.zone"), clean(i.interventionZone)],
+      [t("detail.countries"), clean(i.paysMiseOeuvre)],
+    ],
+  },
+  {
+    title: t("detail.partners"),
+    fields: [
+      [t("detail.supported"), clean(i.partners)],
+      [t("detail.mainPartners"), clean(i.mainPartners)],
+      [t("detail.contribution"), clean(i.partnersContribution)],
+      [t("detail.partnerZone"), clean(i.partnerZone)],
+    ],
+  },
+  {
+    title: t("detail.context"),
+    fields: [
+      [t("detail.legal"), clean(i.legalEnvironment)],
+      [t("detail.transparency"), clean(i.transparencyAssessment)],
+      [t("detail.difficulties"), clean(i.publicAuthoritiesDifficulties)],
+      [t("detail.recognition"), clean(i.obligationRecognition)],
+      [t("detail.issues"), clean(i.electionProcessIssues)],
+      [t("detail.reported"), clean(i.reportedIssues)],
+      [t("detail.impact"), clean(i.impactDysfunctions)],
+    ],
+  },
+];
+const groups = sections.map((g) => ({ ...g, fields: g.fields.filter(([, v]) => v) }));
+
+const issuesNature = clean(i.electionIssuesNature);
+const outcome = clean(i.reportOutcome);
+const description = clean(i.description);
+const objectives = clean(i.objectives);
+const website = i.website && i.website !== "Vide" ? i.website : null;
+const socials = Object.entries(i.socialLinks ?? {}).filter(([, v]) => v && v !== "Vide") as [string, string][];
+const resources = (i.resources ?? []).filter((r) => r.signedUrl || r.url);
+
+// Contexte : même pays, puis même thématique
+const sameCountry = self?.country ? rows.filter((r) => r.country === self.country) : [];
+const similar = [
+  ...sameCountry.filter((r) => r.slug !== i.slug),
+  ...rows.filter((r) => r.thematic && r.thematic === self?.thematic && r.country !== self?.country),
+].slice(0, 3);
+const countryThemes = new Map<string, number>();
+for (const r of sameCountry) if (r.thematic) countryThemes.set(r.thematic, (countryThemes.get(r.thematic) ?? 0) + 1);
+---
+
+<div class="band">
+  <header class="wrap dhead">
+    <a class="back" href={`${b}/initiatives/`}>← {t("detail.back")}</a>
+    <div class="dtitle">
+      <div class="dlogo">
+        {
+          i.logo && i.logo !== "Vide" ? (
+            <img src={i.logo} alt="" width="88" height="88" />
+          ) : (
+            <span aria-hidden="true">{i.title.slice(0, 1)}</span>
+          )
+        }
+      </div>
+      <div>
+        <p class="kicker">{country}{self?.year ? ` · ${self.year}` : ""}</p>
+        <h1>{i.title}</h1>
+        <div class="dtags">
+          {clean(i.thematic) && <span class="tag acc">{clean(i.thematic)}</span>}
+          {clean(i.category) && <span class="tag">{clean(i.category)}</span>}
+          {self?.issues && <span class="tag hot">{t("tag.issues")}</span>}
+        </div>
+      </div>
+    </div>
+    {
+      (website || socials.length > 0) && (
+        <div class="dlinks">
+          {website && (
+            <a class="btn btn-primary" href={website} target="_blank" rel="noopener">
+              {t("detail.website")} ↗
+            </a>
+          )}
+          {socials.map(([k, v]) => (
+            <a class="btn btn-ghost" href={v} target="_blank" rel="noopener">
+              {k === "twitter" ? "X" : k.charAt(0).toUpperCase() + k.slice(1)}
+            </a>
+          ))}
+        </div>
+      )
+    }
+  </header>
+</div>
+
+<section class="sec">
+  <div class="wrap dgrid">
+    <div class="dmain">
+      {
+        description && (
+          <div class="prose-block">
+            <p class="kicker">{t("detail.summary")}</p>
+            <p class="lead">{description}</p>
+          </div>
+        )
+      }
+      {
+        objectives && (
+          <div class="prose-block">
+            <p class="kicker">{t("detail.objectives")}</p>
+            <p>{objectives}</p>
+          </div>
+        )
+      }
+      {
+        (issuesNature || outcome) && (
+          <div class="prose-block">
+            <p class="kicker">{t("detail.issues")}</p>
+            {issuesNature && <blockquote class="dquote">{issuesNature}</blockquote>}
+            {outcome && (
+              <p>
+                <b>{t("detail.outcome")} :</b> {outcome}
+              </p>
+            )}
+          </div>
+        )
+      }
+      <div class="sheet">
+        {
+          groups
+            .filter((g) => g.fields.length)
+            .map((g) => (
+              <div>
+                <h4>{g.title}</h4>
+                <dl>
+                  {g.fields.map(([k, v]) => (
+                    <>
+                      <dt>{k}</dt>
+                      <dd>{v}</dd>
+                    </>
+                  ))}
+                </dl>
+              </div>
+            ))
+        }
+      </div>
+      {
+        resources.length > 0 && (
+          <div class="prose-block">
+            <p class="kicker">{t("detail.resources")}</p>
+            <ul class="res">
+              {resources.map((r) => (
+                <li>
+                  <a href={r.signedUrl || r.url} target="_blank" rel="noopener">
+                    {r.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+
+    {
+      self?.country && (
+        <aside class="dside">
+          <p class="kicker">{t("detail.inCountry", { country: country ?? "" })}</p>
+          <p class="big num">{sameCountry.length}</p>
+          <p class="muted">{t("detail.inCountryText", { n: sameCountry.length })}</p>
+          <div class="chips">
+            {[...countryThemes].sort((a, b) => b[1] - a[1]).map(([th, n]) => (
+              <a class="chip" href={`${b}/initiatives/?country=${encodeURIComponent(self.country!)}&them=${encodeURIComponent(th)}`}>
+                {th} <span class="num">{n}</span>
+              </a>
+            ))}
+          </div>
+          <a class="side-link" href={`${b}/observatoire/?country=${encodeURIComponent(self.country)}`}>
+            {t("nav.observatory")} · {country} →
+          </a>
+        </aside>
+      )
+    }
+  </div>
+</section>
+
+{
+  similar.length > 0 && (
+    <section class="sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="kicker">{t("detail.similar")}</p>
+        </div>
+        <div class="cards">
+          {similar.map((r) => (
+            <InitiativeCard row={r} lang={lang} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .dhead {
+    padding-block: 28px 40px;
+  }
+  .back {
+    color: var(--band-ink-2);
+    text-decoration: none;
+    font-size: 13.5px;
+  }
+  .back:hover {
+    color: var(--band-ink);
+  }
+  .dtitle {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 22px;
+    align-items: center;
+  }
+  .dlogo {
+    width: 88px;
+    height: 88px;
+    border-radius: 14px;
+    background: #fff;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .dlogo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .dlogo span {
+    font-size: 34px;
+    font-weight: 700;
+    color: #161512;
+  }
+  .dtitle h1 {
+    margin-top: 8px;
+    font-size: clamp(28px, 4.4vw, 50px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .dtags {
+    margin-top: 12px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .dlinks {
+    margin-top: 24px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  @media (max-width: 560px) {
+    .dtitle {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .dgrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 40px 56px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .dgrid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .dmain {
+    display: grid;
+    gap: 36px;
+  }
+  .prose-block {
+    display: grid;
+    gap: 10px;
+  }
+  .prose-block .lead {
+    font-size: 17px;
+    color: var(--ink);
+  }
+  .dquote {
+    margin: 0;
+    padding-left: 16px;
+    border-left: 3px solid var(--brand-orange);
+    white-space: pre-line;
+    color: var(--ink);
+  }
+  .res {
+    margin: 0;
+    padding-left: 18px;
+  }
+  .dside {
+    position: sticky;
+    top: 84px;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    background: var(--surface);
+    padding: 20px;
+    display: grid;
+    gap: 10px;
+  }
+  .dside .big {
+    font-size: 44px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .dside .muted {
+    color: var(--ink-2);
+    font-size: 13.5px;
+  }
+  .side-link {
+    margin-top: 6px;
+    font-weight: 600;
+    font-size: 13.5px;
+  }
+</style>

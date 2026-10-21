@@ -1,0 +1,144 @@
+---
+import InitiativeCard from "@/components/InitiativeCard.astro";
+import { getRows } from "@/lib/initiatives";
+import { useT, type Lang } from "@/i18n/ui";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useT(lang);
+const rows = (await getRows(lang)).sort((a, b) => a.title.localeCompare(b.title));
+
+const options = (get: (r: (typeof rows)[number]) => string | null) => {
+  const m = new Map<string, number>();
+  for (const r of rows) {
+    const v = get(r);
+    if (v) m.set(v, (m.get(v) ?? 0) + 1);
+  }
+  return [...m].sort((a, b) => a[0].localeCompare(b[0]));
+};
+const countries = [...new Map(rows.filter((r) => r.country).map((r) => [r.country!, r.countryLabel!]))].sort((a, b) =>
+  a[1].localeCompare(b[1]),
+);
+const categories = options((r) => r.category);
+const thematics = options((r) => r.thematic);
+---
+
+<div class="band">
+  <header class="hero wrap list-hero">
+    <p class="kicker">{t("nav.initiatives")}</p>
+    <h1>{t("list.title")}</h1>
+    <p class="lede">{t("list.lede")}</p>
+  </header>
+</div>
+
+<div class="filterbar">
+  <div class="wrap">
+    <input type="search" id="l-q" placeholder={t("obs.search")} aria-label={t("obs.search")} />
+    <select id="l-country" aria-label={t("obs.filter")}>
+      <option value="">{t("list.allCountries")}</option>
+      {countries.map(([name, label]) => <option value={name}>{label}</option>)}
+    </select>
+    <select id="l-cat" aria-label={t("obs.category")}>
+      <option value="">{t("list.allCategories")}</option>
+      {categories.map(([c, n]) => <option value={c}>{c} ({n})</option>)}
+    </select>
+    <select id="l-them" aria-label={t("obs.thematic")}>
+      <option value="">{t("list.allThematics")}</option>
+      {thematics.map(([c, n]) => <option value={c}>{c} ({n})</option>)}
+    </select>
+    <button class="reset" id="l-reset" type="button" hidden>{t("list.clear")}</button>
+    <span class="eyebrow" id="l-count"></span>
+  </div>
+</div>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="cards" id="l-cards">
+      {
+        rows.map((r) => (
+          <div
+            class="cell"
+            data-country={r.country ?? ""}
+            data-cat={r.category ?? ""}
+            data-them={r.thematic ?? ""}
+            data-text={[r.title, r.countryLabel, r.category, r.thematic, r.summary, ...r.targets].join(" ").toLowerCase()}
+          >
+            <InitiativeCard row={r} lang={lang} />
+          </div>
+        ))
+      }
+    </div>
+    <p class="empty" id="l-empty" hidden>{t("obs.empty")}</p>
+  </div>
+</section>
+
+<script define:vars={{ countLabel: t("obs.count", { n: "{n}" }) }}>
+  const $ = (id) => document.getElementById(id);
+  const q = $("l-q");
+  const selects = { country: $("l-country"), cat: $("l-cat"), them: $("l-them") };
+  const cells = [...document.querySelectorAll("#l-cards .cell")];
+
+  // Paramètres d'URL : ?country=…&cat=…&them=…&q=…, et l'ancien ?tags=… (lien de la carte v1)
+  const params = new URLSearchParams(location.search);
+  const legacy = params.get("tags");
+  for (const [k, el] of Object.entries(selects)) {
+    const v = params.get(k) ?? legacy;
+    if (v && [...el.options].some((o) => o.value === v)) el.value = v;
+  }
+  q.value = params.get("q") ?? "";
+
+  function apply() {
+    const needle = q.value.trim().toLowerCase();
+    let n = 0;
+    for (const c of cells) {
+      const ok =
+        (!selects.country.value || c.dataset.country === selects.country.value) &&
+        (!selects.cat.value || c.dataset.cat === selects.cat.value) &&
+        (!selects.them.value || c.dataset.them === selects.them.value) &&
+        (!needle || c.dataset.text.includes(needle));
+      c.hidden = !ok;
+      if (ok) n++;
+    }
+    $("l-count").textContent = countLabel.replace("{n}", n);
+    $("l-empty").hidden = n > 0;
+    const active = needle || Object.values(selects).some((s) => s.value);
+    $("l-reset").hidden = !active;
+
+    const url = new URL(location.href);
+    url.search = "";
+    for (const [k, el] of Object.entries(selects)) if (el.value) url.searchParams.set(k, el.value);
+    if (needle) url.searchParams.set("q", q.value.trim());
+    history.replaceState(null, "", url);
+  }
+
+  q.addEventListener("input", apply);
+  Object.values(selects).forEach((s) => s.addEventListener("change", apply));
+  $("l-reset").addEventListener("click", () => {
+    q.value = "";
+    Object.values(selects).forEach((s) => (s.value = ""));
+    apply();
+  });
+  apply();
+</script>
+
+<style>
+  .list-hero {
+    padding-block: 44px 36px;
+  }
+  .filterbar input[type="search"] {
+    flex: 1;
+    min-width: 180px;
+    max-width: 340px;
+  }
+  .filterbar select {
+    max-width: 220px;
+  }
+  .cell[hidden] {
+    display: none;
+  }
+  .cell {
+    display: grid;
+  }
+</style>

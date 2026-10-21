@@ -3,7 +3,7 @@ import sharp from "sharp";
 import ico from "sharp-ico";
 import path from "node:path";
 
-const faviconSrc = path.resolve("src/images/logo_AHEAD.png");
+const faviconSrc = path.resolve("src/images/icon.png");
 
 export const GET: APIRoute = async () => {
 
@@ -22,7 +22,7 @@ export const GET: APIRoute = async () => {
   // Convert the image to an ICO file
   const icoBuffer = ico.encode(buffers);
 
-  return new Response(icoBuffer, {
+  return new Response(new Uint8Array(icoBuffer), {
     headers: { "Content-Type": "image/x-icon" },
   });
 };

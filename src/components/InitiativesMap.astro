@@ -1,0 +1,155 @@
+---
+import type { Lang } from "@/i18n/ui";
+
+export type MapPoint = {
+  name: string;
+  label: string;
+  count: number;
+  coords: [number, number];
+  initiatives: { slug: string; title: string }[];
+};
+
+interface Props {
+  points: MapPoint[];
+  lang: Lang;
+  height?: string;
+}
+
+const { points, lang, height = "520px" } = Astro.props;
+---
+
+<div class="imap" style={`height:${height}`} data-lang={lang}>
+  <div class="imap-canvas"></div>
+  <script type="application/json" set:html={JSON.stringify(points)} />
+</div>
+
+<script>
+  import maplibregl from "maplibre-gl";
+  import "maplibre-gl/dist/maplibre-gl.css";
+  import { base, type Lang } from "@/i18n/ui";
+
+  const isDark = () => {
+    const t = document.documentElement.dataset.theme;
+    return t ? t === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+  };
+
+  // Fonds OpenFreeMap (OpenStreetMap, sans clé API) : Positron en clair, Dark en sombre
+  const style = (dark: boolean) => `https://tiles.openfreemap.org/styles/${dark ? "dark" : "positron"}`;
+
+  const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
+  for (const root of document.querySelectorAll<HTMLElement>(".imap")) {
+    const lang = (root.dataset.lang ?? "en") as Lang;
+    const points = JSON.parse(root.querySelector("script")!.textContent!) as {
+      name: string;
+      label: string;
+      count: number;
+      coords: [number, number];
+      initiatives: { slug: string; title: string }[];
+    }[];
+    const b = base(lang);
+    const listUrl = (name: string) => `${b}/initiatives/?country=${encodeURIComponent(name)}`;
+
+    const map = new maplibregl.Map({
+      container: root.querySelector<HTMLElement>(".imap-canvas")!,
+      style: style(isDark()),
+      bounds: [
+        [-20, -36],
+        [52, 38],
+      ],
+      fitBoundsOptions: { padding: 12 },
+      cooperativeGestures: true,
+      attributionControl: { compact: true },
+    });
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+
+    const geojson = {
+      type: "FeatureCollection" as const,
+      features: points.map((p) => ({
+        type: "Feature" as const,
+        geometry: { type: "Point" as const, coordinates: p.coords },
+        properties: { name: p.name, label: p.label, count: p.count, list: JSON.stringify(p.initiatives) },
+      })),
+    };
+    const max = Math.max(1, ...points.map((p) => p.count));
+
+    const addLayers = () => {
+      if (map.getSource("pts")) return;
+      map.addSource("pts", { type: "geojson", data: geojson });
+      map.addLayer({
+        id: "pts",
+        type: "circle",
+        source: "pts",
+        paint: {
+          // Aire proportionnelle au nombre d'initiatives
+          "circle-radius": ["*", 22, ["sqrt", ["/", ["get", "count"], max]]],
+          "circle-color": isDark() ? "#4d8ff0" : "#2c6fd6",
+          "circle-opacity": 0.85,
+          "circle-stroke-width": 2,
+          "circle-stroke-color": isDark() ? "#17181b" : "#ffffff",
+        },
+      });
+    };
+    map.on("load", addLayers);
+    map.on("style.load", addLayers);
+
+    const popup = new maplibregl.Popup({ closeButton: false, offset: 12, maxWidth: "280px", className: "imap-pop" });
+    map.on("mousemove", "pts", (e) => {
+      map.getCanvas().style.cursor = "pointer";
+      const f = e.features![0];
+      const p = f.properties as { label: string; count: number; list: string; name: string };
+      const list = JSON.parse(p.list) as { slug: string; title: string }[];
+      const items = list
+        .slice(0, 5)
+        .map((i) => `<li>${esc(i.title)}</li>`)
+        .join("");
+      const more = list.length > 5 ? `<li>+ ${list.length - 5}</li>` : "";
+      popup
+        .setLngLat((f.geometry as GeoJSON.Point).coordinates as [number, number])
+        .setHTML(`<strong>${esc(p.label)}</strong> · ${p.count}<ul>${items}${more}</ul>`)
+        .addTo(map);
+    });
+    map.on("mouseleave", "pts", () => {
+      map.getCanvas().style.cursor = "";
+      popup.remove();
+    });
+    map.on("click", "pts", (e) => {
+      const name = (e.features![0].properties as { name: string }).name;
+      window.location.href = listUrl(name);
+    });
+
+    document.addEventListener("soobu:theme", () => {
+      map.setStyle(style(isDark()));
+    });
+  }
+</script>
+
+<style is:global>
+  .imap {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--rule);
+    background: var(--sunk);
+  }
+  .imap-canvas {
+    position: absolute;
+    inset: 0;
+  }
+  .imap-pop .maplibregl-popup-content {
+    background: var(--tip-bg);
+    color: var(--tip-ink);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 12.5px;
+    line-height: 1.4;
+    box-shadow: none;
+  }
+  .imap-pop .maplibregl-popup-tip {
+    display: none;
+  }
+  .imap-pop ul {
+    margin: 6px 0 0;
+    padding-left: 16px;
+  }
+</style>

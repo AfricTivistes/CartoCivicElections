@@ -1,0 +1,190 @@
+---
+import InitiativesMap from "@/components/InitiativesMap.astro";
+import InitiativeCard from "@/components/InitiativeCard.astro";
+import { getRows, kpis, mapPoints } from "@/lib/initiatives";
+import { base, formLinks, ui, useT, type Lang } from "@/i18n/ui";
+import faqsEn from "@data/faqs.json";
+import faqsFr from "@data/fr/faqs.json";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useT(lang);
+const b = base(lang);
+const rows = await getRows(lang);
+const k = kpis(rows);
+const points = mapPoints(rows, lang);
+const faqs = (lang === "fr" ? faqsFr : faqsEn).faqs;
+const latest = rows
+  .slice()
+  .sort((a, b) => (b.year ?? 0) - (a.year ?? 0) || a.title.localeCompare(b.title))
+  .slice(0, 6);
+const strings = {
+  ...ui[lang],
+  pre: lang === "fr" ? "Pré-électorale" : "Pre-electoral",
+  election: lang === "fr" ? "Électorale" : "Electoral",
+  post: lang === "fr" ? "Post-électorale" : "Post-electoral",
+};
+---
+
+<div class="band">
+  <header class="hero wrap">
+    <p class="kicker">{t("home.kicker")}</p>
+    <h1 set:html={t("home.title")} />
+    <p class="lede">{t("home.lede")}</p>
+    <div class="mt-7 flex flex-wrap gap-3">
+      <a class="btn btn-primary" href={`${b}/observatoire/`}>{t("home.explore")} →</a>
+      <a class="btn btn-ghost" href={`${b}/initiatives/`}>{t("home.browse")}</a>
+    </div>
+    <div class="tally" id="h-tally" aria-hidden="true"></div>
+    <div class="tally-key" id="h-tally-key"></div>
+    <div class="kpis">
+      <div class="kpi"><div class="n num">{k.initiatives}</div><div class="l">{t("kpi.initiatives")}</div></div>
+      <div class="kpi"><div class="n num">{k.countries}</div><div class="l">{t("kpi.countries")}</div></div>
+      <div class="kpi"><div class="n num">{k.partners} %</div><div class="l">{t("kpi.partners")}</div></div>
+      <div class="kpi"><div class="n num">{k.issues} %</div><div class="l">{t("kpi.issues")}</div></div>
+    </div>
+  </header>
+</div>
+
+<section class="sec" id="carte">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{t("home.mapKicker")}</p>
+      <h2>{t("home.mapTitle")}</h2>
+      <p>{t("home.mapText")}</p>
+    </div>
+    <InitiativesMap points={points} lang={lang} />
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{t("home.insightsKicker")}</p>
+      <h2>{t("home.insightsTitle")}</h2>
+    </div>
+    <div class="grid-3">
+      <div class="fig"><h3>{t("obs.thematic")}</h3><p class="q">{t("obs.share")}</p><div id="i-them"></div></div>
+      <div class="fig"><h3>{t("obs.target")}</h3><p class="q">{t("obs.multi")}</p><div id="i-target"></div></div>
+      <div class="fig"><h3>{t("obs.phases")}</h3><p class="q">{t("obs.multi")}</p><div id="i-phase"></div></div>
+    </div>
+    <p class="mt-8"><a href={`${b}/observatoire/`} class="font-semibold">{t("home.insightsMore")} →</a></p>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{t("home.latestKicker")}</p>
+      <h2>{t("home.latestTitle")}</h2>
+    </div>
+    <div class="cards">
+      {latest.map((r) => <InitiativeCard row={r} lang={lang} />)}
+    </div>
+    <p class="mt-8"><a href={`${b}/initiatives/`} class="font-semibold">{t("home.browse")} →</a></p>
+  </div>
+</section>
+
+<section class="band">
+  <div class="wrap cta">
+    <div>
+      <h2>{t("home.ctaTitle")}</h2>
+      <p>{t("home.ctaText")}</p>
+    </div>
+    <a class="btn btn-primary" href={formLinks[lang]} target="_blank" rel="noopener">{t("nav.submit")} →</a>
+  </div>
+</section>
+
+<section class="sec" id="faqs">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{t("home.faqKicker")}</p>
+      <h2>{t("home.faqTitle")}</h2>
+    </div>
+    <div class="list faq">
+      {
+        faqs.map((f) => (
+          <details class="resp">
+            <summary>
+              <span class="o">{f.question}</span>
+            </summary>
+            <div class="resp-body">
+              <p set:html={f.answer} />
+            </div>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script type="application/json" id="home-data" set:html={JSON.stringify({ rows, strings })} />
+
+<script>
+  import { answered, countBy, hbars, initTooltip } from "@/scripts/viz";
+  import type { Row } from "@/lib/normalize";
+
+  const { rows, strings: S } = JSON.parse(document.getElementById("home-data")!.textContent!) as {
+    rows: Row[];
+    strings: Record<string, string>;
+  };
+  const $ = (id: string) => document.getElementById(id);
+  const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  const opts = (total: number, limit = 5) => ({ total, limit, more: S["obs.showMore"], less: S["obs.showLess"], of: S["obs.of"] });
+
+  // Les catégories fourre-tout (« Autres », « Tout cité plus haut ») vont dans le gris
+  const CATCH_ALL = /^(autres?|others?|tout cit|all above)/i;
+  const cats = countBy(rows, (r) => r.category)
+    .map((c) => c.label)
+    .sort((a, b) => Number(CATCH_ALL.test(a)) - Number(CATCH_ALL.test(b)));
+  const color = (c: string | null) => {
+    const i = c ? cats.indexOf(c) : -1;
+    return i >= 0 && i < 3 && !CATCH_ALL.test(c!) ? `var(--c${i + 1})` : "var(--c-other)";
+  };
+  $("h-tally")!.innerHTML = rows
+    .slice()
+    .sort((a, b) => cats.indexOf(a.category ?? "") - cats.indexOf(b.category ?? ""))
+    .map((r) => `<i style="background:${color(r.category)}"></i>`)
+    .join("");
+  $("h-tally-key")!.innerHTML =
+    cats
+      .slice(0, 3)
+      .filter((c) => !CATCH_ALL.test(c))
+      .map((c) => `<span><b style="background:${color(c)}"></b>${esc(c)}</span>`)
+      .join("") +
+    (cats.length > 3 ? `<span><b style="background:var(--c-other)"></b>${esc(S["obs.other"])}</span>` : "") +
+    `<span>${esc(S["home.tallyNote"])}</span>`;
+
+  hbars($("i-them"), countBy(rows, (r) => r.thematic), opts(answered(rows, (r) => r.thematic)));
+  hbars($("i-target"), countBy(rows, (r) => r.targets), opts(answered(rows, (r) => r.targets), 4));
+  hbars(
+    $("i-phase"),
+    (["pre", "election", "post"] as const).map((k) => ({ label: S[k], n: rows.filter((r) => r.phases.includes(k)).length })),
+    opts(answered(rows, (r) => r.phases)),
+  );
+  initTooltip();
+</script>
+
+<style>
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 40px;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 48px;
+  }
+  .cta h2 {
+    font-size: clamp(24px, 3.2vw, 34px);
+    letter-spacing: -0.015em;
+  }
+  .cta p {
+    margin-top: 8px;
+    color: var(--band-ink-2);
+  }
+  .faq summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+</style>

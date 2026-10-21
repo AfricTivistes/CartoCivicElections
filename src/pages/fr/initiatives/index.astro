@@ -1,26 +1,11 @@
 ---
 import MainLayout from "@/layouts/MainLayout.astro";
-import InitiativesGrid from "@/components/InitiativesGrid.jsx";
+import InitiativesList from "@/components/InitiativesList.astro";
+import { useT } from "@/i18n/ui";
 
-// Define variables for page content
-const title: string = "Initiatives Citoyennes";
-const subTitle: string =
-  "Découvrez et soutenez les initiatives citoyennes pour des élections transparentes et équitables à travers l'Afrique";
-
-import { getInitiatives } from "@/lib/initiatives";
-
-const initiatives = await getInitiatives("fr");
+const t = useT("fr");
 ---
 
-<MainLayout title={title}>
-  <div class="mx-auto max-w-[85rem] px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-    <!-- Header Section -->
-    <div class="mb-8 text-center">
-      <h1 class="text-primary-600 mb-4 text-4xl font-bold">{title}</h1>
-      <p class="text-lg text-gray-600">{subTitle}</p>
-    </div>
-
-    <!-- Initiatives Grid Component -->
-    <InitiativesGrid client:load initiatives={initiatives} language={"fr"} />
-  </div>
+<MainLayout lang="fr" title={t("list.title")} description={t("list.lede")}>
+  <InitiativesList lang="fr" />
 </MainLayout>

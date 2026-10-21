@@ -23,6 +23,7 @@ function getField(product: any, fieldName: string): any {
     }
   }
 
+  if (typeof value === "string") value = value.trim();
   if (
     value === "Vide" ||
     value === "Non spécifié" ||
@@ -121,7 +122,9 @@ export const initiativeSchema = z.object({
 
   // Resources & social
   resources: z.array(resourceSchema).optional().default([]),
-  socialLinks: socialLinksSchema.optional().default({}),
+  socialLinks: socialLinksSchema
+    .optional()
+    .default({ facebook: "Vide", twitter: "Vide", linkedin: "Vide" }),
 
   // Image
   logo: z.string().default("Non spécifié"),

@@ -3,7 +3,7 @@ import paysData from "@/utils/pays.json";
 import { getInitiatives } from "@/lib/initiatives";
 import type { Initiative } from "@/collections/initiatives/config";
 
-export const GET: APIRoute = async ({ params, request }) => {
+export const GET: APIRoute = async ({ request }) => {
   try {
     // Extraction de la langue à partir de l'URL complète
     const url = new URL(request.url);

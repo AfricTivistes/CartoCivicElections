@@ -1,0 +1,11 @@
+---
+import MainLayout from "@/layouts/MainLayout.astro";
+import Observatory from "@/components/Observatory.astro";
+import { useT } from "@/i18n/ui";
+
+const t = useT("fr");
+---
+
+<MainLayout lang="fr" title={t("nav.observatory")} description={t("obs.lede")}>
+  <Observatory lang="fr" />
+</MainLayout>

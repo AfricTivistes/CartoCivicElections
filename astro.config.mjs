@@ -1,10 +1,7 @@
 import { defineConfig } from "astro/config";
-import tailwind from "@astrojs/tailwind";
+import tailwindcss from "@tailwindcss/vite";
 import vercel from "@astrojs/vercel";
 import sitemap from "@astrojs/sitemap";
-import compressor from "astro-compressor";
-import starlight from "@astrojs/starlight";
-import react from "@astrojs/react";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -35,99 +32,19 @@ function copyInitiativeLogos() {
 
 // https://astro.build/config
 export default defineConfig({
-  // https://docs.astro.build/en/guides/images/#authorizing-remote-images
   site: "https://soobu.tech/",
-  image: {
-    domains: ["images.unsplash.com"],
-  },
   prefetch: true,
+  i18n: {
+    defaultLocale: "en",
+    locales: ["en", "fr"],
+    routing: { prefixDefaultLocale: false },
+  },
+  vite: {
+    plugins: [tailwindcss()],
+  },
   integrations: [
-    react({
-      include: ['**/*.jsx', '**/*.tsx']
-    }),
-    tailwind(),
-    sitemap(),
-    starlight({
-      title: "ScrewFast Docs",
-      defaultLocale: "root",
-      // https://github.com/withastro/starlight/blob/main/packages/starlight/CHANGELOG.md
-      // If no Astro and Starlight i18n configurations are provided, the built-in default locale is used in Starlight and a matching Astro i18n configuration is generated/used.
-      // If only a Starlight i18n configuration is provided, an equivalent Astro i18n configuration is generated/used.
-      // If only an Astro i18n configuration is provided, the Starlight i18n configuration is updated to match it.
-      // If both an Astro and Starlight i18n configurations are provided, an error is thrown.
-      locales: {
-        root: {
-          label: "English",
-          lang: "en",
-        },
-        fr: { label: "Français", lang: "fr" },
-      },
-      // https://starlight.astro.build/guides/sidebar/
-      sidebar: [
-        {
-          label: "Quick Start Guides",
-          translations: {
-            de: "Schnellstartanleitungen",
-            es: "Guías de Inicio Rápido",
-            fa: "راهنمای شروع سریع",
-            fr: "Guides de Démarrage Rapide",
-            ja: "クイックスタートガイド",
-            "zh-cn": "快速入门指南",
-          },
-          autogenerate: { directory: "guides" },
-        },
-        {
-          label: "Tools & Equipment",
-          items: [
-            { label: "Tool Guides", link: "tools/tool-guides/" },
-            { label: "Equipment Care", link: "tools/equipment-care/" },
-          ],
-        },
-        {
-          label: "Construction Services",
-          autogenerate: { directory: "construction" },
-        },
-        {
-          label: "Advanced Topics",
-          autogenerate: { directory: "advanced" },
-        },
-      ],
-      social: [
-        {
-          icon: "github",
-          label: "GitHub",
-          href: "https://github.com/mearashadowfax/ScrewFast",
-        },
-      ],
-      disable404Route: true,
-      customCss: ["./src/assets/styles/starlight.css"],
-      favicon: "/favicon.ico",
-      components: {
-        SiteTitle: "./src/components/ui/starlight/SiteTitle.astro",
-        Head: "./src/components/ui/starlight/Head.astro",
-        MobileMenuFooter: "./src/components/ui/starlight/MobileMenuFooter.astro",
-        ThemeSelect: "./src/components/ui/starlight/ThemeSelect.astro",
-      },
-      head: [
-        {
-          tag: "meta",
-          attrs: {
-            property: "og:image",
-            content: "https://soobu.tech/" + "/social.webp",
-          },
-        },
-        {
-          tag: "meta",
-          attrs: {
-            property: "twitter:image",
-            content: "https://soobu.tech/" + "/social.webp",
-          },
-        },
-      ],
-    }),
-    compressor({
-      gzip: false,
-      brotli: true,
+    sitemap({
+      i18n: { defaultLocale: "en", locales: { en: "en", fr: "fr" } },
     }),
     copyInitiativeLogos(),
   ],
