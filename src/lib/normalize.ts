@@ -178,6 +178,10 @@ export type Row = {
   outcome: string | null;
   summary: string | null;
   logo: string | null;
+  organisation: string | null;
+  regions: string[];
+  /** Fond de couverture tiré du logo (renseigné par getRows) */
+  cover: { bg: string; ink: "light" | "dark" } | null;
 };
 
 /**
@@ -250,6 +254,11 @@ export function toRows(initiatives: Initiative[], lang: Lang): Row[] {
       outcome: longText(i.reportOutcome),
       summary: longText(i.description),
       logo: i.logo && i.logo !== "Vide" ? i.logo : null,
+      organisation: clean(i.organisation),
+      regions: multi(i.region, /\s*[,\/;]\s*/)
+        .map((r) => r.label.toUpperCase())
+        .filter((r) => !/^(AUTRES?|OTHERS?)$/.test(r)),
+      cover: null,
     };
   });
 }

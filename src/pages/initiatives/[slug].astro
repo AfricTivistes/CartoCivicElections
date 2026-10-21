@@ -1,20 +1,20 @@
 ---
 import MainLayout from "@/layouts/MainLayout.astro";
 import InitiativeDetail from "@/components/InitiativeDetail.astro";
-import { getInitiatives } from "@/lib/initiatives";
-import { toRows } from "@/lib/normalize";
+import { getInitiatives, getRows } from "@/lib/initiatives";
+import type { Row } from "@/lib/normalize";
 import type { Initiative } from "@/collections/initiatives/config";
 
 export async function getStaticPaths() {
   const initiatives = await getInitiatives("en");
-  const rows = toRows(initiatives, "en");
+  const rows = await getRows("en");
   return initiatives.map((initiative) => ({
     params: { slug: initiative.slug },
     props: { initiative, rows },
   }));
 }
 
-const { initiative, rows } = Astro.props as { initiative: Initiative; rows: ReturnType<typeof toRows> };
+const { initiative, rows } = Astro.props as { initiative: Initiative; rows: Row[] };
 const description = initiative.description?.slice(0, 160);
 ---
 

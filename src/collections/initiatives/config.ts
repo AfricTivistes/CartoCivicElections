@@ -80,6 +80,8 @@ export const initiativeSchema = z.object({
   country: z.string().default("Pays non spécifié"),
   langue: z.string().default("Langue non spécifiée"),
   typeOrganisation: z.string().default("Organisation non spécifiée"),
+  organisation: z.string().default("Non spécifié"),
+  region: z.string().default("Non spécifié"),
   category: z.string().default("Non catégorisé"),
   thematic: z.string().default("Non spécifié"),
   description: z.string().default("Description non disponible"),
@@ -157,6 +159,18 @@ export const initiativeMapper = (raw: any) => {
     langue: getField(raw, "Langue") || "Langue non spécifiée",
     typeOrganisation:
       getField(raw, "Type d'organisation") || "Organisation non spécifiée",
+    organisation: (() => {
+      // Certains répondants ont saisi leur propre nom comme organisation :
+      // on ne publie jamais le nom d'une personne (« Prénoms et Nom » reste privé).
+      const org = getField(raw, "Nom de l'organisation porteuse de l'initiative");
+      const person = getField(raw, "Prénoms et Nom");
+      const same =
+        typeof org === "string" &&
+        typeof person === "string" &&
+        org.toLowerCase().replace(/\s+/g, " ") === person.toLowerCase().replace(/\s+/g, " ");
+      return (!same && org) || "Non spécifié";
+    })(),
+    region: getField(raw, "Région couverte par l'initiative") || "Non spécifié",
     category: getField(raw, "Catégorie de l'initiative") || "Non catégorisé",
     thematic: getField(raw, "Thématique de l'initiative") || "Non spécifié",
     description:

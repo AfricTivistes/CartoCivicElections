@@ -3,6 +3,7 @@ import type { Initiative } from "@/collections/initiatives/config";
 import { downloadAndOptimizeImage } from "@/utils/images";
 import { toRows, countryCoords, countryLabel, type Row } from "@/lib/normalize";
 import type { Lang } from "@/i18n/ui";
+import { logoCover } from "@/lib/covers";
 import type { MapPoint } from "@/components/InitiativesMap.astro";
 
 /**
@@ -67,7 +68,9 @@ export async function getInitiativeDetails(language: string = "fr") {
  * observatory.
  */
 export async function getRows(language: Lang) {
-  return toRows(await getInitiatives(language), language);
+  const rows = toRows(await getInitiatives(language), language);
+  await Promise.all(rows.map(async (r) => (r.cover = await logoCover(r.logo))));
+  return rows;
 }
 
 export function mapPoints(rows: Row[], language: Lang): MapPoint[] {

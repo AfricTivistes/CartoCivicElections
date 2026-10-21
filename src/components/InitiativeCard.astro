@@ -1,37 +1,33 @@
 ---
+import InitiativeCover from "@/components/InitiativeCover.astro";
 import type { Row } from "@/lib/normalize";
-import { base, type Lang } from "@/i18n/ui";
+import { base, useT, type Lang } from "@/i18n/ui";
 
 interface Props {
   row: Row;
   lang: Lang;
+  variant?: "card" | "feature";
+  eager?: boolean;
 }
-const { row, lang } = Astro.props;
-const initials = row.title
-  .split(/\s+/)
-  .filter((w) => /^[A-Za-zÀ-ÿ]/.test(w))
-  .slice(0, 2)
-  .map((w) => w[0].toUpperCase())
-  .join("");
+const { row, lang, variant = "card", eager = false } = Astro.props;
+const t = useT(lang);
+// Inutile de répéter le nom quand l'organisation porte le même nom que l'initiative
+const org =
+  row.organisation && row.organisation.toLowerCase() !== row.title.toLowerCase() ? row.organisation : null;
 ---
 
-<a class="icard" href={`${base(lang)}/initiatives/${row.slug}/`}>
-  <div class="icard-logo">
-    {
-      row.logo ? (
-        <img src={row.logo} alt="" loading="lazy" decoding="async" width="56" height="56" />
-      ) : (
-        <span aria-hidden="true">{initials}</span>
-      )
-    }
-  </div>
+<a class={`icard icard-${variant}`} href={`${base(lang)}/initiatives/${row.slug}/`}>
+  <InitiativeCover row={row} size={variant === "feature" ? "feature" : "card"} eager={eager} />
   <div class="icard-body">
-    <p class="m">{row.countryLabel}{row.year ? ` · ${row.year}` : ""}</p>
+    <p class="m">
+      {row.countryLabel}{row.year ? ` · ${row.year}` : ""}
+    </p>
     <h3>{row.title}</h3>
+    {org && <p class="org">{t("card.by", { org })}</p>}
     {row.summary && <p class="sum">{row.summary}</p>}
     <div class="tags">
       {row.thematic && <span class="tag acc">{row.thematic}</span>}
-      {row.category && <span class="tag">{row.category}</span>}
+      {row.regions[0] && <span class="tag">{row.regions[0]}</span>}
     </div>
   </div>
 </a>
@@ -39,73 +35,91 @@ const initials = row.title
 <style is:global>
   .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 290px), 1fr));
+    gap: 20px;
   }
   .icard {
-    display: grid;
-    grid-template-columns: 56px minmax(0, 1fr);
-    gap: 14px;
-    padding: 16px;
+    display: flex;
+    flex-direction: column;
     border: 1px solid var(--rule);
-    border-radius: 12px;
+    border-radius: 14px;
+    overflow: hidden;
     background: var(--surface);
     color: var(--ink);
     text-decoration: none;
-    transition: border-color 0.15s;
+    transition:
+      border-color 0.15s,
+      transform 0.2s,
+      box-shadow 0.2s;
   }
   .icard:hover {
     border-color: var(--line);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 28px -14px rgba(22, 21, 18, 0.35);
   }
-  .icard-logo {
-    width: 56px;
-    height: 56px;
-    border-radius: 10px;
-    background: #fff;
-    border: 1px solid var(--rule);
-    display: grid;
-    place-items: center;
-    overflow: hidden;
+  .icard .cover img {
+    transition: transform 0.35s;
   }
-  .icard-logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
+  .icard:hover .cover img {
+    transform: scale(1.04);
   }
-  .icard-logo span {
-    font-weight: 700;
-    color: #161512;
-    font-size: 17px;
+  .icard-body {
+    padding: 14px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
   }
   .icard .m {
     font-size: 12px;
     color: var(--ink-3);
   }
   .icard h3 {
-    margin-top: 2px;
+    margin-top: 4px;
     font-family: var(--font-body);
-    font-size: 15.5px;
+    font-size: 16px;
     font-weight: 700;
     line-height: 1.3;
   }
+  .icard .org {
+    margin-top: 3px;
+    font-size: 12.5px;
+    color: var(--ink-2);
+  }
   .icard .sum {
-    margin-top: 6px;
+    margin-top: 8px;
     font-size: 13.5px;
     color: var(--ink-2);
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
   .icard .tags {
-    margin-top: 10px;
+    margin-top: auto;
+    padding-top: 12px;
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
   }
+  /* Grand format pour la vitrine */
+  .icard-feature h3 {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 2.4vw, 28px);
+    letter-spacing: -0.015em;
+    line-height: 1.15;
+  }
+  .icard-feature .sum {
+    -webkit-line-clamp: 3;
+    font-size: 14.5px;
+  }
   @media (prefers-reduced-motion: reduce) {
-    .icard {
+    .icard,
+    .icard .cover img {
       transition: none;
+    }
+    .icard:hover,
+    .icard:hover .cover img {
+      transform: none;
     }
   }
 </style>
