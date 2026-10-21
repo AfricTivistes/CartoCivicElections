@@ -1,14 +1,9 @@
 ---
-// Import the necessary components
 import MainLayout from "@/layouts/MainLayout.astro";
-import ContactSection from "@/components/sections/misc/ContactSection.astro";
-
+import Contact from "@/components/Contact.astro";
+import { useT } from "@/i18n/ui";
 ---
 
-<!--Utilizing MainLayout for the outer layout of the page, and defining meta for SEO purposes-->
-<MainLayout
-  title="Contact | Soobu"
-  lang="fr"
->
-  <ContactSection />
+<MainLayout lang="fr" title={useT("fr")("nav.contact")}>
+  <Contact lang="fr" />
 </MainLayout>

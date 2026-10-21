@@ -1,0 +1,426 @@
+---
+import { getRows } from "@/lib/initiatives";
+import { base, ui, useT, type Lang } from "@/i18n/ui";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useT(lang);
+const rows = await getRows(lang);
+
+const strings = {
+  ...ui[lang],
+  yes: lang === "fr" ? "Oui" : "Yes",
+  no: lang === "fr" ? "Non" : "No",
+  answers: lang === "fr" ? "réponses" : "answers",
+  initiatives: lang === "fr" ? "initiatives" : "initiatives",
+  pre: lang === "fr" ? "Pré-électorale" : "Pre-electoral",
+  election: lang === "fr" ? "Électorale" : "Electoral",
+  post: lang === "fr" ? "Post-électorale" : "Post-electoral",
+  transp: lang === "fr"
+    ? ["Faible", "Passable", "Assez bien", "Bien", "Très bien", "Excellente"]
+    : ["Poor", "Fair", "Fairly good", "Good", "Very good", "Excellent"],
+  open: lang === "fr" ? "Voir la fiche" : "Open the record",
+  noDate: lang === "fr" ? "sans date de début" : "without start date",
+  base: base(lang),
+};
+---
+
+<div class="band">
+  <header class="hero wrap">
+    <p class="kicker">{t("obs.kicker")}</p>
+    <h1 set:html={t("obs.title")} />
+    <p class="lede">{t("obs.lede")}</p>
+    <div class="tally" id="h-tally" aria-hidden="true"></div>
+    <div class="tally-key" id="h-tally-key"></div>
+    <div class="kpis">
+      <div class="kpi"><div class="n num" id="k-init">–</div><div class="l">{t("kpi.initiatives")}</div></div>
+      <div class="kpi"><div class="n num" id="k-countries">–</div><div class="l">{t("kpi.countries")}</div></div>
+      <div class="kpi"><div class="n num" id="k-partners">–</div><div class="l">{t("kpi.partners")}</div></div>
+      <div class="kpi"><div class="n num" id="k-issues">–</div><div class="l">{t("kpi.issues")}</div></div>
+    </div>
+  </header>
+</div>
+
+<div class="filterbar">
+  <div class="wrap">
+    <label class="eyebrow" for="f-country">{t("obs.filter")}</label>
+    <select id="f-country"></select>
+    <button class="reset" id="f-reset" type="button" hidden>{t("obs.reset")}</button>
+    <span class="eyebrow" id="f-count"></span>
+  </div>
+</div>
+
+<section class="sec" id="rythme">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{t("obs.rhythmKicker")}</p>
+      <h2>{t("obs.rhythmTitle")}</h2>
+      <p id="t-note">{t("obs.rhythmNote")}</p>
+    </div>
+    <div class="chart" id="c-time"></div>
+  </div>
+</section>
+
+<section class="sec" id="pays">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{t("obs.countriesKicker")}</p>
+      <h2>{t("obs.countriesTitle")}</h2>
+      <p>{t("obs.countriesText")}</p>
+    </div>
+    <div class="grid-2">
+      <div class="countries" id="c-pays"></div>
+      <div class="fig"><h3>{t("obs.orgType")}</h3><p class="q">{t("obs.multi")}</p><div id="c-org"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="nature">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{t("obs.natureKicker")}</p>
+      <h2>{t("obs.natureTitle")}</h2>
+    </div>
+    <div class="grid-2">
+      <div class="fig"><h3>{t("obs.category")}</h3><p class="q">{t("obs.share")}</p><div id="c-cat"></div></div>
+      <div class="fig"><h3>{t("obs.thematic")}</h3><p class="q">{t("obs.share")}</p><div id="c-them"></div></div>
+      <div class="fig"><h3>{t("obs.target")}</h3><p class="q">{t("obs.multi")}</p><div id="c-target"></div></div>
+      <div class="fig"><h3>{t("obs.electionType")}</h3><p class="q">{t("obs.multi")}</p><div id="c-elec"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="cycle">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{t("obs.cycleKicker")}</p>
+      <h2>{t("obs.cycleTitle")}</h2>
+    </div>
+    <div class="grid-2">
+      <div class="fig"><h3>{t("obs.phases")}</h3><p class="q">{t("obs.multi")}</p><div id="c-phase"></div></div>
+      <div class="fig"><h3>{t("obs.zone")}</h3><p class="q">{t("obs.share")}</p><div id="c-zone"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="partenariats">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{t("obs.partnersKicker")}</p>
+      <h2>{t("obs.partnersTitle")}</h2>
+    </div>
+    <div class="grid-3">
+      <div class="fig"><h3>{t("obs.partnersShare")}</h3><p class="q">{t("obs.share")}</p><div id="c-partners"></div></div>
+      <div class="fig"><h3>{t("obs.mainPartners")}</h3><p class="q">{t("obs.multi")}</p><div id="c-contrib"></div></div>
+      <div class="fig"><h3>{t("obs.partnerZone")}</h3><p class="q">{t("obs.multi")}</p><div id="c-pzone"></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="environnement">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{t("obs.envKicker")}</p>
+      <h2>{t("obs.envTitle")}</h2>
+      <p>{t("obs.envText")}</p>
+    </div>
+    <div class="grid-2">
+      <div class="fig">
+        <div class="env" id="c-env"></div>
+        <div class="legend" id="env-legend"></div>
+      </div>
+      <div class="fig">
+        <h3>{t("obs.transparency")}</h3>
+        <p class="q" id="transp-q"></p>
+        <div id="c-transp"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="voix">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{lang === "fr" ? "Réponses libres" : "Open answers"}</p>
+      <h2>{lang === "fr" ? "Ce qu’elles ont constaté" : "What they witnessed"}</h2>
+      <p>
+        {
+          lang === "fr"
+            ? "Les mots des organisations, sans reformulation."
+            : "The organisations’ own words, unedited."
+        }
+      </p>
+    </div>
+    <div class="tabs" id="v-tabs" role="group">
+      <button type="button" data-k="issuesNature" aria-pressed="true">{t("obs.issuesNature")} <span class="num" id="v-n1"></span></button>
+      <button type="button" data-k="outcome" aria-pressed="false">{t("detail.outcome")} <span class="num" id="v-n2"></span></button>
+    </div>
+    <div class="voices" id="v-list"></div>
+    <button type="button" class="linkish" id="v-more" hidden></button>
+  </div>
+</section>
+
+<section class="sec" id="initiatives">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{t("obs.explorerKicker")}</p>
+      <h2>{t("obs.explorerTitle")}</h2>
+      <p>{t("obs.explorerText")}</p>
+    </div>
+    <div class="ex-tools">
+      <input type="search" id="ex-q" placeholder={t("obs.search")} aria-label={t("obs.search")} />
+      <select id="ex-sort" aria-label="Sort">
+        <option value="title">{t("obs.sortTitle")}</option>
+        <option value="country">{t("obs.sortCountry")}</option>
+        <option value="recent">{t("obs.sortRecent")}</option>
+      </select>
+    </div>
+    <p class="eyebrow" id="ex-count" style="margin-bottom:10px"></p>
+    <div class="list" id="ex-list"></div>
+  </div>
+</section>
+
+<script type="application/json" id="obs-data" set:html={JSON.stringify({ rows, strings })} />
+
+<script>
+  import { answered, columns, countBy, hbars, initTooltip, pct, stack, type Item } from "@/scripts/viz";
+  import type { Row } from "@/lib/normalize";
+
+  const { rows: ALL, strings: S } = JSON.parse(document.getElementById("obs-data")!.textContent!) as {
+    rows: Row[];
+    strings: Record<string, any>;
+  };
+  const $ = (id: string) => document.getElementById(id);
+  const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  const fmt = (k: string, n: number) => String(S[k]).replace("{n}", String(n));
+
+  // Couleurs catégorielles fixées sur l'ensemble (jamais réassignées au filtre)
+  // Les catégories fourre-tout (« Autres », « Tout cité plus haut ») vont dans le gris
+  const CATCH_ALL = /^(autres?|others?|tout cit|all above)/i;
+  const CAT_ORDER = countBy(ALL, (r) => r.category)
+    .map((c) => c.label)
+    .sort((a, b) => Number(CATCH_ALL.test(a)) - Number(CATCH_ALL.test(b)));
+  const catColor = (c: string | null) => {
+    const i = c ? CAT_ORDER.indexOf(c) : -1;
+    return i >= 0 && i < 3 && !CATCH_ALL.test(c!) ? `var(--c${i + 1})` : "var(--c-other)";
+  };
+
+  let country = new URLSearchParams(location.search).get("country") ?? "";
+  let voiceKey: "issuesNature" | "outcome" = "issuesNature";
+  let voicesExpanded = false;
+
+  // --- filtre pays ---
+  const sel = $("f-country") as HTMLSelectElement;
+  const countries = countBy(ALL, (r) => r.country);
+  const labelOf = new Map(ALL.map((r) => [r.country, r.countryLabel]));
+  sel.innerHTML =
+    `<option value="">${esc(S["obs.all"])}</option>` +
+    countries
+      .slice()
+      .sort((a, b) => (labelOf.get(a.label) ?? "").localeCompare(labelOf.get(b.label) ?? ""))
+      .map((c) => `<option value="${esc(c.label)}">${esc(labelOf.get(c.label))} (${c.n})</option>`)
+      .join("");
+  sel.addEventListener("change", () => setCountry(sel.value));
+  $("f-reset")!.addEventListener("click", () => setCountry(""));
+
+  function setCountry(c: string) {
+    country = c;
+    const url = new URL(location.href);
+    if (c) url.searchParams.set("country", c);
+    else url.searchParams.delete("country");
+    history.replaceState(null, "", url);
+    render();
+  }
+
+  const yesNoSegs = (rows: Row[], get: (r: Row) => boolean | null) => {
+    const yes = rows.filter((r) => get(r) === true).length;
+    const no = rows.filter((r) => get(r) === false).length;
+    return [
+      { label: S.yes, n: yes, color: "var(--fill)", dark: true },
+      { label: S.no, n: no, color: "var(--r2)" },
+    ];
+  };
+
+  function render() {
+    const rows = country ? ALL.filter((r) => r.country === country) : ALL;
+    const N = rows.length;
+    sel.value = country;
+    $("f-reset")!.hidden = !country;
+    $("f-count")!.textContent = fmt("obs.count", N);
+    const hb = (id: string, items: Item[], total: number, limit = 8, hot = false) =>
+      hbars($(id), items, { total, limit, hot, more: S["obs.showMore"], less: S["obs.showLess"], of: S["obs.of"] });
+
+    // KPI
+    const share = (get: (r: Row) => boolean | null) => {
+      const a = rows.filter((r) => get(r) !== null);
+      return a.length ? `${pct(a.filter((r) => get(r)).length, a.length)} %` : "–";
+    };
+    $("k-init")!.textContent = String(N);
+    $("k-countries")!.textContent = String(new Set(rows.map((r) => r.country).filter(Boolean)).size);
+    $("k-partners")!.textContent = share((r) => r.partners);
+    $("k-issues")!.textContent = share((r) => r.issues);
+
+    // Grille de points colorée par catégorie
+    $("h-tally")!.innerHTML = rows
+      .slice()
+      .sort((a, b) => CAT_ORDER.indexOf(a.category ?? "") - CAT_ORDER.indexOf(b.category ?? ""))
+      .map((r) => `<i style="background:${catColor(r.category)}" title="${esc(r.title)}"></i>`)
+      .join("");
+    $("h-tally-key")!.innerHTML =
+      CAT_ORDER.slice(0, 3)
+        .filter((c) => !CATCH_ALL.test(c))
+        .map((c) => `<span><b style="background:${catColor(c)}"></b>${esc(c)}</span>`)
+        .join("") +
+      (CAT_ORDER.length > 3 ? `<span><b style="background:var(--c-other)"></b>${esc(S["obs.other"])}</span>` : "") +
+      `<span>${esc(S["home.tallyNote"])}</span>`;
+
+    // Chronologie
+    const years = countBy(rows, (r) => (r.year ? String(r.year) : null)).map((i) => ({ x: Number(i.label), n: i.n }));
+    columns($("c-time"), years, S.initiatives);
+    const noDate = rows.filter((r) => !r.year).length;
+    $("t-note")!.textContent = `${S["obs.rhythmNote"].split(".")[0]}. ${noDate} ${S.initiatives} ${S.noDate}.`;
+
+    // Pays : une ligne par pays, un point par initiative
+    const byCountry = countBy(ALL, (r) => r.country);
+    $("c-pays")!.innerHTML = byCountry
+      .map(
+        (c) => `<button type="button" class="country${c.label === country ? " sel" : ""}" data-c="${esc(c.label)}" aria-pressed="${c.label === country}">
+          <span class="nm">${esc(labelOf.get(c.label))}</span>
+          <span class="dots">${"<i></i>".repeat(c.n)}</span>
+          <span class="ct">${c.n}</span></button>`,
+      )
+      .join("");
+    $("c-pays")!.querySelectorAll<HTMLButtonElement>(".country").forEach((b) =>
+      b.addEventListener("click", () => setCountry(b.dataset.c === country ? "" : b.dataset.c!)),
+    );
+
+    hb("c-org", countBy(rows, (r) => r.org), answered(rows, (r) => r.org), 6);
+    hb("c-zone", countBy(rows, (r) => r.zone), answered(rows, (r) => r.zone), 5);
+    hb("c-cat", countBy(rows, (r) => r.category), answered(rows, (r) => r.category), 6);
+    hb("c-them", countBy(rows, (r) => r.thematic), answered(rows, (r) => r.thematic), 8);
+    hb("c-target", countBy(rows, (r) => r.targets), answered(rows, (r) => r.targets), 6);
+    hb("c-elec", countBy(rows, (r) => r.election), answered(rows, (r) => r.election), 6);
+
+    // Phases : part des initiatives couvrant chaque phase (ordre du cycle)
+    const ph = answered(rows, (r) => r.phases);
+    hb(
+      "c-phase",
+      (["pre", "election", "post"] as const).map((k) => ({ label: S[k], n: rows.filter((r) => r.phases.includes(k)).length })),
+      ph,
+    );
+
+    // Partenariats
+    stack($("c-partners"), yesNoSegs(rows, (r) => r.partners));
+    hb("c-contrib", countBy(rows, (r) => r.contribution), answered(rows, (r) => r.contribution), 6);
+    hb("c-pzone", countBy(rows, (r) => r.partnerZone), answered(rows, (r) => r.partnerZone), 5);
+
+    // Environnement : matrice Oui / Non
+    const env: [string, (r: Row) => boolean | null][] = [
+      [S["obs.legal"], (r) => r.legal],
+      [S["obs.recognition"], (r) => r.recognition],
+      [S["obs.difficulties"], (r) => r.difficulties],
+      [S["obs.issues"], (r) => r.issues],
+      [S["obs.reported"], (r) => r.reported],
+      [S["detail.impact"], (r) => r.impact],
+    ];
+    const envEl = $("c-env")!;
+    envEl.innerHTML = env
+      .map(([label], i) => `<div class="envrow"><span class="nm">${esc(label)}</span><div id="env-${i}"></div><span class="nn num" id="env-n-${i}"></span></div>`)
+      .join("");
+    env.forEach(([, get], i) => {
+      stack($(`env-${i}`), yesNoSegs(rows, get), { height: 18, legend: false });
+      $(`env-n-${i}`)!.textContent = `n=${answered(rows, get)}`;
+    });
+    $("env-legend")!.innerHTML = `<span><b style="background:var(--fill)"></b>${S.yes}</span><span><b style="background:var(--r2)"></b>${S.no}</span><span>${S["obs.share"]}</span>`;
+
+    // Transparence : échelle ordinale (rampe bleue, foncé = mieux)
+    const ramp = ["var(--o1)", "var(--o2)", "var(--o3)", "var(--o4)", "var(--o5)", "var(--o6)"];
+    const tr = answered(rows, (r) => r.transparency);
+    $("transp-q")!.textContent = `${tr} ${S.answers}`;
+    stack(
+      $("c-transp"),
+      [6, 5, 4, 3, 2, 1].map((v) => ({
+        label: S.transp[v - 1],
+        n: rows.filter((r) => r.transparency === v).length,
+        color: ramp[v - 1],
+        dark: v >= 4,
+      })),
+    );
+
+    renderVoices(rows);
+    renderExplorer(rows);
+  }
+
+  // --- Voix du terrain ---
+  document.querySelectorAll<HTMLButtonElement>("#v-tabs button").forEach((b) =>
+    b.addEventListener("click", () => {
+      voiceKey = b.dataset.k as typeof voiceKey;
+      voicesExpanded = false;
+      document.querySelectorAll("#v-tabs button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+      render();
+    }),
+  );
+  function renderVoices(rows: Row[]) {
+    $("v-n1")!.textContent = String(rows.filter((r) => r.issuesNature).length);
+    $("v-n2")!.textContent = String(rows.filter((r) => r.outcome).length);
+    const quotes = rows.filter((r) => r[voiceKey]);
+    const shown = voicesExpanded ? quotes : quotes.slice(0, 9);
+    $("v-list")!.innerHTML = shown.length
+      ? shown
+          .map(
+            (r) => `<figure class="voice"><blockquote>${esc(r[voiceKey])}</blockquote>
+          <figcaption><a href="${S.base}/initiatives/${r.slug}/">${esc(r.title)}</a> · ${esc(r.countryLabel ?? "")}</figcaption></figure>`,
+          )
+          .join("")
+      : `<p class="empty">${esc(S["obs.empty"])}</p>`;
+    const more = $("v-more") as HTMLButtonElement;
+    more.hidden = quotes.length <= 9;
+    more.textContent = `${voicesExpanded ? S["obs.showLess"] : S["obs.showMore"]} (${quotes.length})`;
+    more.onclick = () => {
+      voicesExpanded = !voicesExpanded;
+      renderVoices(rows);
+    };
+  }
+
+  // --- Explorateur ---
+  const q = $("ex-q") as HTMLInputElement;
+  const sort = $("ex-sort") as HTMLSelectElement;
+  q.addEventListener("input", () => render());
+  sort.addEventListener("change", () => render());
+  function renderExplorer(rows: Row[]) {
+    const needle = q.value.trim().toLowerCase();
+    let list = needle
+      ? rows.filter((r) =>
+          [r.title, r.countryLabel, r.category, r.thematic, r.summary, ...r.targets].join(" ").toLowerCase().includes(needle),
+        )
+      : rows.slice();
+    list.sort((a, b) =>
+      sort.value === "country"
+        ? (a.countryLabel ?? "").localeCompare(b.countryLabel ?? "") || a.title.localeCompare(b.title)
+        : sort.value === "recent"
+          ? (b.year ?? 0) - (a.year ?? 0)
+          : a.title.localeCompare(b.title),
+    );
+    $("ex-count")!.textContent = fmt("obs.count", list.length);
+    $("ex-list")!.innerHTML = list.length
+      ? list
+          .map(
+            (r) => `<details class="resp"><summary>
+            <div><div class="o">${esc(r.title)}</div><div class="m">${esc(r.countryLabel ?? "")}${r.year ? ` · ${r.year}` : ""}</div></div>
+            <div class="tags">${r.thematic ? `<span class="tag acc">${esc(r.thematic)}</span>` : ""}${r.issues ? `<span class="tag hot">${esc(S["tag.issues"])}</span>` : ""}</div>
+          </summary>
+          <div class="resp-body">
+            ${r.summary ? `<p>${esc(r.summary)}</p>` : ""}
+            <p class="m">${[r.category, ...r.targets].filter(Boolean).map(esc).join(" · ")}</p>
+            <a class="btn btn-ghost" href="${S.base}/initiatives/${r.slug}/">${esc(S.open)} →</a>
+          </div></details>`,
+          )
+          .join("")
+      : `<p class="empty">${esc(S["obs.empty"])}</p>`;
+  }
+
+  initTooltip();
+  render();
+</script>

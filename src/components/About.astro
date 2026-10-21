@@ -1,0 +1,163 @@
+---
+import { Image } from "astro:assets";
+import { about, partners } from "@/data_files/about";
+import { getRows, kpis } from "@/lib/initiatives";
+import { base, useT, type Lang } from "@/i18n/ui";
+import photo1 from "../../public/salute.jpeg";
+import photo2 from "../../public/discute.jpeg";
+import photo3 from "../../public/telling.jpeg";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useT(lang);
+const c = about[lang];
+const k = kpis(await getRows(lang));
+const photos = [photo1, photo2, photo3];
+---
+
+<div class="band">
+  <header class="hero wrap">
+    <p class="kicker">{t("nav.about")}</p>
+    <h1>{c.title}</h1>
+    <p class="lede">{c.lede}</p>
+    <div class="kpis">
+      <div class="kpi"><div class="n num">{k.initiatives}</div><div class="l">{t("kpi.initiatives")}</div></div>
+      <div class="kpi"><div class="n num">{k.countries}</div><div class="l">{t("kpi.countries")}</div></div>
+      <div class="kpi"><div class="n num">{k.partners} %</div><div class="l">{t("kpi.partners")}</div></div>
+      <div class="kpi"><div class="n num">2010</div><div class="l">{lang === "fr" ? "première année couverte" : "first year covered"}</div></div>
+    </div>
+  </header>
+</div>
+
+{
+  c.blocks.map((blk, idx) => (
+    <section class="sec">
+      <div class={`wrap ablock ${idx % 2 ? "rev" : ""}`}>
+        <div class="sec-head">
+          <p class="kicker">{blk.kicker}</p>
+          <h2>{blk.title}</h2>
+          <div class="prose-block">
+            <p set:html={blk.html} />
+          </div>
+        </div>
+        {photos[idx] && <Image src={photos[idx]} alt="" widths={[480, 800]} sizes="(max-width: 800px) 100vw, 420px" class="aphoto" />}
+      </div>
+    </section>
+  ))
+}
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{c.stakesTitle}</p>
+    </div>
+    <ol class="stakes">
+      {c.stakes.map((s, i) => <li><span class="num">0{i + 1}</span>{s}</li>)}
+    </ol>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="wrap">
+    <div class="sec-head">
+      <p class="kicker">{c.partnersTitle}</p>
+      <p>{c.partnersText}</p>
+    </div>
+    <ul class="plist">
+      {
+        partners.map((p) => (
+          <li>
+            <a href={p.href} target="_blank" rel="noopener" title={p.name}>
+              <Image src={p.logo} alt={p.name} height={48} />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="mt-8 flex flex-wrap gap-3">
+      <a class="btn btn-primary" href="https://ahead.africa" target="_blank" rel="noopener">{c.aheadBtn} ↗</a>
+      <a class="btn btn-ghost" href={`${base(lang)}/contact/`}>{t("nav.contact")}</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .ablock {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    gap: 32px 56px;
+    align-items: center;
+  }
+  .ablock.rev .aphoto {
+    order: -1;
+  }
+  .ablock .sec-head {
+    margin-bottom: 0;
+  }
+  .aphoto {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+  }
+  @media (max-width: 800px) {
+    .ablock {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .ablock.rev .aphoto {
+      order: 0;
+    }
+  }
+  .stakes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .stakes li {
+    border-top: 2px solid var(--ink);
+    padding-top: 14px;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .stakes .num {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+  @media (max-width: 720px) {
+    .stakes {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .plist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .plist a {
+    display: flex;
+    align-items: center;
+    height: 72px;
+    padding: 10px 16px;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    background: #fff;
+  }
+  .plist :global(img) {
+    height: 48px;
+    width: auto;
+    max-width: 180px;
+    object-fit: contain;
+  }
+</style>

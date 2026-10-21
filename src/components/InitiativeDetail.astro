@@ -1,0 +1,866 @@
+---
+import type { Initiative } from "@/collections/initiatives/config";
+import InitiativeCard from "@/components/InitiativeCard.astro";
+import InitiativeCover from "@/components/InitiativeCover.astro";
+import { clean, countryLabel, year, type Row } from "@/lib/normalize";
+import { base, formLinks, useT, type Lang } from "@/i18n/ui";
+
+interface Props {
+  initiative: Initiative;
+  rows: Row[];
+  lang: Lang;
+}
+const { initiative: i, rows, lang } = Astro.props;
+const t = useT(lang);
+const b = base(lang);
+const self = rows.find((r) => r.slug === i.slug)!;
+const country = self?.country ? countryLabel(self.country, lang) : clean(i.country);
+const org =
+  self?.organisation && self.organisation.toLowerCase() !== i.title.toLowerCase() ? self.organisation : null;
+
+// Période lisible : 2019 – 2024, ou « depuis 2020 »
+const y0 = year(i.startDate);
+const y1 = year(i.endDate);
+const period = y0 && y1 ? (y0 === y1 ? `${y0}` : `${y0} – ${y1}`) : y0 ? t("detail.since", { year: y0 }) : null;
+
+const facts = [
+  [t("detail.dates"), period],
+  [t("detail.zone"), self?.zone ?? null],
+  [t("detail.region"), self?.regions.join(" · ") || null],
+  [t("detail.election"), self?.election.slice(0, 3).join(" · ") || null],
+  [
+    t("detail.partners"),
+    self?.partners === true ? t("detail.partnersYes") : self?.partners === false ? t("detail.partnersNo") : null,
+  ],
+].filter(([, v]) => v) as [string, string][];
+
+type Field = [string, string | null];
+const sections: { title: string; fields: Field[] }[] = [
+  {
+    title: t("detail.identity"),
+    fields: [
+      [t("detail.carriedBy"), clean(i.organisation)],
+      [t("detail.org"), clean(i.typeOrganisation)],
+      [t("detail.category"), clean(i.category)],
+      [t("detail.thematic"), clean(i.thematic)],
+      [t("detail.dates"), [clean(i.startDate), clean(i.endDate)].filter(Boolean).join(" → ") || null],
+    ],
+  },
+  {
+    title: t("detail.scope"),
+    fields: [
+      [t("detail.election"), clean(i.electionType)],
+      [t("detail.phases"), clean(i.phases)],
+      [t("detail.targets"), clean(i.targetAudience)],
+      [t("detail.zone"), clean(i.interventionZone)],
+      [t("detail.region"), clean(i.region)],
+      [t("detail.countries"), clean(i.paysMiseOeuvre)],
+    ],
+  },
+  {
+    title: t("detail.partners"),
+    fields: [
+      [t("detail.supported"), clean(i.partners)],
+      [t("detail.mainPartners"), clean(i.mainPartners)],
+      [t("detail.contribution"), clean(i.partnersContribution)],
+      [t("detail.partnerZone"), clean(i.partnerZone)],
+    ],
+  },
+  {
+    title: t("detail.context"),
+    fields: [
+      [t("detail.legal"), clean(i.legalEnvironment)],
+      [t("detail.transparency"), clean(i.transparencyAssessment)],
+      [t("detail.difficulties"), clean(i.publicAuthoritiesDifficulties)],
+      [t("detail.recognition"), clean(i.obligationRecognition)],
+      [t("detail.issues"), clean(i.electionProcessIssues)],
+      [t("detail.reported"), clean(i.reportedIssues)],
+      [t("detail.impact"), clean(i.impactDysfunctions)],
+    ],
+  },
+];
+const groups = sections.map((g) => ({ ...g, fields: g.fields.filter(([, v]) => v) })).filter((g) => g.fields.length);
+
+const issuesNature = clean(i.electionIssuesNature);
+const outcome = clean(i.reportOutcome);
+const description = clean(i.description);
+const objectives = clean(i.objectives);
+const website = i.website && i.website !== "Vide" ? i.website : null;
+const socials = Object.entries(i.socialLinks ?? {}).filter(([, v]) => v && v !== "Vide") as [string, string][];
+const resources = (i.resources ?? []).filter((r) => r.signedUrl || r.url);
+
+// Cycle électoral et publics touchés
+const PHASES = [
+  ["pre", lang === "fr" ? "Pré-électorale" : "Pre-electoral"],
+  ["election", lang === "fr" ? "Électorale" : "Electoral"],
+  ["post", lang === "fr" ? "Post-électorale" : "Post-electoral"],
+] as const;
+const audienceIcon = (label: string) => {
+  const k = label.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  if (/jeun|youth|young|etudi|student/.test(k)) return "youth";
+  if (/femm|women|wowen|girl/.test(k)) return "women";
+  if (/electeur|voter/.test(k)) return "voter";
+  if (/pouvoir|authorit|public|institution/.test(k)) return "authority";
+  if (/journal|media/.test(k)) return "media";
+  return "people";
+};
+const audiences = (self?.targets ?? []).slice(0, 6).map((label) => ({ label, icon: audienceIcon(label) }));
+
+// Parcours de lecture : même pays, sinon même thématique, sinon tout
+const alpha = (xs: Row[]) => xs.slice().sort((a, z) => a.title.localeCompare(z.title));
+let seq = alpha(rows.filter((r) => r.country && r.country === self?.country));
+if (seq.length < 2) seq = alpha(rows.filter((r) => r.thematic && r.thematic === self?.thematic));
+if (seq.length < 2) seq = alpha(rows);
+const pos = seq.findIndex((r) => r.slug === i.slug);
+const prev = seq[(pos - 1 + seq.length) % seq.length];
+const next = seq[(pos + 1) % seq.length];
+
+const sameCountry = self?.country ? rows.filter((r) => r.country === self.country) : [];
+const similar = [
+  ...rows.filter((r) => r.thematic && r.thematic === self?.thematic && r.country !== self?.country),
+  ...sameCountry,
+]
+  .filter((r) => r.slug !== i.slug && r.slug !== prev?.slug && r.slug !== next?.slug)
+  .filter((r, idx, arr) => arr.findIndex((x) => x.slug === r.slug) === idx)
+  .sort((a, z) => Number(!!z.logo) - Number(!!a.logo))
+  .slice(0, 3);
+const countryThemes = new Map<string, number>();
+for (const r of sameCountry) if (r.thematic) countryThemes.set(r.thematic, (countryThemes.get(r.thematic) ?? 0) + 1);
+
+// Partage
+const pageUrl = new URL(Astro.url.pathname, Astro.site).toString();
+const shareText = `${i.title} · Sóobu`;
+const enc = encodeURIComponent;
+const shares = [
+  ["WhatsApp", `https://wa.me/?text=${enc(`${shareText} ${pageUrl}`)}`],
+  ["X", `https://twitter.com/intent/tweet?text=${enc(shareText)}&url=${enc(pageUrl)}`],
+  ["LinkedIn", `https://www.linkedin.com/sharing/share-offsite/?url=${enc(pageUrl)}`],
+  ["Facebook", `https://www.facebook.com/sharer/sharer.php?u=${enc(pageUrl)}`],
+];
+
+const hasCycle = (self?.phases.length ?? 0) > 0 || audiences.length > 0;
+const toc = [
+  description && ["resume", t("detail.summary")],
+  objectives && ["objectifs", t("detail.objectives")],
+  hasCycle && ["cycle", t("detail.cycle")],
+  (issuesNature || outcome) && ["contexte", t("detail.issues")],
+  groups.length && ["fiche", t("detail.factsheet")],
+].filter(Boolean) as [string, string][];
+---
+
+<div class="band">
+  <header class="wrap dhero">
+    <div class="dhero-text">
+      <a class="back" href={`${b}/initiatives/`}>← {t("detail.back")}</a>
+      <p class="kicker">{country}{self?.year ? ` · ${self.year}` : ""}</p>
+      <h1>{i.title}</h1>
+      {
+        org && (
+          <p class="carried">
+            {t("detail.carriedBy")} <strong>{org}</strong>
+          </p>
+        )
+      }
+      <div class="dtags">
+        {clean(i.thematic) && <span class="tag acc">{clean(i.thematic)}</span>}
+        {clean(i.category) && <span class="tag">{clean(i.category)}</span>}
+        {self?.issues && <span class="tag hot">{t("tag.issues")}</span>}
+      </div>
+      {
+        (website || socials.length > 0) && (
+          <div class="dlinks">
+            {website && (
+              <a class="btn btn-primary" href={website} target="_blank" rel="noopener">
+                {t("detail.website")} ↗
+              </a>
+            )}
+            {socials.map(([k, v]) => (
+              <a class="btn btn-ghost" href={v} target="_blank" rel="noopener">
+                {k === "twitter" ? "X" : k.charAt(0).toUpperCase() + k.slice(1)}
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </div>
+    <div class="dhero-cover">
+      {self && <InitiativeCover row={self} size="hero" eager />}
+    </div>
+  </header>
+</div>
+
+{
+  facts.length > 0 && (
+    <div class="facts">
+      <dl class="wrap">
+        {facts.map(([k, v]) => (
+          <div>
+            <dt>{k}</dt>
+            <dd>{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  )
+}
+
+<section class="sec dsec">
+  <div class="wrap dgrid">
+    <article class="dmain">
+      {
+        description && (
+          <div class="block" id="resume">
+            <p class="kicker">{t("detail.summary")}</p>
+            <p class="lead">{description}</p>
+          </div>
+        )
+      }
+      {
+        objectives && (
+          <div class="block" id="objectifs">
+            <p class="kicker">{t("detail.objectives")}</p>
+            <p class="body">{objectives}</p>
+          </div>
+        )
+      }
+      {
+        hasCycle && (
+          <div class="block" id="cycle">
+            <p class="kicker">{t("detail.cycle")}</p>
+            <p class="muted">{t("detail.cycleText")}</p>
+            <ol class="cycle">
+              {PHASES.map(([k, label]) => (
+                <li class={self.phases.includes(k) ? "on" : ""}>
+                  <span class="bar" />
+                  <span class="lab">{label}</span>
+                </li>
+              ))}
+            </ol>
+            {audiences.length > 0 && (
+              <>
+                <h3 class="sub">{t("detail.audiences")}</h3>
+                <ul class="aud">
+                  {audiences.map((a) => (
+                    <li>
+                      <svg viewBox="0 0 24 24" aria-hidden="true" class="ico">
+                        {a.icon === "youth" && (
+                          <>
+                            <circle cx="12" cy="7" r="3.2" />
+                            <path d="M6 20c0-3.6 2.7-6.2 6-6.2s6 2.6 6 6.2" />
+                            <path d="M9.5 4.4 12 3l2.5 1.4" />
+                          </>
+                        )}
+                        {a.icon === "women" && (
+                          <>
+                            <circle cx="12" cy="7" r="3.2" />
+                            <path d="M7 20l2.6-6.6h4.8L17 20Z" />
+                          </>
+                        )}
+                        {a.icon === "voter" && (
+                          <>
+                            <rect x="4" y="11" width="16" height="9" rx="1.5" />
+                            <path d="M8 11V5h8v6M9.5 8l1.8 1.6L14.5 6.5" />
+                          </>
+                        )}
+                        {a.icon === "authority" && (
+                          <>
+                            <path d="M3 9.5 12 4l9 5.5Z" />
+                            <path d="M6 10v8M10 10v8M14 10v8M18 10v8M4 20h16" />
+                          </>
+                        )}
+                        {a.icon === "media" && (
+                          <>
+                            <rect x="3" y="6" width="13" height="12" rx="1.5" />
+                            <path d="M16 10l5-3v10l-5-3" />
+                          </>
+                        )}
+                        {a.icon === "people" && (
+                          <>
+                            <circle cx="9" cy="8" r="2.8" />
+                            <circle cx="16.5" cy="9" r="2.3" />
+                            <path d="M3.5 19c0-3.2 2.4-5.4 5.5-5.4s5.5 2.2 5.5 5.4M14.5 14c3 0 5.5 1.8 5.5 5" />
+                          </>
+                        )}
+                      </svg>
+                      <span>{a.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        )
+      }
+      {
+        (issuesNature || outcome) && (
+          <div class="block" id="contexte">
+            <p class="kicker">{t("detail.issues")}</p>
+            {issuesNature && <blockquote class="dquote">{issuesNature}</blockquote>}
+            {outcome && (
+              <p class="body">
+                <b>{t("detail.outcome")} :</b> {outcome}
+              </p>
+            )}
+          </div>
+        )
+      }
+      {
+        groups.length > 0 && (
+          <div class="block" id="fiche">
+            <p class="kicker">{t("detail.factsheet")}</p>
+            <div class="sheet">
+              {groups.map((g) => (
+                <div>
+                  <h4>{g.title}</h4>
+                  <dl>
+                    {g.fields.map(([k, v]) => (
+                      <>
+                        <dt>{k}</dt>
+                        <dd>{v}</dd>
+                      </>
+                    ))}
+                  </dl>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      }
+      {
+        resources.length > 0 && (
+          <div class="block">
+            <p class="kicker">{t("detail.resources")}</p>
+            <ul class="res">
+              {resources.map((r) => (
+                <li>
+                  <a href={r.signedUrl || r.url} target="_blank" rel="noopener">
+                    {r.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </article>
+
+    <aside class="dside">
+      {
+        toc.length > 1 && (
+          <nav class="toc" aria-label={t("detail.toc")}>
+            <p class="eyebrow">{t("detail.toc")}</p>
+            {toc.map(([id, label]) => (
+              <a href={`#${id}`} data-toc={id}>
+                {label}
+              </a>
+            ))}
+          </nav>
+        )
+      }
+      <div class="share">
+        <p class="eyebrow">{t("detail.shareTitle")}</p>
+        <div class="share-row">
+          {
+            shares.map(([name, href]) => (
+              <a href={href} target="_blank" rel="noopener" class="sbtn">
+                {name}
+              </a>
+            ))
+          }
+          <button type="button" class="sbtn" id="copy-link" data-url={pageUrl} data-done={t("detail.copied")}>
+            {t("detail.copy")}
+          </button>
+          <button type="button" class="sbtn" id="native-share" data-url={pageUrl} data-title={shareText} hidden>
+            ↗
+          </button>
+        </div>
+      </div>
+      {
+        self?.country && (
+          <div class="incountry">
+            <p class="kicker">{t("detail.inCountry", { country: country ?? "" })}</p>
+            <p class="big num">{sameCountry.length}</p>
+            <p class="muted">{t("detail.inCountryText", { n: sameCountry.length })}</p>
+            <div class="chips">
+              {[...countryThemes]
+                .sort((a, z) => z[1] - a[1])
+                .map(([th, n]) => (
+                  <a
+                    class="chip"
+                    href={`${b}/initiatives/?country=${encodeURIComponent(self.country!)}&them=${encodeURIComponent(th)}`}
+                  >
+                    {th} <span class="num">{n}</span>
+                  </a>
+                ))}
+            </div>
+            <a class="side-link" href={`${b}/observatoire/?country=${encodeURIComponent(self.country)}`}>
+              {t("nav.observatory")} · {country} →
+            </a>
+          </div>
+        )
+      }
+    </aside>
+  </div>
+</section>
+
+{
+  prev && next && prev.slug !== i.slug && (
+    <nav class="pager wrap" aria-label="Initiatives">
+      <a class="pg prev" href={`${b}/initiatives/${prev.slug}/`}>
+        <InitiativeCover row={prev} />
+        <span>
+          <span class="eyebrow">← {t("detail.prev")}</span>
+          <strong>{prev.title}</strong>
+          <span class="m">{prev.countryLabel}</span>
+        </span>
+      </a>
+      <a class="pg next" href={`${b}/initiatives/${next.slug}/`}>
+        <span>
+          <span class="eyebrow">{t("detail.next")} →</span>
+          <strong>{next.title}</strong>
+          <span class="m">{next.countryLabel}</span>
+        </span>
+        <InitiativeCover row={next} />
+      </a>
+    </nav>
+  )
+}
+
+{
+  similar.length > 0 && (
+    <section class="sec">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="kicker">{t("detail.moreLike")}</p>
+        </div>
+        <div class="cards">
+          {similar.map((r) => (
+            <InitiativeCard row={r} lang={lang} />
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<section class="band">
+  <div class="wrap dcta">
+    <div>
+      <h2>{t("detail.ctaTitle")}</h2>
+      <p>{t("detail.ctaText")}</p>
+    </div>
+    <a class="btn btn-primary" href={formLinks[lang]} target="_blank" rel="noopener">{t("nav.submit")} →</a>
+  </div>
+</section>
+
+<script>
+  // Copier le lien et partage natif (mobile)
+  const copy = document.getElementById("copy-link") as HTMLButtonElement | null;
+  copy?.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(copy.dataset.url!);
+      const label = copy.textContent;
+      copy.textContent = copy.dataset.done!;
+      setTimeout(() => (copy.textContent = label), 2000);
+    } catch {}
+  });
+  const native = document.getElementById("native-share") as HTMLButtonElement | null;
+  if (native && "share" in navigator) {
+    native.hidden = false;
+    native.addEventListener("click", () =>
+      navigator.share({ title: native.dataset.title, url: native.dataset.url }).catch(() => {}),
+    );
+  }
+
+  // Sommaire : surligne la section visible
+  const links = [...document.querySelectorAll<HTMLAnchorElement>("[data-toc]")];
+  if (links.length && "IntersectionObserver" in window) {
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          links.forEach((l) => l.toggleAttribute("aria-current", l.dataset.toc === e.target.id));
+        }
+      },
+      { rootMargin: "-30% 0px -60% 0px" },
+    );
+    links.forEach((l) => {
+      const target = document.getElementById(l.dataset.toc!);
+      if (target) obs.observe(target);
+    });
+  }
+</script>
+
+<style>
+  .dhero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: 32px 56px;
+    align-items: center;
+    padding-block: 28px 48px;
+  }
+  .back {
+    display: inline-block;
+    margin-bottom: 26px;
+    color: var(--band-ink-2);
+    text-decoration: none;
+    font-size: 13.5px;
+  }
+  .back:hover {
+    color: var(--band-ink);
+  }
+  .dhero h1 {
+    margin-top: 10px;
+    font-weight: 700;
+    font-size: clamp(30px, 4.6vw, 56px);
+    line-height: 1.04;
+    letter-spacing: -0.025em;
+  }
+  .carried {
+    margin-top: 14px;
+    font-size: 16px;
+    color: var(--band-ink-2);
+  }
+  .carried strong {
+    color: var(--band-ink);
+  }
+  .dtags {
+    margin-top: 16px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .dlinks {
+    margin-top: 24px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .dhero-cover :global(.cover) {
+    border-radius: 16px;
+    box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.7);
+  }
+  @media (max-width: 860px) {
+    .dhero {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .dhero-cover {
+      order: -1;
+      margin-top: 8px;
+    }
+    .dhero-cover :global(.cover) {
+      aspect-ratio: 16 / 9;
+    }
+    .back {
+      margin-bottom: 14px;
+    }
+  }
+
+  .facts {
+    border-bottom: 1px solid var(--rule);
+    background: var(--surface);
+  }
+  .facts dl {
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+  .facts dl > div {
+    padding: 16px 16px 16px 0;
+  }
+  .facts dl > div + div {
+    padding-left: 16px;
+    border-left: 1px solid var(--rule);
+  }
+  .facts dt {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+  }
+  .facts dd {
+    margin: 4px 0 0;
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+  @media (max-width: 560px) {
+    .facts dl > div + div {
+      border-left: 0;
+      padding-left: 0;
+      border-top: 1px solid var(--rule);
+    }
+  }
+
+  .dsec {
+    border-top: 0;
+  }
+  .dgrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 40px 64px;
+    align-items: start;
+  }
+  @media (max-width: 960px) {
+    .dgrid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .dmain {
+    display: grid;
+    gap: 44px;
+    max-width: 72ch;
+  }
+  .block {
+    display: grid;
+    gap: 12px;
+    scroll-margin-top: 80px;
+  }
+  .lead {
+    font-size: clamp(17px, 1.6vw, 19px);
+    line-height: 1.6;
+    white-space: pre-line;
+  }
+  .body {
+    white-space: pre-line;
+    color: var(--ink-2);
+  }
+  .muted {
+    color: var(--ink-3);
+    font-size: 13.5px;
+  }
+  .dquote {
+    margin: 0;
+    padding: 4px 0 4px 18px;
+    border-left: 3px solid var(--brand-orange);
+    white-space: pre-line;
+    font-size: 16px;
+  }
+  .sub {
+    margin-top: 10px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* Frise du cycle électoral */
+  .cycle {
+    list-style: none;
+    margin: 6px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .cycle .bar {
+    display: block;
+    height: 12px;
+    background: var(--sunk);
+    border: 1px dashed var(--rule);
+  }
+  .cycle li:first-child .bar {
+    border-radius: 6px 0 0 6px;
+  }
+  .cycle li:last-child .bar {
+    border-radius: 0 6px 6px 0;
+  }
+  .cycle li.on .bar {
+    background: var(--fill);
+    border-color: var(--fill);
+  }
+  .cycle .lab {
+    display: block;
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+  .cycle li.on .lab {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* Publics */
+  .aud {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+  }
+  .aud li {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    background: var(--surface);
+    font-size: 13.5px;
+  }
+  .ico {
+    width: 26px;
+    height: 26px;
+    flex: none;
+    fill: none;
+    stroke: var(--fill);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .res {
+    margin: 0;
+    padding-left: 18px;
+  }
+
+  /* Colonne latérale */
+  .dside {
+    position: sticky;
+    top: 84px;
+    display: grid;
+    gap: 18px;
+  }
+  @media (max-width: 960px) {
+    .dside {
+      position: static;
+    }
+    .toc {
+      display: none;
+    }
+  }
+  .toc {
+    display: grid;
+    gap: 2px;
+    border-left: 2px solid var(--rule);
+    padding-left: 14px;
+  }
+  .toc .eyebrow {
+    margin-bottom: 6px;
+  }
+  .toc a {
+    font-size: 13.5px;
+    color: var(--ink-2);
+    text-decoration: none;
+    padding: 3px 0;
+  }
+  .toc a:hover,
+  .toc a[aria-current] {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .share .eyebrow {
+    margin-bottom: 8px;
+  }
+  .share-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .sbtn {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+    border: 1px solid var(--rule);
+    background: var(--surface);
+    border-radius: 999px;
+    padding: 5px 11px;
+  }
+  .sbtn:hover {
+    border-color: var(--line);
+  }
+  .incountry {
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    background: var(--surface);
+    padding: 18px;
+    display: grid;
+    gap: 10px;
+  }
+  .incountry .big {
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .side-link {
+    font-weight: 600;
+    font-size: 13.5px;
+  }
+
+  /* Précédente / suivante */
+  .pager {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding-block: 8px 48px;
+  }
+  .pg {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 14px;
+    align-items: center;
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--surface);
+    color: var(--ink);
+    text-decoration: none;
+    padding-right: 14px;
+  }
+  .pg.next {
+    grid-template-columns: minmax(0, 1fr) 120px;
+    padding: 0 0 0 14px;
+    text-align: right;
+  }
+  .pg:hover {
+    border-color: var(--line);
+  }
+  .pg :global(.cover) {
+    height: 100%;
+    aspect-ratio: 4 / 3;
+  }
+  .pg > span {
+    display: grid;
+    gap: 3px;
+    padding-block: 12px;
+  }
+  .pg strong {
+    font-size: 15px;
+    line-height: 1.3;
+  }
+  .pg .m {
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+  @media (max-width: 640px) {
+    .pager {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .pg,
+    .pg.next {
+      grid-template-columns: 96px minmax(0, 1fr);
+      padding: 0 14px 0 0;
+      text-align: left;
+    }
+    .pg.next :global(.cover) {
+      order: -1;
+    }
+  }
+
+  .dcta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 40px;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 44px;
+  }
+  .dcta h2 {
+    font-size: clamp(22px, 3vw, 30px);
+    letter-spacing: -0.015em;
+  }
+  .dcta p {
+    margin-top: 8px;
+    color: var(--band-ink-2);
+  }
+</style>

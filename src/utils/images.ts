@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import fetch from "node-fetch";
 import sharp from "sharp";
 
 /**
@@ -34,7 +33,7 @@ export async function downloadAndOptimizeImage(
       return null;
     }
 
-    const imageBuffer = await response.buffer();
+    const imageBuffer = Buffer.from(await response.arrayBuffer());
 
     await sharp(imageBuffer).resize(800).webp({ quality: 80 }).toFile(filePath);
 

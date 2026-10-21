@@ -1,0 +1,289 @@
+---
+import InitiativeCard from "@/components/InitiativeCard.astro";
+import { getRows } from "@/lib/initiatives";
+import { useT, type Lang } from "@/i18n/ui";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useT(lang);
+const rows = (await getRows(lang)).sort((a, b) => a.title.localeCompare(b.title));
+
+const tally = (values: (string | null)[]) => {
+  const m = new Map<string, number>();
+  for (const v of values) if (v) m.set(v, (m.get(v) ?? 0) + 1);
+  return [...m];
+};
+const byName = (xs: [string, number][]) => xs.sort((a, b) => a[0].localeCompare(b[0]));
+const byCount = (xs: [string, number][]) => xs.slice().sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+
+const countryLabel = new Map(rows.filter((r) => r.country).map((r) => [r.country!, r.countryLabel!]));
+const countries = tally(rows.map((r) => r.country)).sort((a, b) =>
+  countryLabel.get(a[0])!.localeCompare(countryLabel.get(b[0])!),
+);
+const categories = byName(tally(rows.map((r) => r.category)));
+const thematics = byName(tally(rows.map((r) => r.thematic)));
+const regions = byName(tally(rows.flatMap((r) => r.regions)));
+
+// À la une : les plus récentes avec logo et résumé, une par pays
+const featured: typeof rows = [];
+for (const r of rows.slice().sort((a, b) => (b.year ?? 0) - (a.year ?? 0))) {
+  if (featured.length === 3) break;
+  if (r.logo && r.summary && !featured.some((f) => f.country === r.country)) featured.push(r);
+}
+
+// Pastilles rapides : thématiques et pays les plus représentés
+const CATCH_ALL = /^(autres?|others?|tout cit|all above)/i;
+const quickThemes = byCount(thematics)
+  .filter(([th]) => !CATCH_ALL.test(th))
+  .slice(0, 5);
+const quickCountries = byCount(countries).slice(0, 5);
+---
+
+<div class="band">
+  <header class="hero wrap list-hero">
+    <p class="kicker">{t("nav.initiatives")}</p>
+    <h1>{t("list.title")}</h1>
+    <p class="lede">{t("list.lede")}</p>
+    <div class="list-stats">
+      <span><b class="num">{rows.length}</b> {t("kpi.initiatives")}</span>
+      <span><b class="num">{countries.length}</b> {t("kpi.countries")}</span>
+      <span><b class="num">{regions.length}</b> {t("list.regions")}</span>
+    </div>
+  </header>
+</div>
+
+{
+  featured.length === 3 && (
+    <section class="sec featured" id="l-featured">
+      <div class="wrap">
+        <div class="sec-head">
+          <p class="kicker">{t("list.featured")}</p>
+          <h2>{t("list.featuredTitle")}</h2>
+        </div>
+        <div class="feat-grid">
+          <div class="feat-main">
+            <InitiativeCard row={featured[0]} lang={lang} variant="feature" eager />
+          </div>
+          <InitiativeCard row={featured[1]} lang={lang} variant="feature" eager />
+          <InitiativeCard row={featured[2]} lang={lang} variant="feature" eager />
+        </div>
+      </div>
+    </section>
+  )
+}
+
+<div class="filterbar" id="l-bar">
+  <div class="wrap">
+    <input type="search" id="l-q" placeholder={t("obs.search")} aria-label={t("obs.search")} />
+    <select id="l-country" aria-label={t("obs.filter")}>
+      <option value="">{t("list.allCountries")}</option>
+      {countries.map(([name, n]) => <option value={name}>{countryLabel.get(name)} ({n})</option>)}
+    </select>
+    <select id="l-them" aria-label={t("obs.thematic")}>
+      <option value="">{t("list.allThematics")}</option>
+      {thematics.map(([c, n]) => <option value={c}>{c} ({n})</option>)}
+    </select>
+    <select id="l-cat" aria-label={t("obs.category")}>
+      <option value="">{t("list.allCategories")}</option>
+      {categories.map(([c, n]) => <option value={c}>{c} ({n})</option>)}
+    </select>
+    <select id="l-region" aria-label={t("detail.region")}>
+      <option value="">{t("list.allRegions")}</option>
+      {regions.map(([c, n]) => <option value={c}>{c} ({n})</option>)}
+    </select>
+    <button class="reset" id="l-reset" type="button" hidden>{t("list.clear")}</button>
+  </div>
+</div>
+
+<section class="sec all">
+  <div class="wrap">
+    <div class="all-head">
+      <div>
+        <p class="kicker">{t("list.all")}</p>
+        <p class="eyebrow mt-2" id="l-count" aria-live="polite"></p>
+      </div>
+      <div class="quick" aria-label={t("list.quick")}>
+        <span class="eyebrow">{t("list.quick")}</span>
+        {quickThemes.map(([th]) => <button type="button" class="chip" data-set="them" data-v={th}>{th}</button>)}
+        {
+          quickCountries.map(([c]) => (
+            <button type="button" class="chip" data-set="country" data-v={c}>
+              {countryLabel.get(c)}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+    <div class="cards" id="l-cards">
+      {
+        rows.map((r) => (
+          <div
+            class="cell"
+            data-country={r.country ?? ""}
+            data-cat={r.category ?? ""}
+            data-them={r.thematic ?? ""}
+            data-region={r.regions.join("|")}
+            data-text={[r.title, r.organisation, r.countryLabel, r.category, r.thematic, r.summary, ...r.targets, ...r.regions]
+              .join(" ")
+              .toLowerCase()}
+          >
+            <InitiativeCard row={r} lang={lang} />
+          </div>
+        ))
+      }
+    </div>
+    <p class="empty" id="l-empty" hidden>{t("obs.empty")}</p>
+  </div>
+</section>
+
+<script define:vars={{ countLabel: t("obs.count", { n: "{n}" }) }}>
+  const $ = (id) => document.getElementById(id);
+  const q = $("l-q");
+  const selects = { country: $("l-country"), cat: $("l-cat"), them: $("l-them"), region: $("l-region") };
+  const cells = [...document.querySelectorAll("#l-cards .cell")];
+  const featured = $("l-featured");
+  const chips = [...document.querySelectorAll(".quick .chip")];
+
+  // Paramètres d'URL : ?country=…&cat=…&them=…&region=…&q=…, et l'ancien ?tags=… (carte v1)
+  const params = new URLSearchParams(location.search);
+  const legacy = params.get("tags");
+  for (const [k, el] of Object.entries(selects)) {
+    const v = params.get(k) ?? legacy;
+    if (v && [...el.options].some((o) => o.value === v)) el.value = v;
+  }
+  q.value = params.get("q") ?? "";
+
+  function apply(scroll = false) {
+    const needle = q.value.trim().toLowerCase();
+    let n = 0;
+    for (const c of cells) {
+      const ok =
+        (!selects.country.value || c.dataset.country === selects.country.value) &&
+        (!selects.cat.value || c.dataset.cat === selects.cat.value) &&
+        (!selects.them.value || c.dataset.them === selects.them.value) &&
+        (!selects.region.value || c.dataset.region.split("|").includes(selects.region.value)) &&
+        (!needle || c.dataset.text.includes(needle));
+      c.hidden = !ok;
+      if (ok) n++;
+    }
+    $("l-count").textContent = countLabel.replace("{n}", n);
+    $("l-empty").hidden = n > 0;
+    const active = Boolean(needle) || Object.values(selects).some((s) => s.value);
+    $("l-reset").hidden = !active;
+    // La vitrine laisse la place aux résultats dès qu'on filtre
+    if (featured) featured.hidden = active;
+    for (const chip of chips) chip.setAttribute("aria-pressed", String(selects[chip.dataset.set].value === chip.dataset.v));
+
+    const url = new URL(location.href);
+    url.search = "";
+    for (const [k, el] of Object.entries(selects)) if (el.value) url.searchParams.set(k, el.value);
+    if (needle) url.searchParams.set("q", q.value.trim());
+    history.replaceState(null, "", url);
+    if (scroll) $("l-bar").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  q.addEventListener("input", () => apply());
+  Object.values(selects).forEach((s) => s.addEventListener("change", () => apply()));
+  for (const chip of chips) {
+    chip.addEventListener("click", () => {
+      const sel = selects[chip.dataset.set];
+      sel.value = sel.value === chip.dataset.v ? "" : chip.dataset.v;
+      apply(true);
+    });
+  }
+  $("l-reset").addEventListener("click", () => {
+    q.value = "";
+    Object.values(selects).forEach((s) => (s.value = ""));
+    apply();
+  });
+  apply();
+</script>
+
+<style>
+  .list-hero {
+    padding-block: 44px 34px;
+  }
+  .list-stats {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+    color: var(--band-ink-2);
+    font-size: 14px;
+  }
+  .list-stats b {
+    color: var(--band-ink);
+    font-size: 22px;
+    margin-right: 4px;
+  }
+  .featured[hidden] {
+    display: none;
+  }
+  .feat-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    gap: 20px;
+  }
+  .feat-main {
+    grid-row: span 2;
+    display: grid;
+  }
+  /* La couverture de la grande carte occupe toute la hauteur disponible */
+  .feat-main :global(.icard .cover) {
+    flex: 1;
+    aspect-ratio: auto;
+    min-height: 280px;
+  }
+  .feat-main :global(.icard-body) {
+    flex: none;
+  }
+  @media (max-width: 860px) {
+    .feat-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .feat-main {
+      grid-row: auto;
+    }
+  }
+  .filterbar input[type="search"] {
+    flex: 1;
+    min-width: 180px;
+    max-width: 320px;
+  }
+  .filterbar select {
+    max-width: 200px;
+  }
+  .all-head {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .quick .eyebrow {
+    margin-right: 4px;
+  }
+  .quick .chip {
+    cursor: pointer;
+    font: inherit;
+    font-size: 12.5px;
+  }
+  .quick .chip[aria-pressed="true"] {
+    background: var(--ink);
+    color: var(--ground);
+    border-color: var(--ink);
+  }
+  .cell[hidden] {
+    display: none;
+  }
+  .cell {
+    display: grid;
+  }
+</style>

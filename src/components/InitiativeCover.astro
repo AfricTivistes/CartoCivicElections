@@ -1,0 +1,119 @@
+---
+import type { Row } from "@/lib/normalize";
+
+/**
+ * Couverture visuelle d'une initiative : le logo net, posé sur sa couleur
+ * dominante. Sans logo, une couverture générée aux couleurs Soobu avec les
+ * initiales et le motif des trois arcs.
+ */
+interface Props {
+  row: Pick<Row, "slug" | "title" | "logo" | "cover">;
+  size?: "card" | "feature" | "hero";
+  eager?: boolean;
+}
+const { row, size = "card", eager = false } = Astro.props;
+
+const BRAND = [
+  { bg: "#2C83F5", ink: "light" },
+  { bg: "#FF5836", ink: "light" },
+  { bg: "#FFC24B", ink: "dark" },
+  { bg: "#161512", ink: "light" },
+] as const;
+const hash = [...row.slug].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7);
+const generated = BRAND[hash % BRAND.length];
+const bg = row.logo && row.cover ? row.cover.bg : row.logo ? "#ffffff" : generated.bg;
+const ink = row.logo && row.cover ? row.cover.ink : row.logo ? "dark" : generated.ink;
+
+const initials = row.title
+  .split(/\s+/)
+  .filter((w) => /^[\p{L}\p{N}]/u.test(w) && w.length > 2)
+  .slice(0, 2)
+  .map((w) => w[0].toUpperCase())
+  .join("") || row.title.slice(0, 2).toUpperCase();
+---
+
+<div class={`cover cover-${size} ink-${ink}`} style={`--cover-bg:${bg}`}>
+  {
+    row.logo ? (
+      <img
+        src={row.logo}
+        alt=""
+        loading={eager ? "eager" : "lazy"}
+        decoding="async"
+        fetchpriority={eager ? "high" : "auto"}
+      />
+    ) : (
+      <>
+        <svg class="arcs" viewBox="0 0 48 48" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+            <path d="M10 28 A15 15 0 0 1 20 10" />
+            <path d="M27 9 A15 15 0 0 1 37 26" />
+            <path d="M33 35 A15 15 0 0 1 14 36" />
+          </g>
+        </svg>
+        <span class="initials" aria-hidden="true">{initials}</span>
+      </>
+    )
+  }
+</div>
+
+<style is:global>
+  .cover {
+    position: relative;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background: var(--cover-bg);
+    aspect-ratio: 16 / 10;
+    isolation: isolate;
+  }
+  .cover img {
+    width: 72%;
+    height: 72%;
+    object-fit: contain;
+    /* Les logos carrés restent lisibles sans envahir la carte */
+    max-width: 260px;
+  }
+  .cover-feature img {
+    max-width: 380px;
+  }
+  .cover-hero {
+    aspect-ratio: 4 / 3;
+  }
+  .cover-hero img {
+    width: 78%;
+    height: 78%;
+    max-width: 440px;
+  }
+  .cover.ink-light {
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .cover.ink-dark {
+    color: rgba(22, 21, 18, 0.88);
+  }
+  .cover .arcs {
+    position: absolute;
+    right: -12%;
+    bottom: -22%;
+    width: 70%;
+    opacity: 0.18;
+    z-index: -1;
+  }
+  .cover .initials {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(36px, 7vw, 64px);
+    letter-spacing: -0.02em;
+  }
+  .cover-hero .initials {
+    font-size: clamp(56px, 10vw, 110px);
+  }
+  /* Filet discret pour les logos sur fond blanc en mode clair */
+  .cover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+    pointer-events: none;
+  }
+</style>

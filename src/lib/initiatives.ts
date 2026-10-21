@@ -1,6 +1,10 @@
 import { getCollection } from "astro:content";
 import type { Initiative } from "@/collections/initiatives/config";
 import { downloadAndOptimizeImage } from "@/utils/images";
+import { toRows, countryCoords, countryLabel, type Row } from "@/lib/normalize";
+import type { Lang } from "@/i18n/ui";
+import { logoCover } from "@/lib/covers";
+import type { MapPoint } from "@/components/InitiativesMap.astro";
 
 /**
  * Retrieves initiatives from the NocoDB-backed Astro content collection,
@@ -19,7 +23,7 @@ export async function getInitiatives(
     await Promise.all(
       allEntries.map(async (entry: any) => {
         if (entry.data.logoUrl) {
-          const result = await downloadAndOptimizeImage(
+          await downloadAndOptimizeImage(
             entry.data.logoUrl,
             entry.data.slug,
           );
@@ -57,4 +61,50 @@ export async function getInitiativeDetails(language: string = "fr") {
     params: { slug: initiative.slug },
     props: { initiative },
   }));
+}
+
+/**
+ * Normalized rows for charts, plus helpers shared by the home page and the
+ * observatory.
+ */
+export async function getRows(language: Lang) {
+  const rows = toRows(await getInitiatives(language), language);
+  await Promise.all(rows.map(async (r) => (r.cover = await logoCover(r.logo))));
+  return rows;
+}
+
+export function mapPoints(rows: Row[], language: Lang): MapPoint[] {
+  const byCountry = new Map<string, Row[]>();
+  for (const r of rows) {
+    if (!r.country) continue;
+    byCountry.set(r.country, [...(byCountry.get(r.country) ?? []), r]);
+  }
+  return [...byCountry].flatMap(([name, rs]) => {
+    const coords = countryCoords(name);
+    if (!coords) return [];
+    return [
+      {
+        name,
+        label: countryLabel(name, language),
+        count: rs.length,
+        coords,
+        initiatives: rs.map((r) => ({ slug: r.slug, title: r.title })),
+      },
+    ];
+  });
+}
+
+export function kpis(rows: Row[]) {
+  const share = (f: (r: Row) => boolean | null) => {
+    const answered = rows.filter((r) => f(r) !== null);
+    return answered.length
+      ? Math.round((answered.filter((r) => f(r)).length / answered.length) * 100)
+      : 0;
+  };
+  return {
+    initiatives: rows.length,
+    countries: new Set(rows.map((r) => r.country).filter(Boolean)).size,
+    partners: share((r) => r.partners),
+    issues: share((r) => r.issues),
+  };
 }
