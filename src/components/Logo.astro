@@ -1,53 +1,49 @@
 ---
 /**
- * Logo Soobu redessiné en SVG : les trois flèches du logo d'origine
- * (bleu, jaune, orange) et le mot SÓOBU en currentColor, pour suivre
- * le thème clair/sombre et le bandeau noir.
+ * Logo Soobu d'origine. Deux versions générées depuis logo-soobu.svg :
+ * light (couleurs d'origine) et dark (texte noir passé en blanc cassé,
+ * flèches inchangées). tone="auto" suit le thème, tone="dark" sert au
+ * bandeau noir du footer.
  */
+import { Image } from "astro:assets";
+import logoLight from "@images/logo-soobu-light.png";
+import logoDark from "@images/logo-soobu-dark.png";
+
 interface Props {
   class?: string;
-  tagline?: boolean;
+  tone?: "auto" | "dark";
 }
-const { class: className = "", tagline = true } = Astro.props;
+const { class: className = "", tone = "auto" } = Astro.props;
+const alt = "Sóobu · AfricTivistes Tech4Elections";
 ---
 
-<svg
-  class={className}
-  viewBox={tagline ? "0 0 206 48" : "0 0 160 48"}
-  role="img"
-  aria-label="Sóobu · Tech4Elections"
-  xmlns="http://www.w3.org/2000/svg"
->
-  <g fill="none" stroke-width="5.5" stroke-linecap="round">
-    <path d="M10 28 A15 15 0 0 1 20 10" stroke="#2C83F5"></path>
-    <path d="M27 9 A15 15 0 0 1 37 26" stroke="#FFC24B"></path>
-    <path d="M33 35 A15 15 0 0 1 14 36" stroke="#FF5836"></path>
-  </g>
-  <g fill="#2C83F5"><path d="M15 7 L24 9 L18 15 Z"></path></g>
-  <g fill="#FFC24B"><path d="M41 22 L36 31 L31 24 Z"></path></g>
-  <g fill="#FF5836"><path d="M9 39 L13 30 L18 37 Z"></path></g>
-  <text
-    x="52"
-    y={tagline ? 27 : 32}
-    fill="currentColor"
-    font-family="Onest Variable, Onest, system-ui, sans-serif"
-    font-weight="800"
-    font-size="24"
-    letter-spacing="1.5">SÓOBU</text
-  >
-  {
-    tagline && (
-      <text
-        x="53"
-        y="42"
-        fill="#FF5836"
-        font-family="Onest Variable, Onest, system-ui, sans-serif"
-        font-weight="600"
-        font-size="10.5"
-        letter-spacing=".4"
-      >
-        Tech4Elections
-      </text>
-    )
+{
+  tone === "dark" ? (
+    <Image src={logoDark} alt={alt} class={className} height={120} loading="eager" />
+  ) : (
+    <>
+      <Image src={logoLight} alt={alt} class:list={[className, "logo-light"]} height={120} loading="eager" />
+      <Image src={logoDark} alt={alt} class:list={[className, "logo-dark"]} height={120} loading="eager" />
+    </>
+  )
+}
+
+<style is:global>
+  .logo-dark {
+    display: none;
   }
-</svg>
+  :root[data-theme="dark"] .logo-light {
+    display: none;
+  }
+  :root[data-theme="dark"] .logo-dark {
+    display: block;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .logo-light {
+      display: none;
+    }
+    :root:not([data-theme="light"]) .logo-dark {
+      display: block;
+    }
+  }
+</style>
